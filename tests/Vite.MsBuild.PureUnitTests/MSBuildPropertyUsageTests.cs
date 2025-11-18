@@ -31,7 +31,6 @@ namespace Vite.MsBuild.PureUnitTests
         {
             // Arrange: Simulate MSBuild property expansion
             var solutionRoot = @"C:\MyProject";
-            var projectDir = @"C:\MyProject\src\WebApp";
             var buildScript = $"{solutionRoot}/scripts/build.sh";
             
             // Act: Use "expanded" properties (as MSBuild would provide them)
