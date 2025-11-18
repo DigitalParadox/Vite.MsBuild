@@ -1,7 +1,153 @@
 <!-- 
 Vite.MsBuild Configuration Syntax Examples
-Shows all supported ways to configure Vite builds in .csproj files
+Shows the TWO simple ways to configure Vite builds in .csproj files
 -->
+
+<!-- ========================================================================
+     OPTION 1: Traditional ItemGroup Style (Always Supported)
+     ======================================================================== -->
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+
+  <!-- Traditional MSBuild ItemGroup approach -->
+  <ItemGroup>
+    <ViteConfig Include="Areas/Admin/vite.admin.config.ts">
+      <BuildId>admin</BuildId>
+      <Mode>development</Mode>
+      <!-- OutputDir auto-detected from Areas convention: wwwroot/Admin/ -->
+    </ViteConfig>
+    <ViteConfig Include="Areas/Customer/vite.customer.config.ts">
+      <BuildId>customer</BuildId>
+      <Mode>production</Mode>
+      <!-- OutputDir auto-detected from Areas convention: wwwroot/Customer/ -->
+    </ViteConfig>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Vite.MsBuild" Version="1.0.0" />
+  </ItemGroup>
+</Project>
+
+<!-- ========================================================================
+     OPTION 2: Simple Task Configuration (.NET 6+ Enhanced) 
+     ======================================================================== -->
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <!-- Global defaults -->
+    <VitePackageManager>pnpm</VitePackageManager>
+    <ViteLogLevel>info</ViteLogLevel>
+  </PropertyGroup>
+
+  <!-- Simple, clean task-style configuration -->
+  <ViteConfig 
+      Name="admin"
+      ConfigFile="Areas/Admin/vite.admin.config.ts"
+      OutputDir="wwwroot/admin"
+      Mode="development"
+      LogLevel="debug" />
+
+  <ViteConfig 
+      Name="customer"
+      ConfigFile="Areas/Customer/vite.customer.config.ts"
+      OutputDir="wwwroot/customer"
+      Mode="production" />
+
+  <ItemGroup>
+    <PackageReference Include="Vite.MsBuild" Version="1.0.0" />
+  </ItemGroup>
+</Project>
+
+<!-- ========================================================================
+     OPTION 2b: Fully Qualified Syntax (Conflict Avoidance)
+     ======================================================================== -->
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+
+  <!-- Fully qualified syntax - guaranteed no conflicts -->
+  <Vite.MsBuild.Tasks.ViteConfig 
+      Name="admin"
+      ConfigFile="Areas/Admin/vite.admin.config.ts"
+      OutputDir="wwwroot/admin"
+      Mode="development" />
+
+  <Vite.MsBuild.Tasks.ViteConfig 
+      Name="customer"
+      ConfigFile="Areas/Customer/vite.customer.config.ts"
+      OutputDir="wwwroot/customer"
+      Mode="production" />
+
+  <ItemGroup>
+    <PackageReference Include="Vite.MsBuild" Version="1.0.0" />
+  </ItemGroup>
+</Project>
+
+<!-- ========================================================================
+     ADVANCED: Build Dependencies and Chains
+     ======================================================================== -->
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+
+  <!-- Core shared library - builds first -->
+  <ViteConfig 
+      Name="shared-lib"
+      ConfigFile="src/shared/vite.config.ts"
+      OutputDir="dist/shared"
+      Mode="production" />
+
+  <!-- Admin app depends on shared library -->
+  <ViteConfig 
+      Name="admin"
+      ConfigFile="src/admin/vite.config.ts"
+      OutputDir="wwwroot/admin"
+      Mode="development"
+      DependsOn="shared-lib" />
+
+  <!-- Customer app also depends on shared library -->
+  <ViteConfig 
+      Name="customer"
+      ConfigFile="src/customer/vite.config.ts"
+      OutputDir="wwwroot/customer"
+      Mode="production"
+      DependsOn="shared-lib" />
+
+  <!-- Enterprise app depends on both admin and customer builds -->
+  <ViteConfig 
+      Name="enterprise"
+      ConfigFile="src/enterprise/vite.config.ts"
+      OutputDir="wwwroot/enterprise"
+      Mode="production"
+      DependsOn="admin,customer" />
+
+  <!-- App that consumes shared library as npm package -->
+  <ViteConfig 
+      Name="main-app"
+      ConfigFile="src/main/vite.config.ts"
+      OutputDir="wwwroot/main"
+      Mode="production"
+      DependsOn="shared-lib"
+      LinkDependencies="true" />
+
+  <!-- ItemGroup syntax also supports dependencies -->
+  <ItemGroup>
+    <ViteConfig Include="src/mobile/vite.config.ts">
+      <BuildId>mobile</BuildId>
+      <Mode>production</Mode>
+      <DependsOn>shared-lib</DependsOn>
+      <LinkDependencies>true</LinkDependencies>
+    </ViteConfig>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Vite.MsBuild" Version="1.0.0" />
+  </ItemGroup>
+</Project>
 
 <!-- ========================================================================
      OPTION 1: Traditional ItemGroup Style (Always Supported)
@@ -31,7 +177,7 @@ Shows all supported ways to configure Vite builds in .csproj files
 </Project>
 
 <!-- ========================================================================
-     OPTION 2: Task Style Configuration (.NET 6+ Enhanced)
+     OPTION 2: Unified Task Configuration (.NET 6+ Enhanced) 
      ======================================================================== -->
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
@@ -42,18 +188,38 @@ Shows all supported ways to configure Vite builds in .csproj files
   </PropertyGroup>
 
   <!-- Clean task-style configuration -->
-  <DefineViteConfig 
+  <ConfigureViteBuild 
       Name="admin"
       Config="Areas/Admin/vite.admin.config.ts"
       OutputDir="wwwroot/admin"
       Mode="development"
       LogLevel="debug" />
 
-  <DefineViteConfig 
+  <ConfigureViteBuild 
       Name="customer"
       Config="Areas/Customer/vite.customer.config.ts"
       OutputDir="wwwroot/customer"
       Mode="production" />
+
+  <!-- Bulk configuration example -->
+  <ItemGroup>
+    <ViteBuildDefinition Include="Areas/Sales/vite.sales.config.ts">
+      <BuildId>sales</BuildId>
+      <Mode>production</Mode>
+    </ViteBuildDefinition>
+    <ViteBuildDefinition Include="Areas/Marketing/vite.marketing.config.ts">
+      <BuildId>marketing</BuildId>
+      <Mode>development</Mode>
+    </ViteBuildDefinition>
+  </ItemGroup>
+
+  <ConfigureViteBuilds ConfigDefinitions="@(ViteBuildDefinition)">
+    <GlobalDefaults>
+      <OutputDir>wwwroot</OutputDir>
+      <LogLevel>info</LogLevel>
+      <PackageManager>pnpm</PackageManager>
+    </GlobalDefaults>
+  </ConfigureViteBuilds>
 
   <ItemGroup>
     <PackageReference Include="Vite.MsBuild" Version="1.0.0" />
@@ -158,7 +324,7 @@ Shows all supported ways to configure Vite builds in .csproj files
   </ItemGroup>
 
   <!-- Use task style for complex configs -->
-  <DefineViteConfig 
+  <ConfigureViteBuild 
       Name="enterprise"
       Config="Areas/Enterprise/vite.enterprise.config.ts"
       OutputDir="wwwroot/enterprise"
