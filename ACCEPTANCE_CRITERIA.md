@@ -462,16 +462,16 @@ AND: Build works across Windows, Linux, macOS
 ### **Enterprise**: Multiple SPAs
 ```xml
 <ItemGroup>
-  <ViteConfigs Include="Areas/Admin/vite.config.ts">
+  <ViteConfig Include="Areas/Admin/vite.config.ts">
     <BuildId>admin</BuildId>
     <OutputDir>wwwroot/admin</OutputDir>
     <Mode>development</Mode>
-  </ViteConfigs>
-  <ViteConfigs Include="Areas/Customer/vite.config.ts">
-    <BuildId>customer</BuildId> 
+  </ViteConfig>
+  <ViteConfig Include="Areas/Customer/vite.config.ts">
+    <BuildId>customer</BuildId>
     <OutputDir>wwwroot/customer</OutputDir>
     <Mode>production</Mode>
-  </ViteConfigs>
+  </ViteConfig>
 </ItemGroup>
 ```
 
@@ -591,21 +591,21 @@ AND: Build works across Windows, Linux, macOS
 
 ```xml
 <ItemGroup>
-  <ViteConfigs Include="Areas/Admin/vite.admin.config.ts">
+  <ViteConfig Include="Areas/Admin/vite.admin.config.ts">
     <BuildId>admin</BuildId>
     <OutputDir>wwwroot/admin</OutputDir>
     <Mode>development</Mode>
-  </ViteConfigs>
-  <ViteConfigs Include="Areas/Customer/vite.customer.config.ts">
+  </ViteConfig>
+  <ViteConfig Include="Areas/Customer/vite.customer.config.ts">
     <BuildId>customer</BuildId> 
     <OutputDir>wwwroot/customer</OutputDir>
     <Mode>production</Mode>
-  </ViteConfigs>
-  <ViteConfigs Include="Areas/Partner/vite.partner.config.ts">
+  </ViteConfig>
+  <ViteConfig Include="Areas/Partner/vite.partner.config.ts">
     <BuildId>partner</BuildId>
     <OutputDir>wwwroot/partner</OutputDir>
     <Mode>staging</Mode>
-  </ViteConfigs>
+  </ViteConfig>
 </ItemGroup>
 ```
 
@@ -631,21 +631,21 @@ AND: Build works across Windows, Linux, macOS
 </PropertyGroup>
 
 <ItemGroup>
-  <ViteConfigs Include="Areas/Admin/vite.admin.config.ts">
+  <ViteConfig Include="Areas/Admin/vite.admin.config.ts">
     <BuildId>admin</BuildId>
     <OutputDir>wwwroot/admin</OutputDir>
     <Mode>development</Mode>  <!-- Lowest priority -->
-  </ViteConfigs>
-  <ViteConfigs Include="Areas/Customer/vite.customer.config.ts">
+  </ViteConfig>
+  <ViteConfig Include="Areas/Customer/vite.customer.config.ts">
     <BuildId>customer</BuildId> 
     <OutputDir>wwwroot/customer</OutputDir>
     <Mode>development</Mode>  <!-- Overridden by CustomerViteMode -->
-  </ViteConfigs>
-  <ViteConfigs Include="Areas/Partner/vite.partner.config.ts">
+  </ViteConfig>
+  <ViteConfig Include="Areas/Partner/vite.partner.config.ts">
     <BuildId>partner</BuildId>
     <OutputDir>wwwroot/partner</OutputDir>
     <Mode>development</Mode>  <!-- Overridden by PartnerViteMode -->
-  </ViteConfigs>
+  </ViteConfig>
 </ItemGroup>
 
 <ItemGroup>
@@ -699,9 +699,9 @@ dotnet build -p:AdminViteMode=local -p:ViteMode=production
 
 **4. ItemGroup Mode Metadata (Lowest Priority)** 
 ```xml
-<ViteConfigs Include="...">
+<ViteConfig Include="...">
   <Mode>development</Mode>
-</ViteConfigs>
+</ViteConfig>
 ```
 
 **5. Configuration-Based Fallback**
