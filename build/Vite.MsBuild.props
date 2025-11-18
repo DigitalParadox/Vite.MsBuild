@@ -37,9 +37,46 @@
       (Optional) Enable/disable ANSI colors in Vite output (default: true)
       <ViteEnableColors>false</ViteEnableColors>  (useful for CI/CD)
       
+      (Optional) Use npx/dlx fallback when Vite not in package.json (default: false)
+      <ViteUseDlxFallback>true</ViteUseDlxFallback>  (useful for testing without local installs)
+      
+      (Optional) When to run Vite build relative to C# compilation (default: BeforeCSharp)
+      <ViteBuildTiming>AfterCSharp</ViteBuildTiming>  (BeforeCSharp or AfterCSharp)
+      
       (Optional) Add frontend files to dotnet watch (default: false)
       <ViteWatchIntegration>true</ViteWatchIntegration>
     </PropertyGroup>
+    
+    Multi-SPA Configuration (Advanced)
+    ==================================
+    
+    For multiple SPAs in a single project (enterprise scenarios):
+    
+    <ItemGroup>
+      <ViteConfigs Include="Areas\Admin\vite.config.admin.ts">
+        <BuildId>admin</BuildId>
+        <OutputDir>wwwroot\admin</OutputDir>
+        <Mode>development</Mode>
+      </ViteConfigs>
+      
+      <ViteConfigs Include="Areas\Customer\vite.config.customer.ts">
+        <BuildId>customer</BuildId>
+        <OutputDir>wwwroot\customer</OutputDir>
+        <Mode>production</Mode>
+      </ViteConfigs>
+      
+      <ViteConfigs Include="Areas\Partner\vite.config.partner.ts">
+        <BuildId>partner</BuildId>
+        <OutputDir>wwwroot\partner</OutputDir>
+        <Mode>development</Mode>
+      </ViteConfigs>
+    </ItemGroup>
+    
+    Multi-SPA Features:
+    - Independent tech stacks (Vue + React + Angular)
+    - Separate build optimization per SPA
+    - Incremental builds (only changed SPAs rebuild)
+    - Per-SPA marker files for build state tracking
     
     Customizing Tracked Files
     ==========================
@@ -85,7 +122,12 @@
         <!-- ViteOutputPath (computed) -->
         <ViteOutputPath>$(MSBuildProjectDirectory)\$(ViteOutputDir)</ViteOutputPath>
 
+        <!-- Multi-Config Support Detection -->
+        <!-- We'll detect this in the targets file where ItemGroups are available -->
+        <ViteMultiConfigMode Condition="'$(ViteMultiConfigMode)' == ''">false</ViteMultiConfigMode>
+
         <!-- ViteConfigFile: Check project directory first, then fall back to ViteProjectRoot -->
+        <!-- Auto-detection for single config mode (will be overridden in multi-config mode) -->
         <ViteConfigFile Condition="'$(ViteConfigFile)' == '' AND Exists('$(MSBuildProjectDirectory)\vite.config.ts')">$(MSBuildProjectDirectory)\vite.config.ts</ViteConfigFile>
         <ViteConfigFile Condition="'$(ViteConfigFile)' == '' AND Exists('$(MSBuildProjectDirectory)\vite.config.js')">$(MSBuildProjectDirectory)\vite.config.js</ViteConfigFile>
         <ViteConfigFile Condition="'$(ViteConfigFile)' == '' AND Exists('$(MSBuildProjectDirectory)\vite.config.mjs')">$(MSBuildProjectDirectory)\vite.config.mjs</ViteConfigFile>
@@ -122,6 +164,18 @@
 
         <!-- ViteEnableColors - enable ANSI color codes in Vite output (default: true) -->
         <ViteEnableColors Condition="'$(ViteEnableColors)' == ''">true</ViteEnableColors>
+
+        <!-- ViteUseDlxFallback - use npx/pnpm dlx/yarn dlx/bun x when Vite not in package.json (default: false) -->
+        <ViteUseDlxFallback Condition="'$(ViteUseDlxFallback)' == ''">false</ViteUseDlxFallback>
+
+        <!-- ViteBuildCommand - custom build command override (highest priority) -->
+        <!-- Example: <ViteBuildCommand>npm run build:prod</ViteBuildCommand> -->
+        <!-- Leave empty to use automatic package manager detection -->
+        <ViteBuildCommand Condition="'$(ViteBuildCommand)' == ''"></ViteBuildCommand>
+
+        <!-- ViteBuildTiming - when to run Vite build relative to C# compilation -->
+        <!-- Options: 'BeforeCSharp' (default) or 'AfterCSharp' -->
+        <ViteBuildTiming Condition="'$(ViteBuildTiming)' == ''">BeforeCSharp</ViteBuildTiming>
 
         <!-- Marker files - Microsoft SDK pattern: Always in IntermediateOutputPath (obj/) -->
         <!-- Vite build marker - tracks successful Vite builds per target framework -->
