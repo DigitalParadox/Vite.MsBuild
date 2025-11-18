@@ -1,11 +1,12 @@
 using FluentAssertions;
+using System;
 using System.IO;
 using Vite.MsBuild.Tasks;
 using Xunit;
 
 namespace Vite.MsBuild.PureUnitTests.Tasks
 {
-    public class ValidateViteConfigTests
+    public class ValidateViteConfigTests : IDisposable
     {
         private readonly string _tempDir;
 
