@@ -64,6 +64,9 @@ All configuration is optional - the package works with sensible defaults.
   
   <!-- Disable colors for CI/CD -->
   <ViteEnableColors>false</ViteEnableColors>
+  
+  <!-- When to run Vite build (default: BeforeCSharp) -->
+  <ViteBuildTiming>AfterCSharp</ViteBuildTiming>
 </PropertyGroup>
 ```
 
@@ -80,6 +83,30 @@ Add or remove files from incremental build tracking:
   <ViteInputFiles Remove="wwwroot\js\legacy\**\*" />
 </ItemGroup>
 ```
+
+## Build Timing
+
+Control when Vite builds relative to C# compilation:
+
+```xml
+<PropertyGroup>
+  <!-- Default: Vite builds before C# compilation -->
+  <ViteBuildTiming>BeforeCSharp</ViteBuildTiming>
+  
+  <!-- Alternative: Vite builds after C# compilation -->
+  <ViteBuildTiming>AfterCSharp</ViteBuildTiming>
+</PropertyGroup>
+```
+
+**BeforeCSharp (Default):**
+- ✅ Frontend assets available during C# compilation
+- ✅ Static web assets properly integrated
+- ✅ Faster overall build (parallel where possible)
+
+**AfterCSharp:**
+- ✅ C# compilation completes first
+- ✅ Useful for debugging build order issues
+- ✅ Good for scenarios where frontend depends on C# outputs
 
 ## Development Workflow
 

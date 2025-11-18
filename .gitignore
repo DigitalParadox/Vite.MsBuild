@@ -20,3 +20,24 @@ Thumbs.db
 *.tmp
 *.temp
 *.log
+**/TestResults/
+**/bin/
+**/obj/
+
+# Common .NET artifacts
+*.dll
+*.exe
+*.pdb
+*.deps.json
+*.runtimeconfig.json
+*.runtimeconfig.dev.json
+
+# Package restore
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# MSBuild Binary and Structured Log
+*.binlog
+*.bl
+

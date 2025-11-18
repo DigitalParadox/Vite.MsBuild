@@ -5,6 +5,10 @@ param(
     [string]$OutputDir = ".\nupkg"
 )
 
+# Set UTF-8 encoding for proper emoji display
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$OutputEncoding = [System.Text.Encoding]::UTF8
+
 Write-Host "📦 Building Vite.MsBuild NuGet Package v$Version" -ForegroundColor Cyan
 Write-Host ""
 
