@@ -31,6 +31,9 @@
       (Optional) Force specific package manager (auto-detects by default)
       <PackageManager>pnpm</PackageManager>  (npm, pnpm, yarn, or bun)
       
+      (Optional) Action when multiple lock files detected (default: warn)
+      <VitePackageManagerConflictAction>warn</VitePackageManagerConflictAction>  (warn, error)
+      
       (Optional) Validate .env files exist (default: silent)
       <ViteMissingEnvAction>warn</ViteMissingEnvAction>  (silent, warn, or error)
       
@@ -161,6 +164,10 @@
 
         <!-- ViteMissingEnvAction - optional validation for .env files -->
         <ViteMissingEnvAction Condition="'$(ViteMissingEnvAction)' == ''">silent</ViteMissingEnvAction>
+
+        <!-- VitePackageManagerConflictAction - behavior for multiple lock files -->
+        <VitePackageManagerConflictAction Condition="'$(VitePackageManagerConflictAction)' == ''">warn</VitePackageManagerConflictAction>
+        <VitePackageManagerConflictAction Condition="'$(CI)' == 'true' AND '$(VitePackageManagerConflictAction)' == 'warn'">error</VitePackageManagerConflictAction>
 
         <!-- ViteEnableColors - enable ANSI color codes in Vite output (default: true) -->
         <ViteEnableColors Condition="'$(ViteEnableColors)' == ''">true</ViteEnableColors>
