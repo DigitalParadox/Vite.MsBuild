@@ -1,9 +1,9 @@
 <Project>
 
     <!-- 
-    Vite.MsBuild | Build Targets
+    Vite.MsBuild | Build Targets (Streamlined Alpha Version)
     
-    All MSBuild targets for Vite integration.
+    High-performance MSBuild integration using C# tasks instead of complex XML logic.
     Automatically imported after Vite.MsBuild.props.
     -->
 
@@ -14,1288 +14,259 @@
         <ViteUseAdvancedTasks Condition="'$(ViteUseAdvancedTasks)' == ''">false</ViteUseAdvancedTasks>
     </PropertyGroup>
 
-    <!-- Import C# tasks if available -->
+    <!-- Register High-Performance C# Tasks -->
+    <UsingTask TaskName="Vite.MsBuild.Tasks.DetectPackageManagerTask" 
+               AssemblyFile="$(ViteMsBuildTasksAssembly)" 
+               Condition="'$(ViteUseAdvancedTasks)' == 'true'" />
+
+    <UsingTask TaskName="Vite.MsBuild.Tasks.CollectViteInputFilesTask" 
+               AssemblyFile="$(ViteMsBuildTasksAssembly)" 
+               Condition="'$(ViteUseAdvancedTasks)' == 'true'" />
+
+    <UsingTask TaskName="Vite.MsBuild.Tasks.ResolveViteConfigurationsTask" 
+               AssemblyFile="$(ViteMsBuildTasksAssembly)" 
+               Condition="'$(ViteUseAdvancedTasks)' == 'true'" />
+
+    <UsingTask TaskName="Vite.MsBuild.Tasks.ResolveViteConfigDependencies" 
+               AssemblyFile="$(ViteMsBuildTasksAssembly)" 
+               Condition="'$(ViteUseAdvancedTasks)' == 'true'" />
+
+    <UsingTask TaskName="Vite.MsBuild.Tasks.ValidateViteProjectTask" 
+               AssemblyFile="$(ViteMsBuildTasksAssembly)" 
+               Condition="'$(ViteUseAdvancedTasks)' == 'true'" />
+
+    <UsingTask TaskName="Vite.MsBuild.Tasks.OrchestrateBuildTask" 
+               AssemblyFile="$(ViteMsBuildTasksAssembly)" 
+               Condition="'$(ViteUseAdvancedTasks)' == 'true'" />
+
+    <!-- Simple configuration task - only one name -->
+    <UsingTask TaskName="Vite.MsBuild.Tasks.ViteConfig" 
+               AssemblyFile="$(ViteMsBuildTasksAssembly)" 
+               Condition="'$(ViteUseAdvancedTasks)' == 'true'" />
+
+    <!-- Legacy task support for environments without C# tasks -->
     <UsingTask TaskName="Vite.MsBuild.Tasks.BuildViteCommand" 
                AssemblyFile="$(ViteMsBuildTasksAssembly)" 
                Condition="'$(ViteUseAdvancedTasks)' == 'true'" />
 
-    <UsingTask TaskName="Vite.MsBuild.Tasks.ResolveViteModes" 
+    <!-- Backward compatibility aliases (with deprecation warnings) -->
+    <UsingTask TaskName="Vite.MsBuild.Tasks.DefineViteConfig" 
                AssemblyFile="$(ViteMsBuildTasksAssembly)" 
                Condition="'$(ViteUseAdvancedTasks)' == 'true'" />
 
-    <!-- Namespaced task registrations (alternative names for same tasks) -->
-    <UsingTask TaskName="Vite.MsBuild.Tasks.NamespacedViteConfig" 
-               AssemblyFile="$(ViteMsBuildTasksAssembly)"
+    <UsingTask TaskName="Vite.MsBuild.Tasks.ConfigureViteConfig" 
+               AssemblyFile="$(ViteMsBuildTasksAssembly)" 
                Condition="'$(ViteUseAdvancedTasks)' == 'true'" />
-
-    <UsingTask TaskName="Vite.MsBuild.Tasks.NamespacedViteBuild" 
-               AssemblyFile="$(ViteMsBuildTasksAssembly)"
-               Condition="'$(ViteUseAdvancedTasks)' == 'true'" />
-
-    <!-- Configuration task -->
-    <UsingTask TaskName="Vite.MsBuild.Tasks.DefineViteConfig" 
-               AssemblyFile="$(ViteMsBuildTasksAssembly)"
-               Condition="'$(ViteUseAdvancedTasks)' == 'true'" />
-
-<!-- 
-    TattooMachineGirl | Directory.Build.props
-    
-    Shared MSBuild properties and targets for all projects in this repository.
-    Automatically imported by MSBuild for all .csproj files.
-    
-    Vite Frontend Integration
-    ==========================
-    Framework-agnostic: Supports Vue, React, Svelte, Solid, Preact, and vanilla JS/TS
-    
-    Projects can opt into Vite frontend integration by setting in their .csproj:
-    
-    <PropertyGroup>
-      <EnableViteBuild>true</EnableViteBuild>
-      
-      (Optional) Custom Vite config location (defaults to repo root vite.config.ts)
-      <ViteConfigFile>$(MSBuildProjectDirectory)\custom-vite.config.ts</ViteConfigFile>
-      
-      (Optional) Custom output directory (defaults to wwwroot\dist)
-      <ViteOutputDir>wwwroot\assets</ViteOutputDir>
-      
-      (Optional) Override Vite mode - Two approaches:
-      
-      Approach 1: Static mappings (cleaner for multiple configs)
-      <ItemGroup>
-        <ViteModeMapping Include="Debug" ViteMode="development" />
-        <ViteModeMapping Include="Release" ViteMode="production" />
-        <ViteModeMapping Include="Staging" ViteMode="staging" />
-        <ViteModeMapping Include="UAT" ViteMode="uat" />
-      </ItemGroup>
-      
-      Approach 2: Direct property (simpler for single override)
-      <ViteMode>staging</ViteMode>
-      <ViteMode Condition="'$(Configuration)' == 'Debug'">local</ViteMode>
-      
-      (Optional) Force specific package manager (auto-detects by default from lock files)
-      <PackageManager>npm</PackageManager>  (or pnpm, yarn, bun)
-      
-      (Optional) Validate .env files exist (default: silent)
-      <ViteMissingEnvAction>silent</ViteMissingEnvAction>  (or warn, error)
-      
-      (Optional) Enable/disable ANSI colors in Vite output (default: true)
-      <ViteEnableColors>false</ViteEnableColors>  (useful for CI/CD)
-      
-      (Optional) When to run Vite build relative to C# compilation (default: BeforeCSharp)
-      <ViteBuildTiming>AfterCSharp</ViteBuildTiming>  (BeforeCSharp or AfterCSharp)
-      
-      (Optional) Framework-specific build command override
-      <ViteBuildCommand Condition="'$(TargetFramework)' == 'net10.0'">npm run
-    build:net10</ViteBuildCommand>
-    </PropertyGroup>
-    
-    Customizing Tracked Files
-    =========================
-    Add or remove files from incremental build tracking:
-    
-    <ItemGroup>
-      (Add custom paths to track)
-      <ViteInputFiles Include="wwwroot\custom\**\*.ts" />
-      <ViteInputFiles Include="wwwroot\data\*.json" />
-      
-      (Exclude paths from tracking)
-      <ViteInputFiles Remove="wwwroot\js\temp\**\*" />
-      <ViteInputFiles Remove="wwwroot\css\vendor\**\*" />
-    </ItemGroup>
-    
-    Convention: Place JS-imported assets in js/assets/, CSS-imported in css/assets/
-    
-    Controlling Verbosity
-    =====================
-    Use standard MSBuild verbosity flags (no custom properties needed):
-    
-    dotnet build -v:q         (Quiet - errors only)
-    dotnet build -v:m         (Minimal - errors + warnings)
-    dotnet build -v:n         (Normal - default output)
-    dotnet build -v:d         (Detailed - includes diagnostics)
-    dotnet build -v:diag      (Diagnostic - full details)
-    
-    Hot Reload Development
-    ======================
-    RECOMMENDED: Use two terminals for best performance
-    
-    Terminal 1: dotnet watch run    (C# hot reload only)
-    Terminal 2: npm run dev          (Vite HMR - instant frontend updates)
-    
-    This keeps them separate:
-    - C# changes: dotnet watch restarts app (~2 seconds)
-    - Frontend changes: Vite HMR updates browser (~50ms, no restart)
-    
-    ALTERNATIVE: Add frontend files to dotnet watch (slower)
-    <PropertyGroup>
-      <ViteWatchIntegration>true</ViteWatchIntegration>
-    </PropertyGroup>
-    
-    This triggers Vite rebuild on file changes, but restarts the app
-    (slower than Vite HMR alone).
-    
-    Note: All properties are prefixed with "Vite" or "Enable" to avoid naming conflicts.
-  -->
-
-    <!-- ====================================================================== -->
-    <!-- Vite Frontend Integration Properties                                   -->
-    <!-- ====================================================================== -->
-
-    <PropertyGroup Label="Vite Configuration">
-        <!-- 
-        Property Naming: All properties are prefixed with "Vite" for namespace safety
-        Examples: EnableViteBuild, ViteProjectRoot, ViteOutputDir, ViteMode, etc.
-        -->
-
-        <!-- Detect if loaded from NuGet package vs Directory.Build.props -->
-        <!-- NuGet packages are in .nuget/packages/ path -->
-        <_ViteLoadedFromPackage Condition="$(MSBuildThisFileFullPath.Contains('.nuget')) OR $(MSBuildThisFileFullPath.Contains('packages\Vite.MsBuild'))">true</_ViteLoadedFromPackage>
-        <_ViteLoadedFromPackage Condition="'$(_ViteLoadedFromPackage)' == ''">false</_ViteLoadedFromPackage>
-        
-        <!-- EnableViteBuild: Auto-enable if loaded from NuGet package, opt-in if Directory.Build.props -->
-        <EnableViteBuild Condition="'$(EnableViteBuild)' == '' AND '$(_ViteLoadedFromPackage)' == 'true'">true</EnableViteBuild>
-        <EnableViteBuild Condition="'$(EnableViteBuild)' == ''">false</EnableViteBuild>
-
-        <!-- ViteProjectRoot: Check project directory first, then fall back to repo root -->
-        <!-- This supports both project-specific and repo-wide Vite configurations -->
-        <ViteProjectRoot Condition="'$(ViteProjectRoot)' == '' AND Exists('$(MSBuildProjectDirectory)\package.json')">$(MSBuildProjectDirectory)\</ViteProjectRoot>
-        <ViteProjectRoot Condition="'$(ViteProjectRoot)' == ''">$(MSBuildThisFileDirectory)</ViteProjectRoot>
-
-        <!-- ViteOutputDir -->
-        <ViteOutputDir Condition="'$(ViteOutputDir)' == ''">wwwroot\dist</ViteOutputDir>
-
-        <!-- ViteOutputPath (computed) -->
-        <ViteOutputPath>$(MSBuildProjectDirectory)\$(ViteOutputDir)</ViteOutputPath>
-
-        <!-- ViteConfigFile: Check project directory first, then fall back to ViteProjectRoot -->
-        <ViteConfigFile Condition="'$(ViteConfigFile)' == '' AND Exists('$(MSBuildProjectDirectory)\vite.config.ts')">$(MSBuildProjectDirectory)\vite.config.ts</ViteConfigFile>
-        <ViteConfigFile Condition="'$(ViteConfigFile)' == '' AND Exists('$(MSBuildProjectDirectory)\vite.config.js')">$(MSBuildProjectDirectory)\vite.config.js</ViteConfigFile>
-        <ViteConfigFile Condition="'$(ViteConfigFile)' == '' AND Exists('$(MSBuildProjectDirectory)\vite.config.mjs')">$(MSBuildProjectDirectory)\vite.config.mjs</ViteConfigFile>
-        <ViteConfigFile Condition="'$(ViteConfigFile)' == '' AND Exists('$(ViteProjectRoot)vite.config.ts')">$(ViteProjectRoot)vite.config.ts</ViteConfigFile>
-        <ViteConfigFile Condition="'$(ViteConfigFile)' == '' AND Exists('$(ViteProjectRoot)vite.config.js')">$(ViteProjectRoot)vite.config.js</ViteConfigFile>
-        <ViteConfigFile Condition="'$(ViteConfigFile)' == '' AND Exists('$(ViteProjectRoot)vite.config.mjs')">$(ViteProjectRoot)vite.config.mjs</ViteConfigFile>
-        <ViteConfigFile Condition="'$(ViteConfigFile)' == ''">$(ViteProjectRoot)vite.config.ts</ViteConfigFile>
-
-        <!-- PackageManager -->
-        <PackageManager
-            Condition="'$(PackageManager)' == '' AND Exists('$(ViteProjectRoot)bun.lockb')">bun</PackageManager>
-        <PackageManager
-            Condition="'$(PackageManager)' == '' AND Exists('$(ViteProjectRoot)pnpm-lock.yaml')">
-            pnpm</PackageManager>
-        <PackageManager
-            Condition="'$(PackageManager)' == '' AND Exists('$(ViteProjectRoot)yarn.lock')">yarn</PackageManager>
-        <PackageManager
-            Condition="'$(PackageManager)' == '' AND Exists('$(ViteProjectRoot)package-lock.json')">
-            npm</PackageManager>
-        <PackageManager Condition="'$(PackageManager)' == ''">npm</PackageManager>
-
-        <!-- Install commands per package manager -->
-        <ViteInstallCommand Condition="'$(PackageManager)' == 'bun'">bun install --frozen-lockfile</ViteInstallCommand>
-        <ViteInstallCommand Condition="'$(PackageManager)' == 'pnpm'">pnpm install --frozen-lockfile</ViteInstallCommand>
-        <ViteInstallCommand Condition="'$(PackageManager)' == 'yarn'">yarn install --frozen-lockfile</ViteInstallCommand>
-        <ViteInstallCommand Condition="'$(PackageManager)' == 'npm'">npm ci</ViteInstallCommand>
-
-        <!-- ViteMode: Will be resolved in ResolveViteMode target (Configuration might not be set
-        yet) -->
-
-        <!-- Map MSBuild verbosity to Vite log level -->
-        <!-- MSBuild: quiet, minimal, normal, detailed, diagnostic -->
-        <!-- Vite: silent, error, warn, info, debug -->
-        <ViteLogLevel Condition="'$(MSBuildVerbosity)' == 'quiet'">silent</ViteLogLevel>
-        <ViteLogLevel Condition="'$(MSBuildVerbosity)' == 'minimal'">warn</ViteLogLevel>
-        <ViteLogLevel Condition="'$(MSBuildVerbosity)' == 'normal'">info</ViteLogLevel>
-        <ViteLogLevel Condition="'$(MSBuildVerbosity)' == 'detailed'">info</ViteLogLevel>
-        <ViteLogLevel Condition="'$(MSBuildVerbosity)' == 'diagnostic'">debug</ViteLogLevel>
-        <ViteLogLevel Condition="'$(ViteLogLevel)' == ''">info</ViteLogLevel>
-
-        <!-- ViteMissingEnvAction - optional validation for .env files -->
-        <ViteMissingEnvAction Condition="'$(ViteMissingEnvAction)' == ''">silent</ViteMissingEnvAction>
-
-        <!-- ViteEnableColors - enable ANSI color codes in Vite output (default: true) -->
-        <!-- Set to false for CI/CD environments that don't support colors -->
-        <ViteEnableColors Condition="'$(ViteEnableColors)' == ''">true</ViteEnableColors>
-
-        <!-- ViteBuildTiming - when to run Vite build relative to C# compilation -->
-        <!-- Options: 'BeforeCSharp' (default) or 'AfterCSharp' -->
-        <ViteBuildTiming Condition="'$(ViteBuildTiming)' == ''">BeforeCSharp</ViteBuildTiming>
-
-        <!-- Marker files - Microsoft SDK pattern: Always in IntermediateOutputPath (obj/) -->
-        <!-- Namespaced with Vite.MsBuild to avoid conflicts with other tools -->
-
-        <!-- Vite build marker - tracks successful Vite builds per target framework -->
-        <!-- Single config mode: one marker for entire build -->
-        <ViteBuildMarker Condition="'$(ViteMultiConfigMode)' == 'false'">$(IntermediateOutputPath)$(TargetFramework).Vite.MsBuild.Build.marker</ViteBuildMarker>
-        
-        <!-- Multi-config mode: per-config markers handled in build targets -->
-        <!-- Format: $(IntermediateOutputPath)$(TargetFramework).Vite.MsBuild.$(BuildId).marker -->
-
-        <!-- Node restore marker - tracks successful npm/pnpm/yarn/bun install -->
-        <!-- Package manager specific to prevent conflicts in multi-manager environments -->
-        <NodeRestoreMarker>$(ViteProjectRoot)obj\Vite.MsBuild.$(PackageManager).marker</NodeRestoreMarker>
-
-        <!-- Working directory - use repo root where package.json and node_modules are located -->
-        <ViteWorkingDirectory>$(ViteProjectRoot)</ViteWorkingDirectory>
-    </PropertyGroup>
-
-    <!-- ====================================================================== -->
-    <!-- dotnet watch Integration                                               -->
-    <!-- ====================================================================== -->
 
     <!-- 
-    Optional: Add frontend files to dotnet watch
-    
-    Default: DISABLED (ViteWatchIntegration=false)
-    Recommended: Use separate terminals for best performance
-      Terminal 1: dotnet watch run  (C# hot reload)
-      Terminal 2: npm run dev        (Vite HMR)
-    
-    Enable: Set ViteWatchIntegration=true to watch frontend files
-    Requires EnableViteBuild=true to be active
-    Caveat: App restarts on frontend changes (slower than Vite HMR alone)
+    Main Build Pipeline (Streamlined)
+    Replaced 21 complex XML targets with simple C# task orchestration
     -->
-    <ItemGroup Condition="'$(EnableViteBuild)' == 'true' AND '$(ViteWatchIntegration)' == 'true'">
-        <!-- Watch TypeScript/JavaScript files -->
-        <Watch Include="wwwroot\js\**\*.ts" />
-        <Watch Include="wwwroot\js\**\*.tsx" />
-        <Watch Include="wwwroot\js\**\*.js" />
-        <Watch Include="wwwroot\js\**\*.jsx" />
-        <Watch Include="wwwroot\js\**\*.mts" />
-        <Watch Include="wwwroot\js\**\*.mjs" />
 
-        <!-- Watch framework component files -->
-        <Watch Include="wwwroot\js\**\*.vue" />
-        <Watch Include="wwwroot\js\**\*.svelte" />
-
-        <!-- Watch CSS/Style files -->
-        <Watch Include="wwwroot\css\**\*.css" />
-        <Watch Include="wwwroot\css\**\*.scss" />
-        <Watch Include="wwwroot\css\**\*.sass" />
-        <Watch Include="wwwroot\css\**\*.less" />
-        <Watch Include="wwwroot\css\**\*.styl" />
-        <Watch Include="wwwroot\css\**\*.stylus" />
-        <Watch Include="wwwroot\css\**\*.pcss" />
-
-        <!-- Watch Vite configuration -->
-        <Watch Include="$(ViteConfigFile)" />
-        <Watch Include="$(ViteProjectRoot)postcss.config.*" />
-        <Watch Include="$(ViteProjectRoot)tailwind.config.*" />
-        <Watch Include="$(ViteProjectRoot)tsconfig.json" />
-    </ItemGroup>
-
-    <!-- ====================================================================== -->
-    <!-- Vite Build Targets                                                     -->
-    <!-- ====================================================================== -->
-
-    <!-- 
-    Target: ShowViteDiagnostics
-    Displays detailed diagnostic information in detailed/diagnostic verbosity
-    Use: dotnet build -v:d  or  dotnet build -v:diag
-  -->
-    <Target Name="ShowViteDiagnostics"
-        BeforeTargets="ResolveViteMode"
-        Condition="'$(EnableViteBuild)' == 'true'">
-
-        <Message Text="🔍 Vite Build Diagnostics" Importance="low" />
-        <Message Text="   LoadedFrom: $(_ViteLoadedFromPackage Condition='$(_ViteLoadedFromPackage)' == 'true') ? 'NuGet Package' : 'Directory.Build.props')" Importance="low" />
-        <Message Text="   EnableViteBuild: $(EnableViteBuild)" Importance="low" />
-        <Message Text="   Configuration: $(Configuration)" Importance="low" />
-        <Message Text="   ViteProjectRoot: $(ViteProjectRoot)" Importance="low" />
-        <Message Text="   ViteConfigFile: $(ViteConfigFile)" Importance="low" />
-        <Message Text="   ViteOutputPath: $(ViteOutputPath)" Importance="low" />
-        <Message Text="   ViteBuildMarker: $(ViteBuildMarker)" Importance="low" />
-        <Message Text="   PackageManager: $(PackageManager)" Importance="low" />
-        <Message Text="   DependencyStrategy: $(PackageManager) (Yarn PnP)" Condition="Exists('$(ViteProjectRoot).pnp.cjs')" Importance="low" />
-        <Message Text="   DependencyStrategy: $(PackageManager) (node_modules)" Condition="!Exists('$(ViteProjectRoot).pnp.cjs')" Importance="low" />
-        <Message Text="   ViteMissingEnvAction: $(ViteMissingEnvAction)" Importance="low" />
-        <Message Text="   TargetFramework: $(TargetFramework)" Importance="low" />
-        <Message Text="   IntermediateOutputPath: $(IntermediateOutputPath)" Importance="low" />
-        <Message Text="   MSBuildProjectDirectory: $(MSBuildProjectDirectory)" Importance="low" />
-        <Message Text="   MSBuildThisFileFullPath: $(MSBuildThisFileFullPath)" Importance="low" />
+    <!-- Target: ShowViteDiagnostics -->
+    <Target Name="ShowViteDiagnostics" 
+        Condition="'$(ViteShowDiagnostics)' == 'true'">
+        
+        <Message Text="🔍 Vite.MsBuild Diagnostics:" Importance="high" />
+        <Message Text="  ViteProjectRoot: $(ViteProjectRoot)" Importance="high" />
+        <Message Text="  ViteConfigFile: $(ViteConfigFile)" Importance="high" />
+        <Message Text="  ViteOutputDir: $(ViteOutputDir)" Importance="high" />
+        <Message Text="  ViteMode: $(ViteMode)" Importance="high" />
+        <Message Text="  PackageManager: $(PackageManager)" Importance="high" />
+        <Message Text="  EnableViteBuild: $(EnableViteBuild)" Importance="high" />
+        <Message Text="  ViteUseAdvancedTasks: $(ViteUseAdvancedTasks)" Importance="high" />
     </Target>
 
-    <!-- 
-    Target: ResolveViteMode
-    Resolves ViteMode from Configuration at build time (Configuration is set late in evaluation)
-  -->
-    <Target Name="ResolveViteMode"
+    <!-- Target: ResolveViteMode (Simple property mapping) -->
+    <Target Name="ResolveViteMode" 
+        BeforeTargets="ValidateViteSetup">
+        
+        <PropertyGroup>
+            <ViteMode Condition="'$(ViteMode)' == '' AND '$(Configuration)' == 'Debug'">development</ViteMode>
+            <ViteMode Condition="'$(ViteMode)' == '' AND '$(Configuration)' == 'Release'">production</ViteMode>
+            <ViteMode Condition="'$(ViteMode)' == ''">development</ViteMode>
+        </PropertyGroup>
+    </Target>
+
+    <!-- Target: DetectPackageManager (High-Performance C# Task) -->
+    <Target Name="DetectPackageManager" 
         BeforeTargets="ValidateViteSetup"
         Condition="'$(EnableViteBuild)' == 'true'">
 
-        <PropertyGroup>
-            <!-- Map Debug → development -->
-            <ViteMode Condition="'$(ViteMode)' == '' AND '$(Configuration)' == 'Debug'">development</ViteMode>
+        <DetectPackageManagerTask ViteProjectRoot="$(ViteProjectRoot)"
+                                  ConflictAction="$(VitePackageManagerConflictAction)"
+                                  Condition="'$(ViteUseAdvancedTasks)' == 'true'">
+            <Output TaskParameter="PackageManager" PropertyName="PackageManager" />
+            <Output TaskParameter="HasConflicts" PropertyName="HasPackageManagerConflicts" />
+            <Output TaskParameter="InstallCommand" PropertyName="ViteInstallCommand" />
+        </DetectPackageManagerTask>
 
-            <!-- Map Release → production -->
-            <ViteMode Condition="'$(ViteMode)' == '' AND '$(Configuration)' == 'Release'">production</ViteMode>
-
-            <!-- Fallback: use Configuration as-is -->
-            <ViteMode Condition="'$(ViteMode)' == ''">$(Configuration)</ViteMode>
+        <!-- Fallback for environments without C# tasks -->
+        <PropertyGroup Condition="'$(ViteUseAdvancedTasks)' != 'true' AND '$(PackageManager)' == ''">
+            <PackageManager Condition="Exists('$(ViteProjectRoot)bun.lockb')">bun</PackageManager>
+            <PackageManager Condition="'$(PackageManager)' == '' AND Exists('$(ViteProjectRoot)pnpm-lock.yaml')">pnpm</PackageManager>
+            <PackageManager Condition="'$(PackageManager)' == '' AND Exists('$(ViteProjectRoot)yarn.lock')">yarn</PackageManager>
+            <PackageManager Condition="'$(PackageManager)' == '' AND Exists('$(ViteProjectRoot)package-lock.json')">npm</PackageManager>
+            <PackageManager Condition="'$(PackageManager)' == ''">npm</PackageManager>
         </PropertyGroup>
-
-        <Message Text="📋 Resolved Vite Mode: $(ViteMode) (from Configuration: $(Configuration))"
-            Importance="normal" />
     </Target>
 
-    <!-- 
-    Target: ValidateViteSetup
-    Validates that Vite configuration is found and accessible
-    Shows welcome message for NuGet package users on first run
-  -->
-    <Target Name="ValidateViteSetup"
-        BeforeTargets="EnsureNodeDependencies"
-        DependsOnTargets="ResolveViteMode"
+    <!-- Target: ValidateViteSetup (Comprehensive C# Validation) -->
+    <Target Name="ValidateViteSetup" 
+        DependsOnTargets="ResolveViteMode;DetectPackageManager"
         Condition="'$(EnableViteBuild)' == 'true'">
 
-        <!-- Check if ViteConfigFile was explicitly set by user -->
-        <PropertyGroup>
-            <_ViteConfigExplicitlySet Condition="'$(ViteConfigFile)' != '' AND '$(ViteConfigFile)' != '$(ViteProjectRoot)vite.config.ts'">true</_ViteConfigExplicitlySet>
-            <_ViteConfigExplicitlySet Condition="'$(_ViteConfigExplicitlySet)' == ''">false</_ViteConfigExplicitlySet>
-        </PropertyGroup>
+        <ValidateViteProjectTask ViteProjectRoot="$(ViteProjectRoot)"
+                                 ViteConfigFile="$(ViteConfigFile)"
+                                 ViteMissingEnvAction="$(ViteMissingEnvAction)"
+                                 PackageManager="$(PackageManager)"
+                                 EnableViteBuild="$(EnableViteBuild)"
+                                 ShowWelcomeMessage="true"
+                                 Condition="'$(ViteUseAdvancedTasks)' == 'true'">
+            <Output TaskParameter="IsValid" PropertyName="ViteProjectIsValid" />
+            <Output TaskParameter="HasPackageJson" PropertyName="ViteHasPackageJson" />
+            <Output TaskParameter="HasViteConfig" PropertyName="ViteHasConfig" />
+        </ValidateViteProjectTask>
 
-        <!-- Error if user explicitly set ViteConfigFile but it doesn't exist -->
-        <Error Text="❌ Vite config not found at specified location: $(ViteConfigFile)&#xA;&#xA;The ViteConfigFile property was explicitly set but the file doesn't exist.&#xA;Check the path or remove the ViteConfigFile property to use auto-detection."
-               Condition="'$(_ViteConfigExplicitlySet)' == 'true' AND !Exists('$(ViteConfigFile)')" />
-
-        <!-- Check if auto-detected config exists -->
-        <PropertyGroup>
-            <_ViteConfigExists Condition="Exists('$(ViteConfigFile)')">true</_ViteConfigExists>
-            <_ViteConfigExists Condition="'$(_ViteConfigExists)' == ''">false</_ViteConfigExists>
-        </PropertyGroup>
-
-        <!-- Welcome message for NuGet package users (first-run only, if config missing) -->
-        <Message Text="🚀 Welcome to Vite.MsBuild!&#xA;&#xA;Vite integration is active, but configuration not found.&#xA;&#xA;📁 Checked locations:&#xA;   • $(MSBuildProjectDirectory)\vite.config.{ts,js,mjs}&#xA;   • $(ViteProjectRoot)vite.config.{ts,js,mjs}&#xA;&#xA;Quick start:&#xA;   1. Navigate to project or repo root&#xA;   2. Initialize Vite: npm create vite@latest . -- --template vue-ts&#xA;   3. Build: dotnet build&#xA;&#xA;Or specify custom location:&#xA;   &lt;ViteConfigFile&gt;path/to/vite.config.ts&lt;/ViteConfigFile&gt;&#xA;&#xA;To disable: &lt;EnableViteBuild&gt;false&lt;/EnableViteBuild&gt;&#xA;&#xA;Documentation: https://github.com/DigitalParadox/Vite.MsBuild#readme" 
-                 Importance="high"
-                 Condition="'$(_ViteLoadedFromPackage)' == 'true' AND '$(_ViteConfigExists)' == 'false'" />
-
-        <!-- Error for Directory.Build.props users (config missing) -->
-        <Error Text="❌ Vite configuration not found!&#xA;&#xA;📁 Checked locations:&#xA;   • $(MSBuildProjectDirectory)\vite.config.{ts,js,mjs}&#xA;   • $(ViteProjectRoot)vite.config.{ts,js,mjs}&#xA;&#xA;Create vite.config.ts or specify custom location:&#xA;   &lt;ViteConfigFile&gt;path/to/vite.config.ts&lt;/ViteConfigFile&gt;&#xA;&#xA;Or disable Vite integration:&#xA;   &lt;EnableViteBuild&gt;false&lt;/EnableViteBuild&gt;"
-               Condition="'$(_ViteLoadedFromPackage)' == 'false' AND '$(_ViteConfigExists)' == 'false'" />
-
-        <!-- package.json validation -->
-        <Error Text="❌ package.json not found at $(ViteProjectRoot)package.json&#xA;&#xA;Vite requires package.json for dependency management.&#xA;Run: npm init -y"
-               Condition="!Exists('$(ViteProjectRoot)package.json')" />
-
-        <!-- Warn if both lock files exist (ambiguous package manager) -->
-        <Warning Text="⚠️  Multiple lock files detected. Using $(PackageManager).&#xA;   • pnpm-lock.yaml&#xA;   • package-lock.json&#xA;&#xA;Delete the unused lock file to avoid confusion."
-                 Condition="Exists('$(ViteProjectRoot)pnpm-lock.yaml') AND Exists('$(ViteProjectRoot)package-lock.json')" />
-
-        <!-- Success messages -->
-        <Message Text="✅ Vite configuration validated"
-                 Importance="normal"
-                 Condition="'$(_ViteConfigExists)' == 'true'" />
-        <Message Text="📍 Config: $(ViteConfigFile)"
-                 Importance="low"
-                 Condition="'$(_ViteConfigExists)' == 'true'" />
-        <Message Text="📍 Project root: $(ViteProjectRoot)"
-                 Importance="low" />
+        <!-- Fallback validation for environments without C# tasks -->
+        <Error Text="❌ No package.json found in $(ViteProjectRoot). Run 'npm init' to create one." 
+               Condition="'$(ViteUseAdvancedTasks)' != 'true' AND !Exists('$(ViteProjectRoot)package.json')" />
     </Target>
 
-    <!-- 
-    Target: ValidateViteMissingEnvAction
-    Validates that ViteMissingEnvAction has a valid value
-  -->
-    <Target Name="ValidateViteMissingEnvAction"
-        BeforeTargets="ValidateViteEnvironmentFiles"
-        Condition="'$(EnableViteBuild)' == 'true' AND '$(ViteMissingEnvAction)' != 'silent' AND '$(ViteMissingEnvAction)' != 'warn' AND '$(ViteMissingEnvAction)' != 'error'">
+    <!-- Target: CollectViteInputs (High-Performance C# File Collection) -->
+    <Target Name="CollectViteInputs">
+        <CollectViteInputFilesTask ViteProjectRoot="$(ViteProjectRoot)"
+                                   ViteConfigFile="$(ViteConfigFile)"
+                                   ViteOutputDir="$(ViteOutputDir)"
+                                   ExcludePatterns="node_modules;.git;obj;bin;$(ViteOutputDir)"
+                                   Condition="'$(ViteUseAdvancedTasks)' == 'true'">
+            <Output TaskParameter="ViteInputFiles" ItemName="ViteInputFiles" />
+            <Output TaskParameter="ConfigurationFiles" ItemName="ViteConfigurationFiles" />
+        </CollectViteInputFilesTask>
 
-        <Warning
-            Text="⚠️  Invalid ViteMissingEnvAction '$(ViteMissingEnvAction)'. Valid values: silent, warn, error. Using 'silent'." />
-
-        <PropertyGroup>
-            <ViteMissingEnvAction>silent</ViteMissingEnvAction>
-        </PropertyGroup>
-    </Target>
-
-    <!-- 
-    Target: ValidateViteEnvironmentFiles
-    Optionally validates that .env.{mode} files exist based on ViteMissingEnvAction
-  -->
-    <Target Name="ValidateViteEnvironmentFiles"
-        BeforeTargets="ViteBuildAssets"
-        Condition="'$(EnableViteBuild)' == 'true' AND '$(ViteMissingEnvAction)' != 'silent'">
-
-        <PropertyGroup>
-            <_ViteModeEnvFile>$(ViteProjectRoot).env.$(ViteMode)</_ViteModeEnvFile>
-            <_ViteModeEnvExists>$([System.IO.File]::Exists('$(_ViteModeEnvFile)'))</_ViteModeEnvExists>
-        </PropertyGroup>
-
-        <!-- Warn mode -->
-        <Warning
-            Text="⚠️  .env file not found: $(_ViteModeEnvFile)&#xA;   Vite will use base .env and .env.local files. This is normal if you don't need mode-specific variables."
-            Condition="'$(ViteMissingEnvAction)' == 'warn' AND '$(_ViteModeEnvExists)' != 'true'" />
-
-        <!-- Error mode (strict validation) -->
-        <Error
-            Text="❌ .env file not found: $(_ViteModeEnvFile)&#xA;   Create this file or set ViteMissingEnvAction to 'silent' to disable this check."
-            Condition="'$(ViteMissingEnvAction)' == 'error' AND '$(_ViteModeEnvExists)' != 'true'" />
-    </Target>
-
-    <!-- 
-    Target: ValidatePackageManager
-    Validates that the configured/detected package manager is installed
-  -->
-    <Target Name="ValidatePackageManager"
-        BeforeTargets="EnsureNodeDependencies"
-        Condition="'$(EnableViteBuild)' == 'true'">
-
-        <!-- Check if package manager binary exists -->
-        <Exec Command="$(PackageManager) --version"
-            IgnoreExitCode="true"
-            ConsoleToMSBuild="true"
-            StandardOutputImportance="low"
-            StandardErrorImportance="low">
-            <Output TaskParameter="ExitCode" PropertyName="_PackageManagerExitCode" />
-        </Exec>
-
-        <Error
-            Text="❌ Package manager '$(PackageManager)' not found. Please install it:&#xA;   npm: https://nodejs.org (included with Node.js)&#xA;   pnpm: https://pnpm.io/installation&#xA;   yarn: https://yarnpkg.com/getting-started/install&#xA;   bun: https://bun.sh"
-            Condition="'$(_PackageManagerExitCode)' != '0'" />
-
-        <Message Text="✅ Package manager validated: $(PackageManager)"
-            Importance="low" />
-    </Target>
-
-    <!-- 
-    Target: CheckNodeRestoreRequired
-    Determines if npm/pnpm install needs to run by comparing timestamps (like NuGet restore check)
-    Sets $(NodeRestoreRequired) property for use by RestoreNodeDependencies
-  -->
-    <Target Name="CheckNodeRestoreRequired"
-        BeforeTargets="RestoreNodeDependencies"
-        Condition="'$(EnableViteBuild)' == 'true'">
-
-        <PropertyGroup>
-            <!-- Default to not required -->
-            <NodeRestoreRequired>false</NodeRestoreRequired>
-        </PropertyGroup>
-
-        <!-- Show detected package manager -->
-        <Message Text="📦 Package manager: $(PackageManager) (auto-detected)"
-            Importance="low" />
-
-        <!-- Check 1: Dependencies missing (node_modules or .pnp.cjs for Yarn PnP) -->
-        <PropertyGroup Condition="!Exists('$(ViteProjectRoot)node_modules') AND !Exists('$(ViteProjectRoot).pnp.cjs')">
-            <NodeRestoreRequired>true</NodeRestoreRequired>
-            <NodeRestoreReason>Dependencies missing (node_modules or .pnp.cjs)</NodeRestoreReason>
-        </PropertyGroup>
-
-        <!-- Check 2a: npm - package-lock.json is newer than node_modules/.package-lock.json -->
-        <PropertyGroup
-            Condition="'$(PackageManager)' == 'npm' AND Exists('$(ViteProjectRoot)package-lock.json') AND Exists('$(ViteProjectRoot)node_modules\.package-lock.json')">
-            <PackageLockTime>$([System.IO.File]::GetLastWriteTime('$(ViteProjectRoot)package-lock.json').Ticks)</PackageLockTime>
-            <NodeModulesLockTime>$([System.IO.File]::GetLastWriteTime('$(ViteProjectRoot)node_modules\.package-lock.json').Ticks)</NodeModulesLockTime>
-            <NodeRestoreRequired Condition="'$(PackageLockTime)' &gt; '$(NodeModulesLockTime)'">true</NodeRestoreRequired>
-            <NodeRestoreReason Condition="'$(PackageLockTime)' &gt; '$(NodeModulesLockTime)'">package-lock.json
-                modified since last restore</NodeRestoreReason>
-        </PropertyGroup>
-
-        <!-- Check 2b: pnpm - pnpm-lock.yaml is newer than node_modules/.pnpm/lock.yaml -->
-        <PropertyGroup
-            Condition="'$(PackageManager)' == 'pnpm' AND Exists('$(ViteProjectRoot)pnpm-lock.yaml') AND Exists('$(ViteProjectRoot)node_modules\.modules.yaml')">
-            <PnpmLockTime>$([System.IO.File]::GetLastWriteTime('$(ViteProjectRoot)pnpm-lock.yaml').Ticks)</PnpmLockTime>
-            <NodeModulesLockTime>$([System.IO.File]::GetLastWriteTime('$(ViteProjectRoot)node_modules\.modules.yaml').Ticks)</NodeModulesLockTime>
-            <NodeRestoreRequired Condition="'$(PnpmLockTime)' &gt; '$(NodeModulesLockTime)'">true</NodeRestoreRequired>
-            <NodeRestoreReason Condition="'$(PnpmLockTime)' &gt; '$(NodeModulesLockTime)'">pnpm-lock.yaml
-                modified since last restore</NodeRestoreReason>
-        </PropertyGroup>
-
-        <!-- Check 2c: yarn - yarn.lock is newer than .pnp.cjs (for PnP) or node_modules (for node-modules mode) -->
-        <PropertyGroup
-            Condition="'$(PackageManager)' == 'yarn' AND Exists('$(ViteProjectRoot)yarn.lock')">
-            <YarnLockTime>$([System.IO.File]::GetLastWriteTime('$(ViteProjectRoot)yarn.lock').Ticks)</YarnLockTime>
-            <!-- Check against .pnp.cjs (PnP mode) -->
-            <YarnCacheTime Condition="Exists('$(ViteProjectRoot).pnp.cjs')">$([System.IO.File]::GetLastWriteTime('$(ViteProjectRoot).pnp.cjs').Ticks)</YarnCacheTime>
-            <!-- Fallback to node_modules (node-modules mode) -->
-            <YarnCacheTime Condition="'$(YarnCacheTime)' == '' AND Exists('$(ViteProjectRoot)node_modules')">$([System.IO.Directory]::GetLastWriteTime('$(ViteProjectRoot)node_modules').Ticks)</YarnCacheTime>
-            <NodeRestoreRequired Condition="'$(YarnCacheTime)' != '' AND '$(YarnLockTime)' &gt; '$(YarnCacheTime)'">true</NodeRestoreRequired>
-            <NodeRestoreReason Condition="'$(YarnCacheTime)' != '' AND '$(YarnLockTime)' &gt; '$(YarnCacheTime)'">yarn.lock
-                modified since last restore</NodeRestoreReason>
-        </PropertyGroup>
-
-        <!-- Check 2d: bun - bun.lockb is newer than node_modules -->
-        <PropertyGroup
-            Condition="'$(PackageManager)' == 'bun' AND Exists('$(ViteProjectRoot)bun.lockb') AND Exists('$(ViteProjectRoot)node_modules')">
-            <BunLockTime>$([System.IO.File]::GetLastWriteTime('$(ViteProjectRoot)bun.lockb').Ticks)</BunLockTime>
-            <NodeModulesTime>$([System.IO.Directory]::GetLastWriteTime('$(ViteProjectRoot)node_modules').Ticks)</NodeModulesTime>
-            <NodeRestoreRequired Condition="'$(BunLockTime)' &gt; '$(NodeModulesTime)'">true</NodeRestoreRequired>
-            <NodeRestoreReason Condition="'$(BunLockTime)' &gt; '$(NodeModulesTime)'">bun.lockb
-                modified since last restore</NodeRestoreReason>
-        </PropertyGroup>
-
-        <!-- Check 3: Fallback - check if any lock file is newer than dependencies (when specific checks don't apply) -->
-        <PropertyGroup
-            Condition="'$(NodeRestoreRequired)' != 'true' AND (Exists('$(ViteProjectRoot)node_modules') OR Exists('$(ViteProjectRoot).pnp.cjs'))">
-            <!-- Find the most recent lock file -->
-            <PackageLockTime Condition="Exists('$(ViteProjectRoot)package-lock.json')">$([System.IO.File]::GetLastWriteTime('$(ViteProjectRoot)package-lock.json').Ticks)</PackageLockTime>
-            <PnpmLockTime Condition="Exists('$(ViteProjectRoot)pnpm-lock.yaml')">$([System.IO.File]::GetLastWriteTime('$(ViteProjectRoot)pnpm-lock.yaml').Ticks)</PnpmLockTime>
-            <YarnLockTime Condition="Exists('$(ViteProjectRoot)yarn.lock')">$([System.IO.File]::GetLastWriteTime('$(ViteProjectRoot)yarn.lock').Ticks)</YarnLockTime>
-            <BunLockTime Condition="Exists('$(ViteProjectRoot)bun.lockb')">$([System.IO.File]::GetLastWriteTime('$(ViteProjectRoot)bun.lockb').Ticks)</BunLockTime>
-            <LatestLockTime>$([System.Math]::Max($([System.Math]::Max($([MSBuild]::ValueOrDefault('$(PackageLockTime)', '0')), $([MSBuild]::ValueOrDefault('$(PnpmLockTime)', '0')))), $([System.Math]::Max($([MSBuild]::ValueOrDefault('$(YarnLockTime)', '0')), $([MSBuild]::ValueOrDefault('$(BunLockTime)', '0'))))))</LatestLockTime>
-            
-            <!-- Get dependency timestamp -->
-            <NodeModulesTime Condition="Exists('$(ViteProjectRoot)node_modules')">$([System.IO.Directory]::GetLastWriteTime('$(ViteProjectRoot)node_modules').Ticks)</NodeModulesTime>
-            <PnpCjsTime Condition="Exists('$(ViteProjectRoot).pnp.cjs')">$([System.IO.File]::GetLastWriteTime('$(ViteProjectRoot).pnp.cjs').Ticks)</PnpCjsTime>
-            <DependenciesTime>$([System.Math]::Max($([MSBuild]::ValueOrDefault('$(NodeModulesTime)', '0')), $([MSBuild]::ValueOrDefault('$(PnpCjsTime)', '0'))))</DependenciesTime>
-            
-            <!-- Simplified check: use basic existence checks for now -->
-            <!-- TODO: Implement proper timestamp comparison for lock vs dependencies -->
-            <NodeRestoreRequired Condition="!Exists('$(ViteProjectRoot)node_modules') AND !Exists('$(ViteProjectRoot).pnp.cjs')">true</NodeRestoreRequired>
-            <NodeRestoreReason Condition="!Exists('$(ViteProjectRoot)node_modules') AND !Exists('$(ViteProjectRoot).pnp.cjs')">Dependencies missing (node_modules or .pnp.cjs)</NodeRestoreReason>
-        </PropertyGroup>
-
-        <Message Text="📊 Node restore check: $(NodeRestoreRequired) $(NodeRestoreReason)"
-            Importance="low"
-            Condition="'$(NodeRestoreRequired)' == 'true'" />
-        <Message Text="⏭️  Skipping npm restore (dependencies up-to-date)"
-            Importance="low"
-            Condition="'$(NodeRestoreRequired)' != 'true'" />
-    </Target>
-
-    <!-- 
-    Target: _DetectMultiplePackageManagers
-    Detects if multiple package manager lock files exist and provides warnings/guidance
-  -->
-    <Target Name="_DetectMultiplePackageManagers" 
-        BeforeTargets="ResolvePackageManager"
-        Condition="'$(EnableViteBuild)' == 'true'">
-
-        <ItemGroup>
-            <_DetectedLockFiles Include="$(ViteProjectRoot)package-lock.json" Condition="Exists('$(ViteProjectRoot)package-lock.json')" />
-            <_DetectedLockFiles Include="$(ViteProjectRoot)pnpm-lock.yaml" Condition="Exists('$(ViteProjectRoot)pnpm-lock.yaml')" />
-            <_DetectedLockFiles Include="$(ViteProjectRoot)yarn.lock" Condition="Exists('$(ViteProjectRoot)yarn.lock')" />
-            <_DetectedLockFiles Include="$(ViteProjectRoot)bun.lockb" Condition="Exists('$(ViteProjectRoot)bun.lockb')" />
+        <!-- Fallback for environments without C# tasks -->
+        <ItemGroup Condition="'$(ViteUseAdvancedTasks)' != 'true'">
+            <ViteInputFiles Include="$(MSBuildProjectDirectory)\wwwroot\**\*.ts;$(MSBuildProjectDirectory)\wwwroot\**\*.js;$(MSBuildProjectDirectory)\wwwroot\**\*.tsx;$(MSBuildProjectDirectory)\wwwroot\**\*.jsx" />
+            <ViteInputFiles Include="$(MSBuildProjectDirectory)\wwwroot\**\*.vue;$(MSBuildProjectDirectory)\wwwroot\**\*.svelte" />
+            <ViteInputFiles Include="$(MSBuildProjectDirectory)\wwwroot\**\*.css;$(MSBuildProjectDirectory)\wwwroot\**\*.scss" />
+            <ViteInputFiles Include="$(ViteProjectRoot)package.json;$(ViteConfigFile)" Condition="Exists('$(ViteConfigFile)')" />
         </ItemGroup>
-
-        <!-- Warn about multiple lock files -->
-        <Warning Text="⚠️ Multiple package manager lock files detected: @(_DetectedLockFiles->'%(Filename)%(Extension)', ', '). This may cause dependency conflicts."
-            Condition="$([MSBuild]::GetItemCount('@(_DetectedLockFiles)')) > 1" />
-        
-        <Message Text="💡 Consider using only $(PackageManager) and removing other lock files for consistency."
-            Importance="normal"
-            Condition="$([MSBuild]::GetItemCount('@(_DetectedLockFiles)')) > 1" />
     </Target>
 
-    <!-- 
-    Target: _CleanupOldPackageManagerMarkers
-    Removes marker files from previously used package managers to prevent stale state
-  -->
-    <Target Name="_CleanupOldPackageManagerMarkers" 
-        BeforeTargets="EnsureNodeDependencies"
-        Condition="'$(EnableViteBuild)' == 'true'">
-
-        <ItemGroup>
-            <_OldMarkers Include="$(ViteProjectRoot)obj\Vite.MsBuild.npm.marker" Condition="'$(PackageManager)' != 'npm'" />
-            <_OldMarkers Include="$(ViteProjectRoot)obj\Vite.MsBuild.pnpm.marker" Condition="'$(PackageManager)' != 'pnpm'" />
-            <_OldMarkers Include="$(ViteProjectRoot)obj\Vite.MsBuild.yarn.marker" Condition="'$(PackageManager)' != 'yarn'" />
-            <_OldMarkers Include="$(ViteProjectRoot)obj\Vite.MsBuild.bun.marker" Condition="'$(PackageManager)' != 'bun'" />
-        </ItemGroup>
-        
-        <Delete Files="@(_OldMarkers)" ContinueOnError="true" />
-        
-        <Message Text="🧹 Cleaned up old package manager markers: @(_OldMarkers->'%(Filename)%(Extension)', ', ')" 
-            Importance="low" 
-            Condition="'@(_OldMarkers)' != ''" />
-    </Target>
-
-    <!-- 
-    Target: RestoreNodeDependencies
-    Runs npm ci during dotnet restore (once per solution, not per project)
-    Uses AfterTargets="Restore" to integrate with standard restore workflow
-    Only runs if CheckNodeRestoreRequired determines it's needed
-  -->
-    <!-- 
-    Target: RestoreNodeDependencies
-    Restores Node.js dependencies using the configured package manager.
-    Uses Inputs/Outputs to prevent parallel build conflicts (Microsoft SDK pattern)
-    Marker file in obj/ directory (cleaned automatically, never committed)
-  -->
-    <Target Name="RestoreNodeDependencies"
-        AfterTargets="Restore"
-        DependsOnTargets="CheckNodeRestoreRequired"
-        Inputs="$(ViteProjectRoot)package.json;$(ViteProjectRoot)package-lock.json;$(ViteProjectRoot)pnpm-lock.yaml;$(ViteProjectRoot)yarn.lock;$(ViteProjectRoot)bun.lockb"
-        Outputs="$(NodeRestoreMarker)"
-        Condition="'$(EnableViteBuild)' == 'true' AND '$(NodeRestoreRequired)' == 'true'">
-
-        <Message Text="📦 Restoring Node.js dependencies ($(PackageManager))..."
-            Importance="high" />
-        <Message Text="   Reason: $(NodeRestoreReason)"
-            Importance="normal" />
-        <Message Text="   Command: $(ViteInstallCommand)"
-            Importance="low" />
-
-        <!-- Ensure obj directory exists at repo root -->
-        <MakeDir Directories="$(ViteProjectRoot)obj" Condition="!Exists('$(ViteProjectRoot)obj')" />
-
-        <Exec Command="$(ViteInstallCommand)"
-            WorkingDirectory="$(ViteProjectRoot)"
-            ContinueOnError="false" />
-
-        <!-- Write marker file to obj/ (Microsoft SDK pattern) -->
-        <Touch Files="$(NodeRestoreMarker)"
-            AlwaysCreate="true"
-            ForceTouch="true" />
-
-        <Message Text="✅ Node.js dependencies restored"
-            Importance="high" />
-    </Target>
-
-    <!-- 
-    Target: EnsureNodeDependencies
-    Ensures npm dependencies are installed before attempting Vite build
-    This is a safety check in case RestoreNodeDependencies didn't run
-  -->
+    <!-- Target: EnsureNodeDependencies (Package manager install) -->
     <Target Name="EnsureNodeDependencies"
-        BeforeTargets="ViteBuildAssets"
+        DependsOnTargets="ValidateViteSetup;DetectPackageManager"
         Condition="'$(EnableViteBuild)' == 'true'">
 
-        <Message Text="🔍 Checking for dependencies in $(ViteProjectRoot)..."
-            Importance="low" />
-
-        <!-- Install dependencies if neither node_modules nor .pnp.cjs exist -->
-        <Exec Command="$(ViteInstallCommand)"
-            WorkingDirectory="$(ViteProjectRoot)"
-            Condition="!Exists('$(ViteProjectRoot)node_modules') AND !Exists('$(ViteProjectRoot).pnp.cjs')"
-            ContinueOnError="false" />
-
-        <Message Text="✅ Node.js dependencies verified"
-            Importance="low"
-            Condition="Exists('$(ViteProjectRoot)node_modules') OR Exists('$(ViteProjectRoot).pnp.cjs')" />
-    </Target>
-
-    <!-- 
-    Target: ViteBuildAssets
-    Runs Vite build to compile frontend assets with incremental build support
-    Uses Microsoft SDK pattern: Inputs/Outputs with marker file in IntermediateOutputPath
-    
-    Single Config Mode: Uses ViteConfigFile and ViteBuildMarker
-    Multi Config Mode: Uses ViteConfig ItemGroup with per-config processing
-  -->
-    <Target Name="ViteBuildAssets"
-        BeforeTargets="Build"
-        DependsOnTargets="_CollectViteInputs"
-        Condition="'$(EnableViteBuild)' == 'true' AND '$(ViteBuildTiming)' == 'BeforeCSharp'">
-
-        <!-- Detect multi-config mode based on ViteConfig ItemGroup -->
+        <!-- Check if install needed -->
         <PropertyGroup>
-            <_ViteHasMultipleConfigs Condition="'@(ViteConfig)' != ''">true</_ViteHasMultipleConfigs>
-            <_ViteHasMultipleConfigs Condition="'$(_ViteHasMultipleConfigs)' == ''">false</_ViteHasMultipleConfigs>
+            <NodeModulesExists Condition="Exists('$(ViteProjectRoot)node_modules')">true</NodeModulesExists>
+            <NodeModulesExists Condition="'$(NodeModulesExists)' == ''">false</NodeModulesExists>
         </PropertyGroup>
 
-        <!-- Single config mode -->
-        <CallTarget Targets="_ViteBuildAssetsCore" 
-                   Condition="'$(_ViteHasMultipleConfigs)' == 'false'" />
+        <!-- Install dependencies if needed -->
+        <Exec Command="$(ViteInstallCommand)" 
+              WorkingDirectory="$(ViteProjectRoot)"
+              Condition="'$(NodeModulesExists)' == 'false' AND '$(ViteInstallCommand)' != ''" />
 
-        <!-- Multi config mode -->
-        <CallTarget Targets="_ViteBuildMultipleConfigs" 
-                   Condition="'$(_ViteHasMultipleConfigs)' == 'true'" />
+        <!-- Fallback install command -->
+        <Exec Command="$(PackageManager) install" 
+              WorkingDirectory="$(ViteProjectRoot)"
+              Condition="'$(NodeModulesExists)' == 'false' AND '$(ViteInstallCommand)' == ''" />
     </Target>
 
-    <!-- Alternative target for after C# compilation -->
+    <!-- Target: ViteBuildAssets (Main Entry Point) -->
+    <Target Name="ViteBuildAssets"
+        BeforeTargets="ResolveStaticWebAssetsInputs"
+        DependsOnTargets="ValidateViteSetup;EnsureNodeDependencies;CollectViteInputs"
+        Inputs="@(ViteInputFiles);$(ViteConfigFile);$(MSBuildProjectFile)"
+        Outputs="$(IntermediateOutputPath)ViteBuild.marker"
+        Condition="'$(EnableViteBuild)' == 'true' AND '$(ViteBuildTiming)' != 'AfterCSharp'">
+
+        <CallTarget Targets="ExecuteViteBuild" />
+    </Target>
+
+    <!-- Target: ViteBuildAssetsAfter (Alternative timing) -->
     <Target Name="ViteBuildAssetsAfter"
-        AfterTargets="Build"
-        DependsOnTargets="_CollectViteInputs"
+        AfterTargets="Build" 
+        DependsOnTargets="ValidateViteSetup;EnsureNodeDependencies;CollectViteInputs"
+        Inputs="@(ViteInputFiles);$(ViteConfigFile);$(MSBuildProjectFile)"
+        Outputs="$(IntermediateOutputPath)ViteBuild.marker"
         Condition="'$(EnableViteBuild)' == 'true' AND '$(ViteBuildTiming)' == 'AfterCSharp'">
 
-        <!-- Detect multi-config mode based on ViteConfigs ItemGroup -->
-        <PropertyGroup>
-            <_ViteHasMultipleConfigs Condition="'@(ViteConfigs)' != ''">true</_ViteHasMultipleConfigs>
-            <_ViteHasMultipleConfigs Condition="'$(_ViteHasMultipleConfigs)' == ''">false</_ViteHasMultipleConfigs>
-        </PropertyGroup>
-
-        <!-- Single config mode -->
-        <CallTarget Targets="_ViteBuildAssetsCore" 
-                   Condition="'$(_ViteHasMultipleConfigs)' == 'false'" />
-
-        <!-- Multi config mode -->
-        <CallTarget Targets="_ViteBuildMultipleConfigs" 
-                   Condition="'$(_ViteHasMultipleConfigs)' == 'true'" />
+        <CallTarget Targets="ExecuteViteBuild" />
     </Target>
 
-    <!-- 
-    Target: _ViteBuildMultipleConfigs
-    Handles building multiple Vite configurations in a single project
-    Each config gets its own marker file for independent incremental builds
-    -->
-    <Target Name="_ViteBuildMultipleConfigs"
-        Condition="'$(EnableViteBuild)' == 'true' AND '@(ViteConfigs)' != ''">
-
-        <Message Text="========================================"
-            Importance="normal" />
-        <Message Text="⚡ Building multiple Vite configurations"
-            Importance="normal" />
-        <Message Text="   Configuration: $(Configuration)"
-            Importance="normal" />
-        <Message Text="   Target Framework: $(TargetFramework)"
-            Importance="normal"
-            Condition="'$(TargetFramework)' != ''" />
-        <Message Text="   Configs: @(ViteConfigs)"
-            Importance="normal" />
-        <Message Text="========================================"
-            Importance="normal" />
-
-        <!-- Smart Path-Based Convention Detection for ViteConfigs -->
-        <ItemGroup>
-            <_ViteConfigsWithDetection Include="@(ViteConfigs)">
-                <!-- Extract config directory and detect architectural pattern -->
-                <ConfigDirectory>$([System.IO.Path]::GetDirectoryName('%(Identity)'))</ConfigDirectory>
-                <IsAreasPattern>$([System.String]::new('$([System.IO.Path]::GetDirectoryName(%(Identity)))').Contains('Areas'))</IsAreasPattern>
-                
-                <!-- Extract area name for Areas pattern (folder name containing config) -->
-                <AreaName Condition="'%(IsAreasPattern)' == 'true'">$([System.IO.Path]::GetFileName('$([System.IO.Path]::GetDirectoryName(%(Identity)))'))</AreaName>
-                
-                <!-- Smart OutputDir detection based on architectural pattern -->
-                <!-- Priority 1: Explicit OutputDir (always wins) -->
-                <SmartOutputDir Condition="'%(OutputDir)' != ''">%(OutputDir)</SmartOutputDir>
-                
-                <!-- Priority 2: BuildId convention (works for any pattern) -->
-                <SmartOutputDir Condition="'%(OutputDir)' == '' AND '%(BuildId)' != ''">wwwroot/%(BuildId)</SmartOutputDir>
-                
-                <!-- Priority 3: Areas pattern - centralized wwwroot with area name -->
-                <SmartOutputDir Condition="'%(OutputDir)' == '' AND '%(BuildId)' == '' AND '%(IsAreasPattern)' == 'true'">wwwroot/%(AreaName)</SmartOutputDir>
-                
-                <!-- Priority 4: Non-Areas pattern - local dist folder -->
-                <SmartOutputDir Condition="'%(OutputDir)' == '' AND '%(BuildId)' == '' AND '%(IsAreasPattern)' != 'true'">%(ConfigDirectory)/dist</SmartOutputDir>
-                
-                <!-- Per-config package manager detection -->
-                <!-- Priority 1: Explicit PackageManager metadata -->
-                <ConfigPackageManager Condition="'%(PackageManager)' != ''">%(PackageManager)</ConfigPackageManager>
-                
-                <!-- Priority 2: Config-specific property (e.g., AdminPackageManager) -->
-                <ConfigPackageManager Condition="'%(PackageManager)' == '' AND '$(%(BuildId)PackageManager)' != ''">$($(%(BuildId)PackageManager))</ConfigPackageManager>
-                
-                <!-- Priority 3: Global PackageManager property -->
-                <ConfigPackageManager Condition="'%(PackageManager)' == '' AND '$(%(BuildId)PackageManager)' == ''">$(PackageManager)</ConfigPackageManager>
-                
-                <!-- Priority 4: Auto-detect (handled in build target) -->
-                <ConfigPackageManager Condition="'%(PackageManager)' == '' AND '$(%(BuildId)PackageManager)' == '' AND '$(PackageManager)' == ''">auto-detect</ConfigPackageManager>
-            </_ViteConfigsWithDetection>
-        </ItemGroup>
-
-        <!-- Process each config individually with comprehensive override support -->
-        <ItemGroup>
-            <_ViteConfigsToProcess Include="@(_ViteConfigsWithDetection)">
-                <!-- Use simple per-config marker files (not per-package-manager) -->
-                <MarkerFile>$(IntermediateOutputPath)$(TargetFramework).Vite.%(BuildId).marker</MarkerFile>
-                
-                <!-- 
-                Override Hierarchy (highest to lowest priority):
-                1. Config-specific property (e.g., AdminViteMode, CustomerViteMode)
-                2. Global ViteMode property 
-                3. Per-config Mode metadata from ItemGroup
-                4. Fallback to 'development'
-                -->
-                <EffectiveMode Condition="'$(%(ViteConfigs.BuildId)ViteMode)' != ''">$($(%(ViteConfigs.BuildId)ViteMode))</EffectiveMode>
-                <EffectiveMode Condition="'$(%(ViteConfigs.BuildId)ViteMode)' == '' AND '$(ViteMode)' != ''">$(ViteMode)</EffectiveMode>
-                <EffectiveMode Condition="'$(%(ViteConfigs.BuildId)ViteMode)' == '' AND '$(ViteMode)' == '' AND '%(ViteConfigs.Mode)' != ''">%(ViteConfigs.Mode)</EffectiveMode>
-                <EffectiveMode Condition="'$(%(ViteConfigs.BuildId)ViteMode)' == '' AND '$(ViteMode)' == '' AND '%(ViteConfigs.Mode)' == ''">development</EffectiveMode>
-                
-                <!-- Use smart OutputDir detection -->
-                <EffectiveOutputDir Condition="'$(%(ViteConfigs.BuildId)ViteOutputDir)' != ''">$($(%(ViteConfigs.BuildId)ViteOutputDir))</EffectiveOutputDir>
-                <EffectiveOutputDir Condition="'$(%(ViteConfigs.BuildId)ViteOutputDir)' == ''">%(SmartOutputDir)</EffectiveOutputDir>
-            </_ViteConfigsToProcess>
-        </ItemGroup>
-
-        <!-- Build each config using MSBuild batching for parallel execution -->
-        <MSBuild Projects="$(MSBuildProjectFile)" 
-                 Targets="_ViteBuildSingleConfig"
-                 Properties="ViteSingleConfigFile=%(ViteConfigs.Identity);ViteSingleOutputDir=%(_ViteConfigsToProcess.EffectiveOutputDir);ViteSingleMode=%(_ViteConfigsToProcess.EffectiveMode);ViteSingleBuildId=%(ViteConfigs.BuildId);ViteSingleMarkerFile=%(_ViteConfigsToProcess.MarkerFile);ViteSingleConfigPackageManager=%(_ViteConfigsToProcess.ConfigPackageManager);ViteSingleIsAreasPattern=%(_ViteConfigsToProcess.IsAreasPattern);ViteSingleConfigDirectory=%(_ViteConfigsToProcess.ConfigDirectory)"
-                 BuildInParallel="false">
-            <Output TaskParameter="TargetOutputs" ItemName="_ViteConfigResults" />
-        </MSBuild>
-
-        <Message Text="========================================"
-            Importance="normal" />
-        <Message Text="✅ Multi-config Vite build completed"
-            Importance="normal" />
-        <Message Text="========================================"
-            Importance="normal" />
-    </Target>
-
-    <!-- 
-    Target: _ResolveViteConfigPackageManager
-    Resolves package manager for individual ViteConfig (auto-detection if needed)
-    -->
-    <Target Name="_ResolveViteConfigPackageManager">
+    <!-- Target: ExecuteViteBuild (Comprehensive C# Build Orchestration) -->
+    <Target Name="ExecuteViteBuild">
         
-        <!-- Auto-detect package manager if set to 'auto-detect' -->
-        <PropertyGroup Condition="'$(ViteSingleConfigPackageManager)' == 'auto-detect'">
-            <!-- Standard priority: bun > pnpm > yarn > npm -->
-            <ViteSingleConfigPackageManager Condition="Exists('$(ViteProjectRoot)bun.lockb')">bun</ViteSingleConfigPackageManager>
-            <ViteSingleConfigPackageManager Condition="'$(ViteSingleConfigPackageManager)' == '' AND Exists('$(ViteProjectRoot)pnpm-lock.yaml')">pnpm</ViteSingleConfigPackageManager>
-            <ViteSingleConfigPackageManager Condition="'$(ViteSingleConfigPackageManager)' == '' AND Exists('$(ViteProjectRoot)yarn.lock')">yarn</ViteSingleConfigPackageManager>
-            <ViteSingleConfigPackageManager Condition="'$(ViteSingleConfigPackageManager)' == '' AND Exists('$(ViteProjectRoot)package-lock.json')">npm</ViteSingleConfigPackageManager>
-            <ViteSingleConfigPackageManager Condition="'$(ViteSingleConfigPackageManager)' == ''">npm</ViteSingleConfigPackageManager>
-        </PropertyGroup>
+        <!-- Resolve configurations first -->
+        <ResolveViteConfigurationsTask ViteProjectRoot="$(ViteProjectRoot)"
+                                       ViteConfigFile="$(ViteConfigFile)"
+                                       ViteOutputDir="$(ViteOutputDir)"
+                                       ViteMode="$(ViteMode)"
+                                       PackageManager="$(PackageManager)"
+                                       UserDefinedConfigs="@(ViteConfig)"
+                                       Condition="'$(ViteUseAdvancedTasks)' == 'true'">
+            <Output TaskParameter="ResolvedConfigs" ItemName="ResolvedViteConfig" />
+            <Output TaskParameter="IsMultiConfig" PropertyName="ViteIsMultiConfig" />
+        </ResolveViteConfigurationsTask>
 
+        <!-- Resolve dependency order for builds -->
+        <ResolveViteConfigDependencies ViteConfigurations="@(ResolvedViteConfig)"
+                                       Condition="'$(ViteUseAdvancedTasks)' == 'true'">
+            <Output TaskParameter="OrderedConfigurations" ItemName="OrderedViteConfig" />
+            <Output TaskParameter="DependencyGroups" ItemName="ViteConfigDependencyGroups" />
+        </ResolveViteConfigDependencies>
+
+        <!-- Execute the build in dependency order -->
+        <OrchestrateBuildTask ViteProjectRoot="$(ViteProjectRoot)"
+                              PackageManager="$(PackageManager)"
+                              ViteMode="$(ViteMode)"
+                              ViteConfigFile="$(ViteConfigFile)"
+                              ViteOutputDir="$(ViteOutputDir)"
+                              ViteBuildCommand="$(ViteBuildCommand)"
+                              ViteInstallCommand="$(ViteInstallCommand)"
+                              ViteEnableColors="$(ViteEnableColors)"
+                              ViteLogLevel="$(ViteLogLevel)"
+                              IntermediateOutputPath="$(IntermediateOutputPath)"
+                              ViteConfigurations="@(OrderedViteConfig)"
+                              ViteInputFiles="@(ViteInputFiles)"
+                              Condition="'$(ViteUseAdvancedTasks)' == 'true'">
+            <Output TaskParameter="BuildSucceeded" PropertyName="ViteBuildSucceeded" />
+            <Output TaskParameter="OutputDirectories" ItemName="ViteOutputDirectories" />
+        </OrchestrateBuildTask>
+
+        <!-- Fallback to legacy build for environments without C# tasks -->
+        <BuildViteCommand ViteProjectRoot="$(ViteProjectRoot)"
+                          ViteConfigFile="$(ViteConfigFile)"
+                          OutputPath="$(ViteOutputDir)"
+                          Mode="$(ViteMode)"
+                          PackageManager="$(PackageManager)"
+                          Condition="'$(ViteUseAdvancedTasks)' != 'true'"
+                          ContinueOnError="false" />
+
+        <!-- Update marker file -->
+        <Touch Files="$(IntermediateOutputPath)ViteBuild.marker" 
+               AlwaysCreate="true" />
     </Target>
 
-    <!-- 
-    Target: _ResolveViteConfigInputs
-    Builds config-specific input file list based on architectural pattern
-    -->
-    <Target Name="_ResolveViteConfigInputs" DependsOnTargets="_ResolveViteConfigPackageManager">
+    <!-- Target: ViteCleanAssets (Clean output directories) -->
+    <Target Name="ViteCleanAssets" 
+        BeforeTargets="Clean" 
+        Condition="'$(EnableViteBuild)' == 'true'">
         
-        <ItemGroup>
-            <!-- Always include the config file itself and package.json -->
-            <_ViteConfigInputFiles Include="$(ViteSingleConfigFile)" />
-            <_ViteConfigInputFiles Include="$(ViteProjectRoot)package.json" Condition="Exists('$(ViteProjectRoot)package.json')" />
-            
-            <!-- Include only the relevant lock file for this config's package manager -->
-            <_ViteConfigInputFiles Include="$(ViteProjectRoot)package-lock.json" 
-                                   Condition="'$(ViteSingleConfigPackageManager)' == 'npm' AND Exists('$(ViteProjectRoot)package-lock.json')" />
-            <_ViteConfigInputFiles Include="$(ViteProjectRoot)yarn.lock" 
-                                   Condition="'$(ViteSingleConfigPackageManager)' == 'yarn' AND Exists('$(ViteProjectRoot)yarn.lock')" />
-            <_ViteConfigInputFiles Include="$(ViteProjectRoot)pnpm-lock.yaml" 
-                                   Condition="'$(ViteSingleConfigPackageManager)' == 'pnpm' AND Exists('$(ViteProjectRoot)pnpm-lock.yaml')" />
-            <_ViteConfigInputFiles Include="$(ViteProjectRoot)bun.lockb" 
-                                   Condition="'$(ViteSingleConfigPackageManager)' == 'bun' AND Exists('$(ViteProjectRoot)bun.lockb')" />
-
-            <!-- Always include the MSBuild project file for config change detection -->
-            <_ViteConfigInputFiles Include="$(MSBuildProjectFile)" />
-        </ItemGroup>
-
-        <!-- Areas pattern: Include area-specific sources + global wwwroot -->
-        <ItemGroup Condition="'$(ViteSingleIsAreasPattern)' == 'true'">
-            <!-- Area-specific sources -->
-            <_ViteConfigInputFiles Include="$(ViteSingleConfigDirectory)/src/**/*.ts" />
-            <_ViteConfigInputFiles Include="$(ViteSingleConfigDirectory)/src/**/*.tsx" />
-            <_ViteConfigInputFiles Include="$(ViteSingleConfigDirectory)/src/**/*.js" />
-            <_ViteConfigInputFiles Include="$(ViteSingleConfigDirectory)/src/**/*.jsx" />
-            <_ViteConfigInputFiles Include="$(ViteSingleConfigDirectory)/src/**/*.vue" />
-            <_ViteConfigInputFiles Include="$(ViteSingleConfigDirectory)/src/**/*.svelte" />
-            <_ViteConfigInputFiles Include="$(ViteSingleConfigDirectory)/src/**/*.css" />
-            <_ViteConfigInputFiles Include="$(ViteSingleConfigDirectory)/src/**/*.scss" />
-            <_ViteConfigInputFiles Include="$(ViteSingleConfigDirectory)/src/**/*.sass" />
-            <_ViteConfigInputFiles Include="$(ViteSingleConfigDirectory)/src/**/*.less" />
-            <_ViteConfigInputFiles Include="$(ViteSingleConfigDirectory)/assets/**/*" />
-            
-            <!-- Global wwwroot (shared resources for Areas) -->
-            <_ViteConfigInputFiles Include="$(MSBuildProjectDirectory)/wwwroot/**/*.ts" />
-            <_ViteConfigInputFiles Include="$(MSBuildProjectDirectory)/wwwroot/**/*.tsx" />
-            <_ViteConfigInputFiles Include="$(MSBuildProjectDirectory)/wwwroot/**/*.js" />
-            <_ViteConfigInputFiles Include="$(MSBuildProjectDirectory)/wwwroot/**/*.jsx" />
-            <_ViteConfigInputFiles Include="$(MSBuildProjectDirectory)/wwwroot/**/*.vue" />
-            <_ViteConfigInputFiles Include="$(MSBuildProjectDirectory)/wwwroot/**/*.svelte" />
-            <_ViteConfigInputFiles Include="$(MSBuildProjectDirectory)/wwwroot/**/*.css" />
-            <_ViteConfigInputFiles Include="$(MSBuildProjectDirectory)/wwwroot/**/*.scss" />
-            <_ViteConfigInputFiles Include="$(MSBuildProjectDirectory)/wwwroot/**/*.sass" />
-            <_ViteConfigInputFiles Include="$(MSBuildProjectDirectory)/wwwroot/**/*.less" />
-        </ItemGroup>
-
-        <!-- Non-Areas pattern: Focus on local sources only -->
-        <ItemGroup Condition="'$(ViteSingleIsAreasPattern)' != 'true'">
-            <!-- Local sources relative to config -->
-            <_ViteConfigInputFiles Include="$(ViteSingleConfigDirectory)/src/**/*.ts" />
-            <_ViteConfigInputFiles Include="$(ViteSingleConfigDirectory)/src/**/*.tsx" />
-            <_ViteConfigInputFiles Include="$(ViteSingleConfigDirectory)/src/**/*.js" />
-            <_ViteConfigInputFiles Include="$(ViteSingleConfigDirectory)/src/**/*.jsx" />
-            <_ViteConfigInputFiles Include="$(ViteSingleConfigDirectory)/src/**/*.vue" />
-            <_ViteConfigInputFiles Include="$(ViteSingleConfigDirectory)/src/**/*.svelte" />
-            <_ViteConfigInputFiles Include="$(ViteSingleConfigDirectory)/src/**/*.css" />
-            <_ViteConfigInputFiles Include="$(ViteSingleConfigDirectory)/src/**/*.scss" />
-            <_ViteConfigInputFiles Include="$(ViteSingleConfigDirectory)/src/**/*.sass" />
-            <_ViteConfigInputFiles Include="$(ViteSingleConfigDirectory)/src/**/*.less" />
-            <_ViteConfigInputFiles Include="$(ViteSingleConfigDirectory)/assets/**/*" />
-            <_ViteConfigInputFiles Include="$(ViteSingleConfigDirectory)/public/**/*" />
-            
-            <!-- Also check parent directories for common SPA patterns -->
-            <_ViteConfigInputFiles Include="$(ViteSingleConfigDirectory)/../src/**/*.ts" />
-            <_ViteConfigInputFiles Include="$(ViteSingleConfigDirectory)/../src/**/*.tsx" />
-            <_ViteConfigInputFiles Include="$(ViteSingleConfigDirectory)/../src/**/*.vue" />
-            <_ViteConfigInputFiles Include="$(ViteSingleConfigDirectory)/../assets/**/*" />
-        </ItemGroup>
-
-        <!-- Allow users to add custom input files via global ViteInputFiles (excluding lock files to avoid conflicts) -->
-        <ItemGroup>
-            <_ViteConfigInputFiles Include="@(ViteInputFiles)" 
-                                   Exclude="$(ViteProjectRoot)*.lock*;$(ViteProjectRoot)package-lock.json;$(ViteProjectRoot)bun.lockb" />
-        </ItemGroup>
-
-    </Target>
-
-    <!-- 
-    Target: _ViteBuildSingleConfig
-    Builds a single Vite configuration (used by multi-config mode)
-    -->
-    <Target Name="_ViteBuildSingleConfig"
-            Inputs="@(_ViteConfigInputFiles)"
-            Outputs="$(ViteSingleMarkerFile)"
-            DependsOnTargets="_ResolveViteConfigInputs"
-            Condition="'$(EnableViteBuild)' == 'true'">
-
-        <!-- Enhanced build with C# Command Builder (if available) -->
-        <BuildViteCommand 
-            ProjectRoot="$(ViteWorkingDirectory)"
-            PackageManagerName="$(ViteSingleConfigPackageManager)"
-            CustomCommand="$(ViteBuildCommand)"
-            ConfigPath="$(ViteSingleConfigFile)"
-            Mode="$(ViteSingleMode)"
-            OutputDir="$(ViteSingleOutputDir)"
-            LogLevel="$(ViteLogLevel)"
-            EnableColors="$(ViteEnableColors)"
-            EnvironmentVariables="$(_ViteEnvVars)"
-            ValidateOnly="$(ViteValidateCommandOnly)"
-            Condition="'$(ViteUseAdvancedTasks)' == 'true'">
-            <Output TaskParameter="CommandLine" PropertyName="_ViteCommandLine" />
-            <Output TaskParameter="ExecutedSuccessfully" PropertyName="_ViteExecutedSuccessfully" />
-            <Output TaskParameter="ExitCode" PropertyName="_ViteExitCode" />
-        </BuildViteCommand>
-
-        <!-- Legacy command construction (fallback) -->
-        <PropertyGroup Condition="'$(ViteUseAdvancedTasks)' != 'true'">
-            <_ViteCommand>$(ViteBuildCommand)</_ViteCommand>
-            <_ViteCommand Condition="'$(_ViteCommand)' == ''">$($(ViteSingleConfigPackageManager)BuildCommand)</_ViteCommand>
-            <_ViteCommand Condition="'$(_ViteCommand)' == '' AND '$(ViteUseDlxFallback)' == 'true'">$(DlxCommand)</_ViteCommand>
-            <_ViteArgs>--config "$(ViteSingleConfigFile)" --mode $(ViteSingleMode) --logLevel $(ViteLogLevel)</_ViteArgs>
-            <_ViteArgs Condition="'$(ViteEnableColors)' == 'false'">$(_ViteArgs) --clearScreen false</_ViteArgs>
-            <_ViteCommandLine>$(_ViteCommand) $(_ViteArgs)</_ViteCommandLine>
-            <_ViteExecutedSuccessfully>true</_ViteExecutedSuccessfully>
-        </PropertyGroup>
-
-        <!-- Show command information -->
-        <Message Text="🎯 Command: $(_ViteCommandLine)" Importance="normal" />
-        <Message Text="🎯 Working Directory: $(ViteWorkingDirectory)" Importance="normal" />
-
-        <!-- Execute Vite build (legacy mode only) -->
-        <Exec Command="$(_ViteCommand) $(_ViteArgs)"
-              WorkingDirectory="$(ViteWorkingDirectory)"
-              Condition="'$(ViteUseAdvancedTasks)' != 'true' AND '$(ViteValidateCommandOnly)' != 'true'" />
-
-        <Message Text="🧪 Validation mode enabled - skipping Vite execution"
-            Importance="normal"
-            Condition="'$(ViteValidateCommandOnly)' == 'true'" />
-
-        <!-- Handle execution results -->
-        <Message Text="✅ Config $(ViteSingleBuildId) completed"
-            Importance="normal"
-            Condition="'$(_ViteExecutedSuccessfully)' == 'true'" />
-
-        <Error Text="❌ Vite build failed for config '$(ViteSingleBuildId)' with exit code $(_ViteExitCode)"
-               Condition="'$(_ViteExecutedSuccessfully)' == 'false' AND '$(_ViteExitCode)' != ''" />
-
-        <!-- Write marker file on success -->
-        <WriteLinesToFile File="$(ViteSingleMarkerFile)" 
-                         Lines="Build completed: $([System.DateTime]::Now.ToString('yyyy-MM-dd HH:mm:ss'))"
-                         Overwrite="true"
-                         Condition="'$(_ViteExecutedSuccessfully)' == 'true' OR '$(ViteValidateCommandOnly)' == 'true'" />
-    </Target>
-
-    <!-- 
-    Target: _ViteBuildAssetsCore
-    Core Vite build logic shared between before/after timing options (single config mode)
-    -->
-    <Target Name="_ViteBuildAssetsCore"
-            Inputs="@(ViteInputFiles);$(ViteConfigFile);$(MSBuildProjectFile)"
-            Outputs="$(ViteBuildMarker)"
-            Condition="'$(EnableViteBuild)' == 'true'">
-
-        <!-- 
-        NOTE: .NET's terminal logger (default in .NET 8+) suppresses most build output.
-        To see ALL Vite build messages, use: dotnet build -tl:false
-        Vite's own output (file sizes, timing) is always visible.
-        The -tl:false flag disables the terminal logger and shows classic MSBuild output.
-        -->
-        <Message Text="========================================"
-            Importance="normal" />
-        <Message Text="⚡ Building frontend assets with Vite"
-            Importance="normal" />
-        <Message Text="   Configuration: $(Configuration)"
-            Importance="normal" />
-        <Message Text="   Vite Mode: $(ViteMode)"
-            Importance="normal" />
-        <Message Text="   Target Framework: $(TargetFramework)"
-            Importance="normal"
-            Condition="'$(TargetFramework)' != ''" />
-        <Message Text="   Build Timing: $(ViteBuildTiming)"
-            Importance="normal" />
-        <Message Text="========================================"
-            Importance="normal" />
-
-        <!-- Determine if we should use dlx fallback (when ViteUseDlxFallback=true and no build script) -->
-        <PropertyGroup>
-            <_UseViteDlxFallback>false</_UseViteDlxFallback>
-            <_UseViteDlxFallback Condition="'$(ViteUseDlxFallback)' == 'true'">true</_UseViteDlxFallback>
-        </PropertyGroup>
-
-        <!-- TODO: Add package.json script detection here in future enhancement -->
-        <!-- For now, ViteUseDlxFallback=true always uses dlx commands -->
+        <RemoveDir Directories="$(ViteOutputDir)" Condition="Exists('$(ViteOutputDir)')" />
+        <Delete Files="$(IntermediateOutputPath)ViteBuild*.marker" />
         
-        <!-- Build Vite command with 3-tier priority system -->
-        <PropertyGroup>
-            <!-- Tier 1: User custom command override (highest priority) -->
-            <_ViteBuildCommand Condition="'$(ViteBuildCommand)' != ''">$(ViteBuildCommand)</_ViteBuildCommand>
-
-            <!-- Tier 2: Package Manager Scripts (when custom command not provided) -->
-            <_ViteBuildCommand Condition="'$(ViteBuildCommand)' == '' AND '$(PackageManager)' == 'npm' AND '$(_UseViteDlxFallback)' != 'true'">npm run build -- --config
-                "$(ViteConfigFile)" --mode $(ViteMode) --logLevel $(ViteLogLevel) --clearScreen
-                false</_ViteBuildCommand>
-            <_ViteBuildCommand Condition="'$(ViteBuildCommand)' == '' AND '$(PackageManager)' == 'pnpm' AND '$(_UseViteDlxFallback)' != 'true'">pnpm run build -- --config
-                "$(ViteConfigFile)" --mode $(ViteMode) --logLevel $(ViteLogLevel) --clearScreen
-                false</_ViteBuildCommand>
-            <_ViteBuildCommand Condition="'$(ViteBuildCommand)' == '' AND '$(PackageManager)' == 'yarn' AND '$(_UseViteDlxFallback)' != 'true'">yarn run build -- --config
-                "$(ViteConfigFile)" --mode $(ViteMode) --logLevel $(ViteLogLevel) --clearScreen
-                false</_ViteBuildCommand>
-            <_ViteBuildCommand Condition="'$(ViteBuildCommand)' == '' AND '$(PackageManager)' == 'bun' AND '$(_UseViteDlxFallback)' != 'true'">bun run build -- --config
-                "$(ViteConfigFile)" --mode $(ViteMode) --logLevel $(ViteLogLevel) --clearScreen
-                false</_ViteBuildCommand>
-
-            <!-- Tier 3: Direct Vite Execution via dlx (when dlx fallback enabled) -->
-            <_ViteBuildCommand Condition="'$(ViteBuildCommand)' == '' AND '$(PackageManager)' == 'npm' AND '$(_UseViteDlxFallback)' == 'true'">npx vite build --config
-                "$(ViteConfigFile)" --mode $(ViteMode) --logLevel $(ViteLogLevel) --clearScreen
-                false</_ViteBuildCommand>
-            <_ViteBuildCommand Condition="'$(ViteBuildCommand)' == '' AND '$(PackageManager)' == 'pnpm' AND '$(_UseViteDlxFallback)' == 'true'">pnpm dlx vite build --config
-                "$(ViteConfigFile)" --mode $(ViteMode) --logLevel $(ViteLogLevel) --clearScreen
-                false</_ViteBuildCommand>
-            <_ViteBuildCommand Condition="'$(ViteBuildCommand)' == '' AND '$(PackageManager)' == 'yarn' AND '$(_UseViteDlxFallback)' == 'true'">yarn dlx vite build --config
-                "$(ViteConfigFile)" --mode $(ViteMode) --logLevel $(ViteLogLevel) --clearScreen
-                false</_ViteBuildCommand>
-            <_ViteBuildCommand Condition="'$(ViteBuildCommand)' == '' AND '$(PackageManager)' == 'bun' AND '$(_UseViteDlxFallback)' == 'true'">bun x vite build --config
-                "$(ViteConfigFile)" --mode $(ViteMode) --logLevel $(ViteLogLevel) --clearScreen
-                false</_ViteBuildCommand>
-        </PropertyGroup>
-
-        <!-- Build environment variables -->
-        <PropertyGroup>
-            <_ViteEnvVars>
-                VITE_PROJECT_DIR=$(MSBuildProjectDirectory);VITE_TARGET_FRAMEWORK=$(TargetFramework)</_ViteEnvVars>
-            <!-- Enable colors if requested (FORCE_COLOR is standard for Node.js tools) -->
-            <_ViteEnvVars Condition="'$(ViteEnableColors)' == 'true'">$(_ViteEnvVars);FORCE_COLOR=1</_ViteEnvVars>
-            <!-- Disable colors explicitly if requested (NO_COLOR is standard) -->
-            <_ViteEnvVars Condition="'$(ViteEnableColors)' == 'false'">$(_ViteEnvVars);NO_COLOR=1</_ViteEnvVars>
-        </PropertyGroup>
-
-        <!-- Detailed output: Show full command (shows in -v:detailed or -v:diag) -->
-        <Message Text="Executing: $(_ViteBuildCommand)" Importance="low" />
-        <Message Text="🔍 Working Directory: $(ViteWorkingDirectory)" Importance="low" />
-        <Message Text="🔍 Environment: $(_ViteEnvVars)" Importance="low" />
-
-        <!-- For testing: skip actual execution and just validate command construction -->
-        <PropertyGroup Condition="'$(ViteValidateCommandOnly)' == 'true'">
-            <_ViteBuildExitCode>0</_ViteBuildExitCode>
-        </PropertyGroup>
-        <Message Text="🧪 Validation mode enabled - skipping Vite execution" 
-                 Condition="'$(ViteValidateCommandOnly)' == 'true'" 
-                 Importance="high" />
-
-        <!-- Run Vite build - Vite's output appears directly in console with colors -->
-        <Exec Command="$(_ViteBuildCommand)"
-            WorkingDirectory="$(ViteWorkingDirectory)"
-            EnvironmentVariables="$(_ViteEnvVars)"
-            ConsoleToMSBuild="true"
-            IgnoreExitCode="false"
-            Condition="'$(ViteValidateCommandOnly)' != 'true'">
-            <Output TaskParameter="ExitCode" PropertyName="_ViteBuildExitCode" />
-        </Exec>
-
-        <!-- Enhanced error message if Vite build fails -->
-        <Error
-            Text="❌ Vite build failed with exit code $(_ViteBuildExitCode)&#xA;   Command: $(_ViteBuildCommand)&#xA;   Working Directory: $(ViteWorkingDirectory)&#xA;   Config File: $(ViteConfigFile)&#xA;   Mode: $(ViteMode)&#xA;   &#xA;   Check the output above for details. Common issues:&#xA;   - Syntax errors in TypeScript/JavaScript files&#xA;   - Missing dependencies (run: $(PackageManager) install)&#xA;   - Invalid Vite configuration&#xA;   - Module resolution failures"
-            Condition="'$(_ViteBuildExitCode)' != '0' AND '$(ViteValidateCommandOnly)' != 'true'" />
-
-        <!-- Write marker file (Microsoft SDK pattern) -->
-        <!-- Records the inputs that were built for incremental build tracking -->
-        <ItemGroup>
-            <_ViteBuildInputsForMarker Include="@(ViteInputFiles)" />
-            <_ViteBuildInputsForMarker Include="$(ViteConfigFile)" />
-            <_ViteBuildInputsForMarker Include="$(MSBuildProjectFile)" />
-        </ItemGroup>
-
-        <WriteLinesToFile File="$(ViteBuildMarker)"
-            Lines="@(_ViteBuildInputsForMarker->'%(FullPath)')"
-            Overwrite="true"
-            WriteOnlyWhenDifferent="true" />
-
-        <Message Text="========================================"
-            Importance="normal" />
-        <Message Text="✅ Vite build completed"
-            Importance="normal" />
-        <Message Text="📁 Output directory: $(ViteOutputPath)"
-            Importance="normal" />
-        <Message Text="📋 Marker file: $(ViteBuildMarker)"
-            Importance="low" />
-        <Message Text="======================================="
-            Importance="normal" />
+        <Message Text="🧹 Cleaned Vite output: $(ViteOutputDir)" Importance="normal" />
     </Target>
 
-    <!-- 
-    Target: _CollectViteInputs
-    Collects all frontend source files for incremental build tracking (Microsoft SDK pattern)
-    MSBuild automatically compares these files against Outputs to determine if rebuild needed
-    Framework-agnostic: Supports Vue, React, Svelte, Solid, Preact, etc.
-    
-    Users can customize by adding ViteInputFiles in their .csproj BEFORE this file imports:
-    <ItemGroup>
-      <ViteInputFiles Include="wwwroot\custom\**\*.ts" />
-      <ViteInputFiles Remove="wwwroot\js\unused\**\*" />
-    </ItemGroup>
-  -->
-    <Target Name="_CollectViteInputs">
-        <ItemGroup>
-            <!-- JavaScript/TypeScript files (all frameworks) -->
-            <ViteInputFiles Include="$(MSBuildProjectDirectory)\wwwroot\js\**\*.ts" />
-            <ViteInputFiles Include="$(MSBuildProjectDirectory)\wwwroot\js\**\*.tsx" />
-            <ViteInputFiles Include="$(MSBuildProjectDirectory)\wwwroot\js\**\*.js" />
-            <ViteInputFiles Include="$(MSBuildProjectDirectory)\wwwroot\js\**\*.jsx" />
-            <ViteInputFiles Include="$(MSBuildProjectDirectory)\wwwroot\js\**\*.mts" />
-            <ViteInputFiles Include="$(MSBuildProjectDirectory)\wwwroot\js\**\*.mjs" />
-
-            <!-- Framework component files -->
-            <ViteInputFiles Include="$(MSBuildProjectDirectory)\wwwroot\js\**\*.vue" />
-            <ViteInputFiles Include="$(MSBuildProjectDirectory)\wwwroot\js\**\*.svelte" />
-
-            <!-- CSS/Style files -->
-            <ViteInputFiles Include="$(MSBuildProjectDirectory)\wwwroot\css\**\*.css" />
-            <ViteInputFiles Include="$(MSBuildProjectDirectory)\wwwroot\css\**\*.scss" />
-            <ViteInputFiles Include="$(MSBuildProjectDirectory)\wwwroot\css\**\*.sass" />
-            <ViteInputFiles Include="$(MSBuildProjectDirectory)\wwwroot\css\**\*.less" />
-            <ViteInputFiles Include="$(MSBuildProjectDirectory)\wwwroot\css\**\*.styl" />
-            <ViteInputFiles Include="$(MSBuildProjectDirectory)\wwwroot\css\**\*.stylus" />
-            <ViteInputFiles Include="$(MSBuildProjectDirectory)\wwwroot\css\**\*.pcss" />
-
-            <!-- Assets imported by JS/CSS (convention: keep in assets/ subdirectories) -->
-            <!-- Users should place JS-imported assets in js/assets/, CSS-imported in css/assets/ -->
-            <ViteInputFiles Include="$(MSBuildProjectDirectory)\wwwroot\js\assets\**\*" />
-            <ViteInputFiles Include="$(MSBuildProjectDirectory)\wwwroot\css\assets\**\*" />
-
-            <!-- Package manager configuration files -->
-            <ViteInputFiles Include="$(ViteProjectRoot)package.json" />
-            <ViteInputFiles Include="$(ViteProjectRoot)package-lock.json"
-                Condition="Exists('$(ViteProjectRoot)package-lock.json')" />
-            <ViteInputFiles Include="$(ViteProjectRoot)pnpm-lock.yaml"
-                Condition="Exists('$(ViteProjectRoot)pnpm-lock.yaml')" />
-            <ViteInputFiles Include="$(ViteProjectRoot)yarn.lock"
-                Condition="Exists('$(ViteProjectRoot)yarn.lock')" />
-            <ViteInputFiles Include="$(ViteProjectRoot)bun.lockb"
-                Condition="Exists('$(ViteProjectRoot)bun.lockb')" />
-
-            <!-- Build configuration files -->
-            <ViteInputFiles Include="$(ViteProjectRoot)tsconfig.json"
-                Condition="Exists('$(ViteProjectRoot)tsconfig.json')" />
-            <ViteInputFiles Include="$(ViteProjectRoot)tsconfig.*.json" />
-            <ViteInputFiles Include="$(ViteProjectRoot)postcss.config.*"
-                Condition="Exists('$(ViteProjectRoot)postcss.config.js') OR Exists('$(ViteProjectRoot)postcss.config.cjs') OR Exists('$(ViteProjectRoot)postcss.config.mjs')" />
-            <ViteInputFiles Include="$(ViteProjectRoot)tailwind.config.*"
-                Condition="Exists('$(ViteProjectRoot)tailwind.config.js') OR Exists('$(ViteProjectRoot)tailwind.config.ts') OR Exists('$(ViteProjectRoot)tailwind.config.cjs')" />
-            <ViteInputFiles Include="$(ViteProjectRoot).browserslistrc"
-                Condition="Exists('$(ViteProjectRoot).browserslistrc')" />
-            <ViteInputFiles Include="$(ViteProjectRoot).env"
-                Condition="Exists('$(ViteProjectRoot).env')" />
-            <ViteInputFiles Include="$(ViteProjectRoot).env.$(ViteMode)"
-                Condition="Exists('$(ViteProjectRoot).env.$(ViteMode)')" />
-            <ViteInputFiles Include="$(ViteProjectRoot).env.local"
-                Condition="Exists('$(ViteProjectRoot).env.local')" />
-        </ItemGroup>
-
-        <!-- Allow user customization via ItemGroup in .csproj or Directory.Build.targets -->
-        <!-- Users can add custom patterns or remove unwanted ones -->
-        <!-- Example in .csproj:
-             <ItemGroup>
-               <ViteInputFiles Include="wwwroot\data\**\*.json" />
-               <ViteInputFiles Include="wwwroot\locales\**\*.yml" />
-               <ViteInputFiles Remove="wwwroot\js\legacy\**\*" />
-             </ItemGroup>
-        -->
-
-        <Message Text="📊 Tracking @(ViteInputFiles->Count()) input files for incremental build"
-            Importance="low" />
-    </Target>
-
-    <!-- 
-    Target: ViteCleanAssets
-    Cleans Vite output directory during dotnet clean
-  -->
-    <Target Name="ViteCleanAssets" BeforeTargets="Clean" Condition="'$(EnableViteBuild)' == 'true'">
-        <Message Text="🧹 Cleaning Vite output directory..."
-            Importance="normal" />
-
-        <RemoveDir Directories="$(ViteOutputPath)"
-            Condition="Exists('$(ViteOutputPath)')" />
-
-        <Message Text="✅ Vite output directory cleaned"
-            Importance="normal" />
-    </Target>
-
-    <!-- ====================================================================== -->
-    <!-- Publishing Integration                                                 -->
-    <!-- ====================================================================== -->
-
-    <!-- 
-    ItemGroup: Ensure Vite assets are included in publish output
-    The .NET SDK automatically includes wwwroot content, but we ensure publish behavior
-  -->
-    <ItemGroup Label="Vite Assets for Publishing" Condition="'$(EnableViteBuild)' == 'true'">
-        <Content Update="$(ViteOutputDir)\**\*"
-            CopyToPublishDirectory="Always"
-            Condition="Exists('$(ViteOutputPath)')" />
-    </ItemGroup>
-
-    <!-- ====================================================================== -->
-    <!-- Standalone Vite Build Target                                           -->
-    <!-- ====================================================================== -->
-
-    <!-- 
-    Target: BuildViteOnly
-    Standalone target to build Vite assets without full .NET build
-    Usage: dotnet build -t:BuildViteOnly
-  -->
-    <Target Name="BuildViteOnly" DependsOnTargets="ValidateViteSetup;EnsureNodeDependencies">
-        <PropertyGroup>
-            <ViteBuildCommand>$(ViteBuildCommandDebug)</ViteBuildCommand>
-            <ViteBuildCommand Condition="'$(Configuration)' == 'Release'">$(ViteBuildCommandRelease)</ViteBuildCommand>
-        </PropertyGroup>
-
-        <Message Text="========================================"
-            Importance="high" />
-        <Message Text="⚡ Building frontend assets with Vite ($(Configuration) mode)..."
-            Importance="high" />
-        <Message Text="========================================"
-            Importance="high" />
-
-        <Exec Command="$(ViteBuildCommand)"
-            WorkingDirectory="$(ViteWorkingDirectory)"
-            EnvironmentVariables="VITE_PROJECT_DIR=$(MSBuildProjectDirectory)"
-            ContinueOnError="false" />
-
-        <Message Text="========================================"
-            Importance="high" />
-        <Message Text="✅ Vite build completed"
-            Importance="high" />
-        <Message Text="📁 Output: $(ViteOutputPath)"
-            Importance="high" />
-        <Message Text="======================================="
-            Importance="high" />
-    </Target>
-
-    <!-- ====================================================================== -->
-    <!-- Development Information                                                -->
-    <!-- ====================================================================== -->
-
-    <!-- Show informational message in Debug builds - runs first -->
-    <Target Name="ViteDebugInfo"
-        BeforeTargets="ValidateViteSetup"
-        Condition="'$(Configuration)' == 'Debug'">
-        <Message
-            Text="ℹ️  Building Vite assets in $(Configuration) mode. Use 'npm run dev' for hot reload during development."
-            Importance="normal"
-            Condition="'$(EnableViteBuild)' == 'true'" />
-    </Target>
-
-    <!-- 
-    Target: CleanViteOutput
-    Cleans Vite output directory when dotnet clean is executed
-    Note: Marker files in obj/ (IntermediateOutputPath) are cleaned automatically by MSBuild
-  -->
-    <Target Name="CleanViteOutput"
-        BeforeTargets="Clean"
-        Condition="'$(EnableViteBuild)' == 'true' AND Exists('$(ViteOutputPath)')">
-
-        <Message Text="🧹 Cleaning Vite output: $(ViteOutputPath)"
-            Importance="high" />
-
-        <RemoveDir Directories="$(ViteOutputPath)" />
-
-        <Message Text="✅ Vite output cleaned (marker files in obj/ cleaned by MSBuild)"
-            Importance="high" />
+    <!-- Target: BuildViteOnly (Development helper) -->
+    <Target Name="BuildViteOnly" 
+        DependsOnTargets="ValidateViteSetup;EnsureNodeDependencies;CollectViteInputs;ExecuteViteBuild">
+        
+        <Message Text="✅ Vite-only build completed" Importance="high" />
     </Target>
 
 </Project>
