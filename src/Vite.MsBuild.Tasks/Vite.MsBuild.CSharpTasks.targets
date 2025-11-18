@@ -1,0 +1,91 @@
+<!-- Enhanced Vite.MsBuild.targets using C# tasks for complex logic -->
+<Project>
+
+  <!-- Load our custom C# tasks -->
+  <PropertyGroup>
+    <ViteMsBuildTasksAssembly>$(MSBuildThisFileDirectory)..\tasks\net6.0\Vite.MsBuild.Tasks.dll</ViteMsBuildTasksAssembly>
+  </PropertyGroup>
+
+  <UsingTask TaskName="Vite.MsBuild.Tasks.ResolveViteModes" 
+             AssemblyFile="$(ViteMsBuildTasksAssembly)" 
+             Condition="Exists('$(ViteMsBuildTasksAssembly)')" />
+
+  <UsingTask TaskName="Vite.MsBuild.Tasks.ValidateViteConfig" 
+             AssemblyFile="$(ViteMsBuildTasksAssembly)" 
+             Condition="Exists('$(ViteMsBuildTasksAssembly)')" />
+
+  <!-- 
+  Target: _ResolveViteModesWithCSharp
+  Uses C# task to handle complex override hierarchy logic
+  -->
+  <Target Name="_ResolveViteModesWithCSharp" 
+          BeforeTargets="_ViteBuildMultipleConfigs"
+          Condition="'$(EnableViteBuild)' == 'true' AND '@(ViteConfigs)' != '' AND Exists('$(ViteMsBuildTasksAssembly)')">
+
+    <!-- Collect all MSBuild properties that might be config-specific overrides -->
+    <ItemGroup>
+      <_ViteModeProperties Include="ViteMode" Value="$(ViteMode)" Condition="'$(ViteMode)' != ''" />
+      
+      <!-- Dynamically collect *ViteMode properties -->
+      <!-- Note: This is a simplified version - real implementation would scan all properties -->
+      <_ViteModeProperties Include="AdminViteMode" Value="$(AdminViteMode)" Condition="'$(AdminViteMode)' != ''" />
+      <_ViteModeProperties Include="CustomerViteMode" Value="$(CustomerViteMode)" Condition="'$(CustomerViteMode)' != ''" />
+      <_ViteModeProperties Include="PartnerViteMode" Value="$(PartnerViteMode)" Condition="'$(PartnerViteMode)' != ''" />
+      <_ViteModeProperties Include="UserViteMode" Value="$(UserViteMode)" Condition="'$(UserViteMode)' != ''" />
+      <_ViteModeProperties Include="ApiViteMode" Value="$(ApiViteMode)" Condition="'$(ApiViteMode)' != ''" />
+    </ItemGroup>
+
+    <!-- Call C# task to resolve effective modes -->
+    <ResolveViteModes 
+        ViteConfigs="@(ViteConfigs)"
+        ViteMode="$(ViteMode)"
+        Properties="@(_ViteModeProperties)"
+        DefaultMode="$(ResolvedViteMode)">
+      <Output TaskParameter="ResolvedConfigs" ItemName="_ViteConfigsWithModes" />
+    </ResolveViteModes>
+
+    <!-- Replace original ViteConfigs with resolved ones -->
+    <ItemGroup>
+      <ViteConfigs Remove="@(ViteConfigs)" />
+      <ViteConfigs Include="@(_ViteConfigsWithModes)" />
+    </ItemGroup>
+
+    <Message Text="🎯 Resolved modes using C# task: @(ViteConfigs->'%(BuildId)=%(EffectiveMode)', ', ')" 
+             Importance="normal" 
+             Condition="'$(ViteBuildVerbosity)' != 'quiet'" />
+
+  </Target>
+
+  <!-- 
+  Target: _ValidateViteConfigsWithCSharp
+  Uses C# task for enhanced config validation
+  -->
+  <Target Name="_ValidateViteConfigsWithCSharp" 
+          BeforeTargets="ValidateViteSetup"
+          Condition="'$(EnableViteBuild)' == 'true' AND Exists('$(ViteMsBuildTasksAssembly)')">
+
+    <ItemGroup>
+      <_ConfigsToValidate Include="@(ViteConfigs)" Condition="Exists('%(Identity)')" />
+    </ItemGroup>
+
+    <!-- Validate each config file -->
+    <ValidateViteConfig 
+        ConfigPath="%(Identity)"
+        ExpectedOutputDir="%(_ConfigsToValidate.OutputDir)"
+        Condition="'%(_ConfigsToValidate.Identity)' != ''">
+      <Output TaskParameter="IsValid" PropertyName="_ConfigValid_%(BuildId)" />
+      <Output TaskParameter="DetectedOutputDir" PropertyName="_DetectedOutputDir_%(BuildId)" />
+      <Output TaskParameter="Warnings" ItemName="_ConfigWarnings" />
+    </ValidateViteConfig>
+
+    <!-- Show validation results -->
+    <Message Text="📋 Config validation: %(BuildId) ✅" 
+             Importance="normal" 
+             Condition="'$(_ConfigValid_%(BuildId))' == 'true'" />
+
+    <Warning Text="Config validation warning: %(_ConfigWarnings.Identity)" 
+             Condition="'@(_ConfigWarnings)' != ''" />
+
+  </Target>
+
+</Project>
