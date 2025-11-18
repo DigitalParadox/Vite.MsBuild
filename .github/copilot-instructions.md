@@ -18,6 +18,27 @@ This project creates a **NuGet package** with MSBuild integration files, not a c
 3. Vite.MsBuild.targets (build logic)
 ```
 
+## Documentation Standards
+
+### Markdown Formatting
+**ALL markdown files must conform to GitHub Flavored Markdown (GFM) standards:**
+
+- **Headers**: Use proper hierarchy with hash symbols and single spaces
+- **Code blocks**: Use triple backticks with language specification
+- **Lists**: Consistent bullet points with proper indentation
+- **Tables**: Use pipe syntax with proper alignment
+- **Links**: Use reference-style or inline links with descriptive text
+- **Badges**: Place on separate lines for better mobile rendering
+- **Line breaks**: Use double spaces or empty lines for paragraph breaks
+
+### Content Guidelines
+- **Clear structure**: Logical hierarchy with descriptive headings
+- **Actionable examples**: Working code snippets that users can copy-paste
+- **Visual formatting**: Use emojis (✅, ❌, 🎯) and formatting (`**bold**`, `*italic*`) for clarity
+- **Professional tone**: Enterprise-ready documentation with comprehensive examples
+- **Update test counts**: Keep test coverage badges current (currently 125 tests)
+- **README formatting**: Ensure README.md renders correctly on GitHub without duplicate headers or malformed sections
+
 ## Key Technical Patterns
 
 ### Property Naming Convention
