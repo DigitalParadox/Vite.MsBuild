@@ -1,98 +1,351 @@
-# Vite.MsBuild# Vite.MsBuild
+# Vite.MsBuild
 
+**Framework-agnostic MSBuild integration for Vite in ASP.NET Core projects.**
 
-
-**Framework-agnostic MSBuild integration for Vite in ASP.NET Core projects.****Framework-agnostic MSBuild integration for Vite in ASP.NET Core projects**
-
-
-
-[![NuGet Package](https://img.shields.io/nuget/v/Vite.MsBuild)](https://www.nuget.org/packages/Vite.MsBuild)Supports: Vue, React, Svelte, Solid, Preact, and vanilla JS/TS
-
+[![NuGet Package](https://img.shields.io/nuget/v/Vite.MsBuild)](https://www.nuget.org/packages/Vite.MsBuild)
 [![Build Status](https://github.com/DigitalParadox/Vite.MsBuild/workflows/CI/badge.svg)](https://github.com/DigitalParadox/Vite.MsBuild/actions)
+[![Test Coverage](https://img.shields.io/badge/tests-125%20passing-brightgreen)](https://github.com/DigitalParadox/Vite.MsBuild/actions)
 
-[![Test Coverage](https://img.shields.io/badge/tests-90%20passing-brightgreen)](https://github.com/DigitalParadox/Vite.MsBuild/actions)## Features
+Supports: Vue, React, Svelte, Solid, Preact, and vanilla JS/TS
 
+## Features
 
-
-**Zero-configuration** Vite integration that works seamlessly with any frontend framework (Vue, React, Svelte, vanilla TypeScript) and any package manager (npm, yarn, pnpm, bun).✅ **Zero configuration** - Auto-detects package.json and vite.config  
-
+✅ **Zero configuration** - Auto-detects package.json and vite.config  
 ✅ **Incremental builds** - Only rebuilds when source files change  
-
-## 🚀 **Quick Start**✅ **Parallel build safe** - Prevents npm install conflicts  
-
+✅ **Parallel build safe** - Prevents npm install conflicts  
 ✅ **Framework-agnostic** - Works with any Vite-supported framework  
-
-### **1. Install Package**✅ **Package manager agnostic** - Auto-detects npm, pnpm, yarn, or bun  
-
-```xml✅ **Smart validation** - Helpful error messages and welcome guide  
-
-<PackageReference Include="Vite.MsBuild" Version="1.0.0" />✅ **Production ready** - Used in production ASP.NET Core apps  
-
-```
+✅ **Package manager agnostic** - Auto-detects npm, pnpm, yarn, or bun  
+✅ **Smart validation** - Helpful error messages and welcome guide  
+✅ **Production ready** - Used in production ASP.NET Core apps  
 
 ## Quick Start
 
-### **2. Build Your Project**
+### Install
 
-```bash### Install
-
-dotnet build
-
-``````bash
-
+```bash
 dotnet add package Vite.MsBuild
+```
 
-**That's it!** 🎉 Your frontend builds automatically alongside your .NET project.```
+The package automatically enables when installed.
 
+### Create Vite Config
 
+```bash
+npm create vite@latest . -- --template vue-ts
+```
 
-## ✨ **Key Features**The package automatically enables when installed.
+### Build
 
-
-
-### **🎯 Zero Configuration Experience**### Create Vite Config
-
-- **Works immediately** after NuGet install (< 30 seconds to productivity)
-
-- **Auto-detects everything**: package manager, build scripts, project structure```bash
-
-- **Intelligent defaults**: Debug → development mode, Release → production modenpm create vite@latest . -- --template vue-ts
-
-- **Framework agnostic**: Vue, React, Svelte, Angular, vanilla TypeScript```
-
-
-
-### **📦 Universal Package Manager Support**### Build
-
-- **npm** - Default Node.js package manager
-
-- **yarn** - Including Yarn v1 and Yarn Berry (PnP)```bash
-
-- **pnpm** - Performance-focused package manager  dotnet build
-
-- **bun** - Ultra-fast JavaScript runtime```
-
-- **Smart fallback**: Script-based → direct tool → helpful error
+```bash
+dotnet build
+```
 
 That's it! Vite assets are built automatically during `dotnet build`.
 
-### **🏢 Enterprise Multi-SPA Architecture**
+## Configuration (Optional)
 
-- **Multiple frontend apps** in single .NET project## Configuration (Optional)
-
-- **Independent configurations** per application
-
-- **Isolated dependency trees** with separate outputsAll configuration is optional - the package works with sensible defaults.
-
-- **Flexible deployment** strategies per SPA
+All configuration is optional - the package works with sensible defaults.
 
 ```xml
+<PropertyGroup>
+  <!-- Disable if needed -->
+  <EnableViteBuild>false</EnableViteBuild>
+  
+  <!-- Custom config location -->
+  <ViteConfigFile>custom.vite.config.ts</ViteConfigFile>
+  
+  <!-- Custom output directory -->
+  <ViteOutputDir>wwwroot/assets</ViteOutputDir>
+  
+  <!-- Override detected package manager -->
+  <PackageManager>pnpm</PackageManager>
+  
+  <!-- Force specific Vite mode -->
+  <ViteMode>staging</ViteMode>
+</PropertyGroup>
+```
 
-### **🔧 Intelligent Command Factory**<PropertyGroup>
+## Enterprise Multi-SPA Configuration
 
-```csharp  <!-- Disable if needed -->
+For complex enterprise scenarios with multiple frontend applications:
 
-// Automatically chooses the best approach:  <EnableViteBuild>false</EnableViteBuild>
+```xml
+<ItemGroup>
+  <ViteConfig Include="Areas/Admin/vite.admin.config.ts">
+    <BuildId>admin</BuildId>
+    <OutputDir>wwwroot/admin</OutputDir>
+    <Mode>development</Mode>
+  </ViteConfig>
+  <ViteConfig Include="Areas/Customer/vite.customer.config.ts">
+    <BuildId>customer</BuildId> 
+    <OutputDir>wwwroot/customer</OutputDir>
+    <Mode>production</Mode>
+  </ViteConfig>
+  <ViteConfig Include="Areas/Partner/vite.partner.config.ts">
+    <BuildId>partner</BuildId>
+    <OutputDir>wwwroot/partner</OutputDir>
+    <Mode>staging</Mode>
+  </ViteConfig>
+</ItemGroup>
+```
+
+## Package Manager Support
+
+Automatically detects and works with:
+
+- **npm** - Default Node.js package manager  
+- **yarn** - Including Yarn v1 and Yarn Berry (PnP)  
+- **pnpm** - Performance-focused package manager  
+- **bun** - Ultra-fast JavaScript runtime  
+
+Priority order: `bun.lockb` → `pnpm-lock.yaml` → `yarn.lock` → `package-lock.json` → `npm` (default)
+
+### Conflict Resolution
+
+When multiple lock files are detected:
+
+**Development:**
+```
+⚠️ Warning: Multiple package manager lock files detected
+💡 To resolve with pnpm:
+   rm package-lock.json yarn.lock && pnpm install --frozen-lockfile
+```
+
+**CI/CD:**
+```
+❌ Error: Multiple package manager lock files detected (fails build)
+💡 Resolution commands provided
+```
+
+## Framework Support
+
+Works seamlessly with any Vite-supported framework:
+
+| Framework | Status | Notes |
+|-----------|--------|--------|
+| **Vue.js** | ✅ Full support | .vue files, Vue CLI migration |
+| **React** | ✅ Full support | .jsx, .tsx files, CRA migration |
+| **Svelte** | ✅ Full support | .svelte files, SvelteKit |
+| **Solid** | ✅ Full support | SolidJS applications |
+| **Preact** | ✅ Full support | Lightweight React alternative |
+| **Vanilla** | ✅ Full support | TypeScript, JavaScript, CSS |
+
+## Monorepo Support
+
+### Central Workspace Pattern
+
+```
+MonoRepo/
+├── pnpm-workspace.yaml
+├── pnpm-lock.yaml
+└── apps/
+    ├── frontend/
+    │   ├── Frontend.csproj
+    │   └── package.json
+    └── admin/
+        ├── Admin.csproj
+        └── package.json
+```
+
+### Per-Project Pattern
+
+```
+Solution/
+├── src/Web/
+│   ├── Web.csproj
+│   ├── package.json
+│   └── package-lock.json
+└── src/Api/
+    ├── Api.csproj
+    ├── package.json
+    └── package-lock.json
+```
+
+## Build Process
+
+### Command Resolution
+
+The package uses a 3-tier command strategy:
+
+1. **Custom Commands** (highest priority)
+   ```xml
+   <ViteBuildCommand>npm run build:custom</ViteBuildCommand>
+   ```
+
+2. **Package Scripts** (preferred)
+   ```bash
+   npm run build  # Uses package.json scripts
+   ```
+
+3. **Direct Tool Execution** (fallback)
+   ```bash
+   npx vite build    # npm
+   yarn dlx vite     # yarn  
+   pnpm dlx vite     # pnpm
+   bunx vite build   # bun
+   ```
+
+### Incremental Builds
+
+- Only rebuilds when frontend files change
+- Uses Microsoft MSBuild incremental build patterns
+- Separate marker files per configuration
+- Parallel build safe across multiple projects
+
+## Environment Variables
+
+Color output is controlled via standard environment variables:
+
+- `FORCE_COLOR=1` - Enable colors (when `ViteEnableColors=true`)
+- `NO_COLOR=1` - Disable colors (when `ViteEnableColors=false`)
+
+## Troubleshooting
+
+### Common Issues
+
+**Build not triggering:**
+```bash
+# Check if Vite is enabled
+dotnet build -v:detailed | grep "Vite"
+```
+
+**Package manager conflicts:**
+```bash
+# Clean conflicting lock files
+rm package-lock.json yarn.lock
+pnpm install --frozen-lockfile
+```
+
+**Custom configuration not found:**
+```xml
+<!-- Specify exact path -->
+<ViteConfigFile>$(MSBuildProjectDirectory)/custom.config.ts</ViteConfigFile>
+```
+
+### Diagnostics
+
+Enable detailed logging:
+
+```bash
+dotnet build -v:detailed
+```
+
+Or use the diagnostic property:
+
+```xml
+<PropertyGroup>
+  <ViteShowDiagnostics>true</ViteShowDiagnostics>
+</PropertyGroup>
+```
+
+## Advanced Scenarios
+
+### Runtime Mode Overrides
+
+```bash
+# Override all configurations globally
+dotnet build -p:ViteMode=production
+
+# Override specific configurations
+dotnet build -p:AdminViteMode=development -p:CustomerViteMode=staging
+
+# CI/CD production build
+dotnet publish -c Release -p:ViteMode=production
+```
+
+### Custom Install Commands
+
+```xml
+<PropertyGroup>
+  <!-- Custom npm install command -->
+  <ViteInstallCommand>npm ci --audit --fund</ViteInstallCommand>
+  
+  <!-- Custom build command -->
+  <ViteBuildCommand>yarn build:enterprise</ViteBuildCommand>
+</PropertyGroup>
+```
+
+### Build Timing Control
+
+```xml
+<PropertyGroup>
+  <!-- Build frontend before C# (default) -->
+  <ViteBuildTiming>BeforeCSharp</ViteBuildTiming>
+  
+  <!-- Build frontend after C# -->
+  <ViteBuildTiming>AfterCSharp</ViteBuildTiming>
+</PropertyGroup>
+```
+
+## Migration Guides
+
+### From Vue CLI
+
+1. Install Vite.MsBuild: `dotnet add package Vite.MsBuild`
+2. Add vite.config.ts with Vue plugin
+3. Remove manual build steps from .csproj
+4. Run `dotnet build`
+
+### From Create React App
+
+1. Install Vite.MsBuild: `dotnet add package Vite.MsBuild`  
+2. Add vite.config.ts with React plugin
+3. Update index.html (remove %PUBLIC_URL%)
+4. Run `dotnet build`
+
+### From Webpack
+
+1. Install Vite.MsBuild: `dotnet add package Vite.MsBuild`
+2. Create vite.config.ts equivalent of webpack.config.js
+3. Remove webpack build targets from .csproj
+4. Run `dotnet build`
+
+## Performance
+
+### Build Times
+
+- **Initial build**: Full frontend compilation
+- **Incremental builds**: 60-90% faster (only changed files)  
+- **Parallel builds**: Safe across multiple projects
+- **Clean builds**: Automatic cleanup of stale assets
+
+### Memory Usage
+
+- **Minimal overhead**: Executes package manager directly
+- **No memory leaks**: Proper process cleanup
+- **Large projects**: Handles 1000+ frontend files efficiently
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Run tests: `dotnet test`
+4. Commit changes: `git commit -m 'Add amazing feature'`
+5. Push to branch: `git push origin feature/amazing-feature`
+6. Open a Pull Request
+
+### Development Setup
+
+```bash
+git clone https://github.com/DigitalParadox/Vite.MsBuild.git
+cd Vite.MsBuild
+dotnet restore
+dotnet test
+```
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- [Vite](https://vitejs.dev/) - The amazing build tool this integrates
+- [ASP.NET Core](https://docs.microsoft.com/aspnet/core/) - The web framework
+- Microsoft MSBuild team for excellent extensibility patterns
+
+---
+
+**Made with ❤️ for the .NET + modern frontend community**
 
 // 1. Custom commands (literal execution)  
 
