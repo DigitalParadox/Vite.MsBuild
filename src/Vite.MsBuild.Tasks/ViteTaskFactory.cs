@@ -16,13 +16,13 @@ namespace Vite.MsBuild.Tasks
 
         public string FactoryName => "Vite.MsBuild.ViteConfig";
 
-        public Type TaskType => typeof(DefineViteConfig);
+        public Type TaskType => typeof(ViteConfig);
 
         public TaskPropertyInfo[] GetTaskParameters()
         {
             if (_parameters.Length == 0)
             {
-                _parameters = ExtractParametersFromTask(typeof(DefineViteConfig));
+                _parameters = ExtractParametersFromTask(typeof(ViteConfig));
             }
             return _parameters;
         }
@@ -36,7 +36,7 @@ namespace Vite.MsBuild.Tasks
 
         public ITask CreateTask(IBuildEngine taskFactoryLoggingHost)
         {
-            return new DefineViteConfig { BuildEngine = taskFactoryLoggingHost };
+            return new ViteConfig { BuildEngine = taskFactoryLoggingHost };
         }
 
         public void CleanupTask(ITask task)
@@ -71,9 +71,9 @@ namespace Vite.MsBuild.Tasks
     /// Alternative approach: Direct namespaced task registration
     /// This allows for <Vite.MsBuild.ViteConfig> syntax without custom factory
     /// </summary>
-    public class NamespacedViteConfig : DefineViteConfig
+    public class NamespacedViteConfig : ViteConfig
     {
-        // Inherits all functionality from DefineViteConfig
+        // Inherits all functionality from ViteConfig
         // but can be registered with a different name in MSBuild
     }
 
