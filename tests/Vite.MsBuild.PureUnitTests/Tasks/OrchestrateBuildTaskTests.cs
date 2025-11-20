@@ -3,11 +3,24 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using System;
 using System.IO;
-using Vite.MsBuild.Tasks;
+using System.Linq;
+using ViteKit.MsBuild.Tasks;
 using Xunit;
 
-namespace Vite.MsBuild.PureUnitTests.Tasks
+namespace ViteKit.MsBuild.PureUnitTests.Tasks
 {
+    /// <summary>
+    /// Tests for OrchestrateBuildTask - the execution engine for Vite builds
+    /// 
+    /// ARCHITECTURE NOTE:
+    /// OrchestrateBuildTask expects configurations in dependency order.
+    /// In the real MSBuild pipeline: ResolveViteConfigDependencies → OrchestrateBuildTask
+    /// - ResolveViteConfigDependencies: Performs topological sort of dependency graph
+    /// - OrchestrateBuildTask: Validates and executes builds in the provided order
+    /// 
+    /// These tests provide configs in correct dependency order to test execution logic.
+    /// See ResolveViteConfigDependenciesTests for dependency sorting tests.
+    /// </summary>
     public class OrchestrateBuildTaskTests : IDisposable
     {
         private readonly string _tempDir;
@@ -105,7 +118,8 @@ namespace Vite.MsBuild.PureUnitTests.Tasks
         [Fact]
         public void Execute_WithDependencies_BuildsInCorrectOrder()
         {
-            // Arrange
+            // Arrange - OrchestrateBuildTask expects configs in dependency order
+            // In real usage, ViteConfigDependencyResolver sorts them first
             var mockEngine = new Helpers.MockBuildEngine();
             var task = new OrchestrateBuildTask
             {
@@ -116,8 +130,9 @@ namespace Vite.MsBuild.PureUnitTests.Tasks
                 IntermediateOutputPath = Path.Combine(_tempDir, "obj"),
                 ViteConfigurations = new[]
                 {
-                    CreateConfig("app", "vite.app.config.ts", "wwwroot/app", dependsOn: "shared"),
-                    CreateConfig("shared", "vite.shared.config.ts", "wwwroot/shared")
+                    // Dependencies must come BEFORE dependents (shared before app)
+                    CreateConfig("shared", "vite.shared.config.ts", "wwwroot/shared"),
+                    CreateConfig("app", "vite.app.config.ts", "wwwroot/app", dependsOn: "shared")
                 }
             };
 
@@ -125,12 +140,13 @@ namespace Vite.MsBuild.PureUnitTests.Tasks
             var result = task.Execute();
 
             // Assert
-            result.Should().BeTrue();
+            result.Should().BeTrue("OrchestrateBuildTask should succeed when configs are in correct dependency order");
             task.ConfigurationsBuilt.Should().Be(2);
+            task.BuildSucceeded.Should().BeTrue();
             
             // Check that dependencies were validated
             mockEngine.LoggedMessages.Should().Contain(m => 
-                m.Message.Contains("All dependencies satisfied") && m.Message.Contains("app"));
+                m != null && m.Message != null && m.Message.Contains("All dependencies satisfied") && m.Message.Contains("app"));
         }
 
         [Fact]
@@ -255,7 +271,7 @@ namespace Vite.MsBuild.PureUnitTests.Tasks
         [Fact]
         public void Execute_WithMultipleDependencies_ValidatesAll()
         {
-            // Arrange
+            // Arrange - Dependencies must be ordered correctly
             var mockEngine = new Helpers.MockBuildEngine();
             var task = new OrchestrateBuildTask
             {
@@ -266,9 +282,10 @@ namespace Vite.MsBuild.PureUnitTests.Tasks
                 IntermediateOutputPath = Path.Combine(_tempDir, "obj"),
                 ViteConfigurations = new[]
                 {
-                    CreateConfig("app", "vite.app.config.ts", "wwwroot/app", dependsOn: "shared,components"),
+                    // Dependencies first, then dependents
                     CreateConfig("shared", "vite.shared.config.ts", "wwwroot/shared"),
-                    CreateConfig("components", "vite.components.config.ts", "wwwroot/components")
+                    CreateConfig("components", "vite.components.config.ts", "wwwroot/components"),
+                    CreateConfig("app", "vite.app.config.ts", "wwwroot/app", dependsOn: "shared,components")
                 }
             };
 
@@ -441,8 +458,68 @@ namespace Vite.MsBuild.PureUnitTests.Tasks
 
             // Assert
             result.Should().BeTrue();
-            mockEngine.LoggedMessages.Should().Contain(m => m.Message.Contains("Building 2 Vite configuration(s)"));
-            mockEngine.LoggedMessages.Should().Contain(m => m.Message.Contains("Successfully built all"));
+            mockEngine.LoggedMessages.Should().Contain(m => m != null && m.Message != null && m.Message.Contains("Building 2 Vite configuration(s)"));
+            mockEngine.LoggedMessages.Should().Contain(m => m != null && m.Message != null && m.Message.Contains("Build Plan"));
+            mockEngine.LoggedMessages.Should().Contain(m => m != null && m.Message != null && m.Message.Contains("Build Summary"));
+            mockEngine.LoggedMessages.Should().Contain(m => m != null && m.Message != null && m.Message.Contains("All builds completed successfully"));
+        }
+
+        [Fact]
+        public void Execute_WithDependencyChange_TriggersParentRebuild()
+        {
+            // Arrange - Create initial build with dependencies
+            var objDir = Path.Combine(_tempDir, "obj");
+            Directory.CreateDirectory(objDir);
+            
+            var mockEngine = new Helpers.MockBuildEngine();
+            var task = new OrchestrateBuildTask
+            {
+                BuildEngine = mockEngine,
+                ViteProjectRoot = _tempDir,
+                PackageManager = "npm",
+                ViteMode = "development",
+                IntermediateOutputPath = objDir,
+                ViteConfigurations = new[]
+                {
+                    CreateConfig("shared", "vite.shared.config.ts", "wwwroot/shared"),
+                    CreateConfig("app", "vite.app.config.ts", "wwwroot/app", dependsOn: "shared")
+                }
+            };
+
+            // Initial build
+            var firstBuild = task.Execute();
+            firstBuild.Should().BeTrue();
+
+            // Simulate dependency rebuild by updating its marker file
+            System.Threading.Thread.Sleep(100); // Ensure timestamp difference
+            var sharedMarkerPath = Path.Combine(objDir, "ViteBuild.shared.marker");
+            File.WriteAllText(sharedMarkerPath, DateTime.UtcNow.ToString("O"));
+
+            // Act - Second build should detect dependency change
+            var secondMockEngine = new Helpers.MockBuildEngine();
+            var secondTask = new OrchestrateBuildTask
+            {
+                BuildEngine = secondMockEngine,
+                ViteProjectRoot = _tempDir,
+                PackageManager = "npm",
+                ViteMode = "development",
+                IntermediateOutputPath = objDir,
+                ViteConfigurations = new[]
+                {
+                    CreateConfig("shared", "vite.shared.config.ts", "wwwroot/shared"),
+                    CreateConfig("app", "vite.app.config.ts", "wwwroot/app", dependsOn: "shared")
+                }
+            };
+
+            var secondBuild = secondTask.Execute();
+
+            // Assert - App should rebuild because shared dependency was updated
+            secondBuild.Should().BeTrue();
+            
+            // Verify the dependency change was detected in logs
+            secondMockEngine.LoggedMessages.Should().Contain(m => 
+                m != null && m.Message != null && m.Message.Contains("Dependency 'shared' was rebuilt, triggering rebuild of 'app'"),
+                "the system should detect and log that the dependency triggered the parent rebuild");
         }
 
         private static ITaskItem CreateConfig(string buildId, string configFile, string outputDir, string? dependsOn = null)

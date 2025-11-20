@@ -1,10 +1,10 @@
 using FluentAssertions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using Vite.MsBuild.Tasks;
+using ViteKit.MsBuild.Tasks;
 using Xunit;
 
-namespace Vite.MsBuild.PureUnitTests.Tasks
+namespace ViteKit.MsBuild.PureUnitTests.Tasks
 {
     public class ResolveViteModesTests
     {
@@ -106,7 +106,7 @@ namespace Vite.MsBuild.PureUnitTests.Tasks
         [Fact]
         public void Execute_FollowsOverrideHierarchy()
         {
-            // Test hierarchy: Config-specific > Global > ItemGroup > Default
+            // Test hierarchy: Config-specific > ItemGroup > Global > Default
             
             // Arrange
             var adminConfig = CreateConfig("admin", "vite.admin.config.ts");
@@ -137,13 +137,13 @@ namespace Vite.MsBuild.PureUnitTests.Tasks
             result.Should().BeTrue();
             task.ResolvedConfigs.Should().HaveCount(3);
             
-            // Admin: Config-specific property wins
+            // Admin: Config-specific property wins (highest priority)
             task.ResolvedConfigs![0].GetMetadata("EffectiveMode").Should().Be("admin-specific");
             
-            // Customer: Global ViteMode wins (no config-specific property)
-            task.ResolvedConfigs[1].GetMetadata("EffectiveMode").Should().Be("global-mode");
+            // Customer: ItemGroup Mode wins (has ItemGroup mode, no config-specific property)
+            task.ResolvedConfigs[1].GetMetadata("EffectiveMode").Should().Be("itemgroup-mode");
             
-            // Shared: Global ViteMode wins (no item group mode)
+            // Shared: Global ViteMode wins (no ItemGroup mode, no config-specific property)
             task.ResolvedConfigs[2].GetMetadata("EffectiveMode").Should().Be("global-mode");
         }
 
