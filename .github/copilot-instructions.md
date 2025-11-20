@@ -8,8 +8,12 @@ This project creates a **NuGet package** with MSBuild integration files, not a c
 
 - **`build/Vite.MsBuild.props`** - Property defaults, auto-detection logic, imported BEFORE user's .csproj
 - **`build/Vite.MsBuild.targets`** - Build targets and validation logic, imported AFTER user's .csproj  
-- **`Vite.MsBuild.nuspec`** - NuGet package manifest
+- **`ViteKit.MsBuild.nuspec`** - NuGet package manifest (internal: ViteKit, public package: Vite.MsBuild)
 - **`build-package.ps1`** - PowerShell build script for creating the .nupkg
+
+### Naming Convention
+- **External/Public**: `Vite.MsBuild` (NuGet package ID, GitHub repo, root directory)
+- **Internal/Code**: `ViteKit.MsBuild` (namespaces, assemblies, project files, directories)
 
 ### MSBuild Import Order
 ```
@@ -34,10 +38,11 @@ This project creates a **NuGet package** with MSBuild integration files, not a c
 ### Content Guidelines
 - **Clear structure**: Logical hierarchy with descriptive headings
 - **Actionable examples**: Working code snippets that users can copy-paste
-- **Visual formatting**: Use emojis (✅, ❌, 🎯) and formatting (`**bold**`, `*italic*`) for clarity
+- **Visual formatting**: Use formatting (`**bold**`, `*italic*`) for clarity
 - **Professional tone**: Enterprise-ready documentation with comprehensive examples
-- **Update test counts**: Keep test coverage badges current (currently 125 tests)
+- **Update test counts**: Keep test coverage badges current (currently 434 tests)
 - **README formatting**: Ensure README.md renders correctly on GitHub without duplicate headers or malformed sections
+- **Logging format**: Use ASCII-safe prefixes ([OK], [BUILD], [ERROR], [SKIP], [LINK]) instead of emojis for cross-platform terminal compatibility
 
 ## Key Technical Patterns
 
@@ -147,11 +152,26 @@ All error/warning messages include:
 Critical target execution order:
 ```
 ShowViteDiagnostics (diagnostic only)
-→ ResolveViteMode (maps Configuration to Vite mode)
+→ ViteConfigurationResolver (resolves multi-config with smart defaults)
+→ ViteConfigDependencyResolver (topological sort for build order)
+→ ViteModeResolver (resolves effective modes with override hierarchy)
 → ValidateViteSetup (config validation + welcome message)
 → EnsureNodeDependencies (npm install if needed)
-→ ViteBuildAssets OR ViteBuildAssetsAfter (main build - timing configurable)
+→ OrchestrateBuildTask (C# task for high-performance builds)
 ```
+
+## Key C# Tasks (ViteKit.MsBuild.Tasks)
+
+### Resolver Tasks
+- **`ViteConfigurationResolver`** - Resolves Vite configurations with smart defaults (replaces 200+ lines of XML)
+- **`ViteConfigDependencyResolver`** - Performs topological sort for dependency-aware build ordering
+- **`ViteModeResolver`** - Resolves effective modes using override hierarchy (config-specific > ItemGroup > global > default)
+
+### Build Tasks
+- **`OrchestrateBuildTask`** - High-performance C# orchestration (replaces 21 complex XML targets)
+- **`DetectPackageManagerTask`** - Auto-detects package manager from lock files
+- **`CollectViteInputFilesTask`** - Gathers all frontend files for incremental builds
+- **`ValidateViteProjectTask`** - Validates project structure and configuration
 
 ### Build Timing Options
 - **`ViteBuildTiming=BeforeCSharp`** (default): Runs before `ResolveStaticWebAssetsInputs` 

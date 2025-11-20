@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Target modern .NET for ViteKit ecosystem -->
+    <!-- Support: Active + Maintenance + 1 year grace after EOS -->
+    <!-- .NET 8: In maintenance until Nov 2026, drop Nov 2027 -->
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    
+    <!-- Suppress acceptable MSBuild security warnings (build-time only, not runtime) -->
+    <NoWarn>$(NoWarn);NU1902;NU1903</NoWarn>
+    
+    <!-- Package info -->
+    <PackageId>Vite.MsBuild.Tasks</PackageId>
+    <Version>1.0.0</Version>
+    <Description>MSBuild tasks for Vite.MsBuild integration</Description>
+    <Company>Vite.MsBuild</Company>
+    
+    <!-- Don't include in main package - this is internal -->
+    <IncludeInPackage>false</IncludeInPackage>
+  </PropertyGroup>
+
+  <!-- MSBuild references -->
+  <ItemGroup>
+    <!-- MSBuild 17.x for .NET 6+ / .NET 8+ / .NET 9+ - Visual Studio 2022+ -->
+    <PackageReference Include="Microsoft.Build.Tasks.Core" Version="17.11.4" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.11.4" PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>

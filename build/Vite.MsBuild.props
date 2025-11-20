@@ -43,6 +43,13 @@
       (Optional) Use npx/dlx fallback when Vite not in package.json (default: false)
       <ViteUseDlxFallback>true</ViteUseDlxFallback>  (useful for testing without local installs)
       
+      (Optional) Specify which package.json script to run (default: build)
+      <ViteBuildScript>build:production</ViteBuildScript>  (build, build:prod, dev, etc.)
+      Set to empty string to force direct vite CLI calls
+      
+      (Optional) Force direct vite build calls, bypass package.json scripts (default: false)
+      <DirectViteBuild>true</DirectViteBuild>  (gives full control over Vite CLI flags)
+      
       (Optional) When to run Vite build relative to C# compilation (default: BeforeCSharp)
       <ViteBuildTiming>AfterCSharp</ViteBuildTiming>  (BeforeCSharp or AfterCSharp)
       
@@ -180,9 +187,34 @@
         <!-- Leave empty to use automatic package manager detection -->
         <ViteBuildCommand Condition="'$(ViteBuildCommand)' == ''"></ViteBuildCommand>
 
+        <!-- ViteBuildScript - specify which package.json script to run (default: "build") -->
+        <!-- Examples: "build:production", "build:staging", "build:dev" -->
+        <!-- Set to empty to force direct vite build calls even if scripts exist -->
+        <!-- Future: Will support "dev" for dev server pass-through -->
+        <ViteBuildScript Condition="'$(ViteBuildScript)' == ''">build</ViteBuildScript>
+
+        <!-- DirectViteBuild - force direct vite CLI calls, bypass package.json scripts -->
+        <!-- Set to 'true' to use 'npx vite build' even if package.json has build script -->
+        <!-- Useful when you want MSBuild to control all Vite CLI flags -->
+        <DirectViteBuild Condition="'$(DirectViteBuild)' == ''">false</DirectViteBuild>
+
+        <!-- ViteCommandType - DEPRECATED: Use DirectViteBuild or ViteBuildScript instead -->
+        <!-- Kept for backward compatibility, will be removed in future version -->
+        <ViteCommandType Condition="'$(ViteCommandType)' == ''"></ViteCommandType>
+
         <!-- ViteBuildTiming - when to run Vite build relative to C# compilation -->
         <!-- Options: 'BeforeCSharp' (default) or 'AfterCSharp' -->
         <ViteBuildTiming Condition="'$(ViteBuildTiming)' == ''">BeforeCSharp</ViteBuildTiming>
+
+        <!-- ViteEnableDiagnostics - enable diagnostic logging (default: false) -->
+        <!-- Auto-enables in CI when debug mode is enabled (RUNNER_DEBUG, SYSTEM_DEBUG, etc.) -->
+        <!-- Set to 'true' to explicitly enable, 'false' to disable even in CI debug mode -->
+        <ViteEnableDiagnostics Condition="'$(ViteEnableDiagnostics)' == ''">false</ViteEnableDiagnostics>
+
+        <!-- ViteDiagnosticLogPath - custom diagnostic log location (optional) -->
+        <!-- Defaults to %LOCALAPPDATA%\ViteKit.MsBuild\diagnostics\ on local builds -->
+        <!-- Defaults to CI artifact paths in CI environments -->
+        <ViteDiagnosticLogPath Condition="'$(ViteDiagnosticLogPath)' == ''">$(LOCALAPPDATA)\ViteKit.MsBuild\diagnostics</ViteDiagnosticLogPath>
 
         <!-- Marker files - Microsoft SDK pattern: Always in IntermediateOutputPath (obj/) -->
         <!-- Vite build marker - tracks successful Vite builds per target framework -->

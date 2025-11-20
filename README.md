@@ -4,7 +4,7 @@
 
 [![NuGet Package](https://img.shields.io/nuget/v/Vite.MsBuild)](https://www.nuget.org/packages/Vite.MsBuild)
 [![Build Status](https://github.com/DigitalParadox/Vite.MsBuild/workflows/CI/badge.svg)](https://github.com/DigitalParadox/Vite.MsBuild/actions)
-[![Tests](https://img.shields.io/badge/tests-292%20passing-brightgreen)](https://github.com/DigitalParadox/Vite.MsBuild/actions)
+[![Tests](https://img.shields.io/badge/tests-434%20passing-brightgreen)](https://github.com/DigitalParadox/Vite.MsBuild/actions)
 
 **Seamlessly integrate Vite with ASP.NET Core** - Build Vue, React, Svelte, or any Vite-supported framework directly from `dotnet build`.
 
@@ -442,17 +442,18 @@ dotnet test
 
 ### Test Coverage
 
-Current test coverage: **292 tests passing** (298 total, 98% pass rate)
+Current test coverage: **434 tests passing** (100% pass rate)
 
 - ✅ **Core Tasks**: ValidateViteProjectTask, DetectPackageManagerTask, CollectViteInputFilesTask
-- ✅ **Configuration Tasks**: ResolveViteConfigDependencies, ResolveViteConfigurationsTask, ResolveViteModes
+- ✅ **Resolver Tasks**: ViteConfigurationResolver, ViteConfigDependencyResolver, ViteModeResolver
+- ✅ **Command Builders**: ViteCommandFactory, ScriptBasedCommandBuilder, DirectToolCommandBuilder, CustomCommandBuilder
 - ✅ **Validation**: ViteConfig, ValidateViteConfig
-- ✅ **Orchestration**: OrchestrateBuildTask (multi-config builds, dependency ordering)
-- ✅ **Build Integration**: MSBuild target execution, incremental builds
+- ✅ **Orchestration**: OrchestrateBuildTask (multi-config builds, dependency ordering, incremental builds)
+- ✅ **Build Integration**: MSBuild target execution, parallel builds, marker files
 - ✅ **Framework Support**: Vue, React, Svelte file detection
-- ✅ **Package Managers**: npm, pnpm, yarn, bun detection and commands
-- ✅ **Advanced Features**: Dependency graphs, circular detection, mode resolution, architecture detection
-- ✅ **Error Scenarios**: Validation, conflict resolution, helpful messages
+- ✅ **Package Managers**: npm, pnpm, yarn, bun detection and command generation
+- ✅ **Advanced Features**: Dependency graphs, topological sorting, circular detection, mode resolution, architecture detection
+- ✅ **Error Scenarios**: Validation, conflict resolution, helpful messages, encoding compatibility
 
 ---
 
