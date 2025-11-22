@@ -1,0 +1,14 @@
+{
+  "name": "custom-build-script-test",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:prod": "vite build --mode production --minify esbuild"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "typescript": "^5.3.0"
+  }
+}
