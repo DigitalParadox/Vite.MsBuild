@@ -1,0 +1,7 @@
+var builder = WebApplication.CreateBuilder(args);
+var app = builder.Build();
+
+app.UseStaticFiles();
+app.MapGet("/", () => "Monorepo Shared Test");
+
+app.Run();
