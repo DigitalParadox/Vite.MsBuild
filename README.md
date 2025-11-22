@@ -1,10 +1,10 @@
-# Vite.MsBuild
+# ViteKit.Msbuild
 
 > **Framework-agnostic MSBuild integration for Vite in ASP.NET Core projects**
 
-[![NuGet Package](https://img.shields.io/nuget/v/Vite.MsBuild)](https://www.nuget.org/packages/Vite.MsBuild)
-[![Build Status](https://github.com/DigitalParadox/Vite.MsBuild/workflows/CI/badge.svg)](https://github.com/DigitalParadox/Vite.MsBuild/actions)
-[![Tests](https://img.shields.io/badge/tests-434%20passing-brightgreen)](https://github.com/DigitalParadox/Vite.MsBuild/actions)
+[![NuGet Package](https://img.shields.io/nuget/v/ViteKit.Msbuild)](https://www.nuget.org/packages/ViteKit.Msbuild)
+[![Build Status](https://github.com/DigitalParadox/ViteKit.Msbuild/workflows/CI/badge.svg)](https://github.com/DigitalParadox/ViteKit.Msbuild/actions)
+[![Tests](https://img.shields.io/badge/tests-434%20passing-brightgreen)](https://github.com/DigitalParadox/ViteKit.Msbuild/actions)
 
 **Seamlessly integrate Vite with ASP.NET Core** - Build Vue, React, Svelte, or any Vite-supported framework directly from `dotnet build`.
 
@@ -27,7 +27,7 @@
 ### 1. Install the NuGet Package
 
 ```bash
-dotnet add package Vite.MsBuild
+dotnet add package ViteKit.Msbuild
 ```
 
 ### 2. Initialize Your Frontend
@@ -70,10 +70,10 @@ dotnet build
 
 ### Zero Configuration (Recommended)
 
-Vite.MsBuild works out-of-the-box with sensible defaults:
+ViteKit.Msbuild works out-of-the-box with sensible defaults:
 
 ```xml
-<PackageReference Include="Vite.MsBuild" Version="2.0.0" />
+<PackageReference Include="ViteKit.Msbuild" Version="2.0.0" />
 <!-- That's it! No configuration needed -->
 ```
 
@@ -132,7 +132,7 @@ Automatically detects and works with all major package managers:
 
 ### Package Manager Conflicts
 
-If multiple lock files are detected, Vite.MsBuild provides clear guidance:
+If multiple lock files are detected, ViteKit.Msbuild provides clear guidance:
 
 ```
 ⚠️  Multiple package manager lock files detected: yarn.lock, package-lock.json
@@ -215,7 +215,7 @@ MyProject/
 ├── vite.config.ts            ← Shared Vite config  
 └── src/
     └── WebApp/
-        └── WebApp.csproj     ← References Vite.MsBuild
+        └── WebApp.csproj     ← References ViteKit.Msbuild
 ```
 
 **Option 2: Project-Specific Dependencies**
@@ -225,7 +225,7 @@ MyProject/
     └── WebApp/
         ├── package.json      ← WebApp-specific dependencies
         ├── vite.config.ts    ← WebApp-specific config
-        └── WebApp.csproj     ← References Vite.MsBuild
+        └── WebApp.csproj     ← References ViteKit.Msbuild
 ```
 
 ---
@@ -305,7 +305,7 @@ export default defineConfig({
 
 ## 🔄 Migration Guide
 
-### From Vite.MsBuild 1.x to 2.x
+### From ViteKit.Msbuild 1.x to 2.x
 
 **Breaking Changes:**
 
@@ -318,10 +318,10 @@ export default defineConfig({
 1. **Update Package Reference:**
    ```xml
    <!-- Old -->
-   <PackageReference Include="Vite.MsBuild" Version="1.x" />
+   <PackageReference Include="ViteKit.Msbuild" Version="1.x" />
    
    <!-- New -->
-   <PackageReference Include="Vite.MsBuild" Version="2.0.0" />
+   <PackageReference Include="ViteKit.Msbuild" Version="2.0.0" />
    ```
 
 2. **Remove Old Configuration (if using):**
@@ -389,7 +389,7 @@ This shows:
 
 ### Incremental Build Optimization
 
-Vite.MsBuild uses MSBuild's incremental build system:
+ViteKit.Msbuild uses MSBuild's incremental build system:
 
 - **Input Files**: All frontend source files + config files
 - **Output Marker**: Timestamp file in `obj/` directory  
@@ -427,8 +427,8 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 ```bash
 # Clone the repository
-git clone https://github.com/DigitalParadox/Vite.MsBuild.git
-cd Vite.MsBuild
+git clone https://github.com/DigitalParadox/ViteKit.Msbuild.git
+cd ViteKit.Msbuild
 
 # Restore dependencies
 dotnet restore
@@ -465,10 +465,10 @@ This project is licensed under the [MIT License](LICENSE).
 
 ## 🔗 Links
 
-- **📦 NuGet Package**: https://www.nuget.org/packages/Vite.MsBuild
-- **🐛 Issues**: https://github.com/DigitalParadox/Vite.MsBuild/issues
-- **💬 Discussions**: https://github.com/DigitalParadox/Vite.MsBuild/discussions
-- **🔀 Pull Requests**: https://github.com/DigitalParadox/Vite.MsBuild/pulls
+- **📦 NuGet Package**: https://www.nuget.org/packages/ViteKit.Msbuild
+- **🐛 Issues**: https://github.com/DigitalParadox/ViteKit.Msbuild/issues
+- **💬 Discussions**: https://github.com/DigitalParadox/ViteKit.Msbuild/discussions
+- **🔀 Pull Requests**: https://github.com/DigitalParadox/ViteKit.Msbuild/pulls
 
 ---
 
