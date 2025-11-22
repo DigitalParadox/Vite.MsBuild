@@ -1,4 +1,4 @@
-# Vite.MsBuild Test Case Completeness Review
+# ViteKit.Msbuild Test Case Completeness Review
 
 ## 📋 Purpose
 

@@ -9,7 +9,7 @@ permalink: /architecture/
 # Architecture
 {: .fs-9 }
 
-Technical documentation about how Vite.MsBuild works internally.
+Technical documentation about how ViteKit.Msbuild works internally.
 {: .fs-6 .fw-300 }
 
 {: .warning }
@@ -18,7 +18,7 @@ Technical documentation about how Vite.MsBuild works internally.
 ## Core Architecture
 
 ### MSBuild Integration
-How Vite.MsBuild integrates with the MSBuild system.
+How ViteKit.Msbuild integrates with the MSBuild system.
 
 - Target execution order
 - Property resolution
@@ -57,11 +57,11 @@ The architecture section contains detailed technical analysis documents that wer
 
 ## For Contributors
 
-If you're contributing to Vite.MsBuild, the architecture documentation will help you understand:
+If you're contributing to ViteKit.Msbuild, the architecture documentation will help you understand:
 
 - Design decisions and rationale
 - Implementation patterns
 - Extension points
 - Testing strategies
 
-See our [Contributing Guide](https://github.com/DigitalParadox/Vite.MsBuild/blob/main/CONTRIBUTING.md) for more information.
+See our [Contributing Guide](https://github.com/DigitalParadox/ViteKit.Msbuild/blob/main/CONTRIBUTING.md) for more information.

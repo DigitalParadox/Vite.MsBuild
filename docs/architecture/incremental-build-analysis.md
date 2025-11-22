@@ -57,7 +57,7 @@ PackageManager = config.GetMetadata("PackageManager") ?? PackageManager
 While per-config package managers work correctly for **command generation**, the MSBuild `Inputs`/`Outputs` still include all `@(ViteInputFiles)` globally:
 
 ```xml
-<!-- build/Vite.MsBuild.targets line 236 -->
+<!-- build/ViteKit.Msbuild.targets line 236 -->
 <Target Name="ViteBuildAssets"
     Inputs="@(ViteInputFiles);$(ViteConfigFile);$(MSBuildProjectFile)"
     Outputs="$(IntermediateOutputPath)ViteBuild.marker">
@@ -85,7 +85,7 @@ While per-config package managers work correctly for **command generation**, the
 
 **Global detection (DetectPackageManager target):**
 ```xml
-<!-- build/Vite.MsBuild.targets line 120 -->
+<!-- build/ViteKit.Msbuild.targets line 120 -->
 <PackageManager Condition="Exists('$(ViteProjectRoot)bun.lockb')">bun</PackageManager>
 <PackageManager Condition="'$(PackageManager)' == '' AND Exists('$(ViteProjectRoot)pnpm-lock.yaml')">pnpm</PackageManager>
 <!-- etc -->
@@ -117,13 +117,13 @@ Markers are **per-BuildId**, not per-package-manager:
 // OrchestrateBuildTask.cs line 472
 private string GetBuildMarkerPath(ViteConfigInfo config)
 {
-    return Path.Combine(IntermediateOutputPath, $"Vite.MsBuild.{config.BuildId}.marker");
+    return Path.Combine(IntermediateOutputPath, $"ViteKit.Msbuild.{config.BuildId}.marker");
 }
 ```
 
 **Examples:**
-- `obj/Vite.MsBuild.admin.marker` (npm)
-- `obj/Vite.MsBuild.customer.marker` (yarn)
+- `obj/ViteKit.Msbuild.admin.marker` (npm)
+- `obj/ViteKit.Msbuild.customer.marker` (yarn)
 
 **Why this is correct:**
 - Each config has unique BuildId
@@ -179,9 +179,9 @@ Resolves correctly in OrchestrateBuildTask! ✅
 ### ✅ Per-Config Marker Files
 
 Separate markers per BuildId prevent interference:
-- `obj/Vite.MsBuild.shared.marker`
-- `obj/Vite.MsBuild.admin.marker`
-- `obj/Vite.MsBuild.customer.marker`
+- `obj/ViteKit.Msbuild.shared.marker`
+- `obj/ViteKit.Msbuild.admin.marker`
+- `obj/ViteKit.Msbuild.customer.marker`
 
 ## Identified Optimization Opportunities
 
@@ -685,7 +685,7 @@ public override bool Execute()
 **Current Cache Implementation:**
 
 ```xml
-<!-- build/Vite.MsBuild.targets -->
+<!-- build/ViteKit.Msbuild.targets -->
 <Target Name="CollectViteInputs"
     Inputs="$(ViteProjectRoot)package.json;$(ViteConfigFile)"
     Outputs="$(IntermediateOutputPath)Vite.InputFiles.cache">
@@ -947,7 +947,7 @@ if (File.Exists(depMarkerPath))
 
 **Current Implementation:**
 ```xml
-<!-- build/Vite.MsBuild.targets line 313 -->
+<!-- build/ViteKit.Msbuild.targets line 313 -->
 <RemoveDir Directories="$(ViteOutputDir)" Condition="Exists('$(ViteOutputDir)')" />
 ```
 
@@ -994,7 +994,7 @@ Only cleans **global** `ViteOutputDir`, not per-config output directories.
 
 **Current Implementation:**
 ```xml
-<!-- build/Vite.MsBuild.targets line 224 -->
+<!-- build/ViteKit.Msbuild.targets line 224 -->
 <Exec Command="$(PackageManager) install" 
       WorkingDirectory="$(ViteProjectRoot)"
       Condition="'$(NodeModulesExists)' == 'false'" />
@@ -1025,7 +1025,7 @@ MSBuild's target ordering usually prevents this, but not guaranteed.
 ```xml
 <!-- Shared marker file across all projects -->
 <PropertyGroup>
-  <NodeRestoreMarker>$(ViteProjectRoot)obj\Vite.MsBuild.NodeRestore.marker</NodeRestoreMarker>
+  <NodeRestoreMarker>$(ViteProjectRoot)obj\ViteKit.Msbuild.NodeRestore.marker</NodeRestoreMarker>
 </PropertyGroup>
 
 <Target Name="EnsureNodeDependencies"

@@ -1,4 +1,4 @@
-# Vite.MsBuild - Comprehensive Acceptance Criteria & Test Scenarios
+# ViteKit.Msbuild - Comprehensive Acceptance Criteria & Test Scenarios
 
 **Product**: MSBuild integration for Vite frontend builds in ASP.NET Core projects  
 **Version**: 1.0.0  
@@ -20,7 +20,7 @@
 #### ✅ **Scenario 1.1: Fresh Project Setup**
 ```
 GIVEN: A new ASP.NET Core project
-WHEN: Developer adds Vite.MsBuild NuGet package
+WHEN: Developer adds ViteKit.Msbuild NuGet package
 THEN: Frontend builds automatically work with zero configuration required
 AND: System auto-detects vite.config.js/ts in project root
 AND: Default output goes to wwwroot/ directory
@@ -30,7 +30,7 @@ AND: Default output goes to wwwroot/ directory
 
 #### ✅ **Scenario 1.2: Build Mode Detection** 
 ```
-GIVEN: A project with Vite.MsBuild package
+GIVEN: A project with ViteKit.Msbuild package
 WHEN: Developer builds in Debug mode
 THEN: Frontend builds in development mode for faster builds
 AND: Source maps are preserved for debugging
@@ -233,7 +233,7 @@ AND: Unchanged files are not reprocessed
 
 #### ✅ **Scenario 5.2: Parallel Build Support**
 ```
-GIVEN: Multiple projects in a solution using Vite.MsBuild
+GIVEN: Multiple projects in a solution using ViteKit.Msbuild
 WHEN: Solution builds with parallel compilation enabled
 THEN: Each project's frontend builds independently
 AND: No conflicts occur with temporary files
@@ -447,7 +447,7 @@ AND: Build works across Windows, Linux, macOS
 
 ### **Beginner**: Zero Configuration
 ```xml
-<PackageReference Include="Vite.MsBuild" Version="1.0.0" />
+<PackageReference Include="ViteKit.Msbuild" Version="1.0.0" />
 ```
 **Result**: Works automatically! 🚀
 
@@ -566,7 +566,7 @@ AND: Build works across Windows, Linux, macOS
 **Use Cases**: Small projects, prototypes, learning
 
 ```xml
-<PackageReference Include="Vite.MsBuild" Version="1.0.0" />
+<PackageReference Include="ViteKit.Msbuild" Version="1.0.0" />
 ```
 **Result**: Automatic Vite integration with sensible defaults
 

@@ -1,23 +1,23 @@
 # Just the Docs theme configuration
 remote_theme: just-the-docs/just-the-docs
 
-title: Vite.MsBuild Documentation
+title: ViteKit.Msbuild Documentation
 description: Framework-agnostic MSBuild integration for Vite in ASP.NET Core projects
 
 # GitHub repository info
 url: "https://digitalparadox.github.io"
-baseurl: "/Vite.MsBuild"
+baseurl: "/ViteKit.Msbuild"
 
 aux_links:
   "GitHub":
-    - "https://github.com/DigitalParadox/Vite.MsBuild"
+    - "https://github.com/DigitalParadox/ViteKit.Msbuild"
   "NuGet Package":
-    - "https://www.nuget.org/packages/Vite.MsBuild"
+    - "https://www.nuget.org/packages/ViteKit.Msbuild"
 
 # Footer configuration
 gh_edit_link: true
 gh_edit_link_text: "Edit this page on GitHub"
-gh_edit_repository: "https://github.com/DigitalParadox/Vite.MsBuild"
+gh_edit_repository: "https://github.com/DigitalParadox/ViteKit.Msbuild"
 gh_edit_branch: "main"
 
 # Search configuration

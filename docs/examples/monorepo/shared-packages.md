@@ -9,7 +9,7 @@ nav_order: 1
 # Monorepo Configuration
 {: .fs-9 }
 
-Complete example showing Vite.MsBuild in a monorepo with shared packages and multiple applications.
+Complete example showing ViteKit.Msbuild in a monorepo with shared packages and multiple applications.
 {: .fs-6 .fw-300 }
 
 ## Scenario
@@ -262,7 +262,7 @@ export default defineConfig({
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Vite.MsBuild" Version="2.0.0" />
+    <PackageReference Include="ViteKit.Msbuild" Version="2.0.0" />
   </ItemGroup>
 
   <!-- Monorepo-specific configuration -->
@@ -404,7 +404,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Vite.MsBuild" Version="2.0.0" />
+    <PackageReference Include="ViteKit.Msbuild" Version="2.0.0" />
   </ItemGroup>
 
   <!-- Mobile-specific configuration -->

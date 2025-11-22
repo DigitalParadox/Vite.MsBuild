@@ -1,4 +1,4 @@
-# Real-World Monorepo with Vite.MsBuild
+# Real-World Monorepo with ViteKit.Msbuild
 
 ## Typical Enterprise Monorepo Structure
 
@@ -44,7 +44,7 @@ Enterprise.Solution/
         └── BuildScripts.csproj       ← Build automation
 ```
 
-## **How Vite.MsBuild Works in This Structure**
+## **How ViteKit.Msbuild Works in This Structure**
 
 ### **Each .csproj Gets Independent Vite Integration** ✅
 
@@ -55,8 +55,8 @@ Enterprise.Solution/
     <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
   
-  <PackageReference Include="Vite.MsBuild" Version="1.0.0" />
-  <!-- Vite.MsBuild auto-detects: apps/AdminPortal/vite.config.ts -->
+  <PackageReference Include="ViteKit.Msbuild" Version="1.0.0" />
+  <!-- ViteKit.Msbuild auto-detects: apps/AdminPortal/vite.config.ts -->
   <!-- Uses: apps/AdminPortal/package.json -->
   <!-- Outputs to: apps/AdminPortal/wwwroot/dist -->
 </Project>
@@ -69,7 +69,7 @@ Enterprise.Solution/
     <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
   
-  <PackageReference Include="Vite.MsBuild" Version="1.0.0" />
+  <PackageReference Include="ViteKit.Msbuild" Version="1.0.0" />
   <!-- Completely independent:
        - apps/CustomerPortal/vite.config.ts
        - apps/CustomerPortal/package.json  
@@ -84,7 +84,7 @@ Enterprise.Solution/
     <TargetFramework>netstandard2.1</TargetFramework>
   </PropertyGroup>
   
-  <PackageReference Include="Vite.MsBuild" Version="1.0.0" />
+  <PackageReference Include="ViteKit.Msbuild" Version="1.0.0" />
   <!-- Library mode:
        - packages/UI.Components/vite.config.ts (library build)
        - packages/UI.Components/package.json
@@ -99,7 +99,7 @@ Enterprise.Solution/
 Our current logic handles this perfectly:
 
 ```xml
-<!-- From Vite.MsBuild.props -->
+<!-- From ViteKit.Msbuild.props -->
 <ViteProjectRoot Condition="'$(ViteProjectRoot)' == '' AND Exists('$(MSBuildProjectDirectory)\package.json')">
   $(MSBuildProjectDirectory)\  <!-- ✅ Use project-specific package.json -->
 </ViteProjectRoot>
@@ -119,9 +119,9 @@ Our current logic handles this perfectly:
 
 Each project gets its own marker files:
 ```
-apps/AdminPortal/obj/Vite.MsBuild.pnpm.marker
-apps/CustomerPortal/obj/Vite.MsBuild.npm.marker  
-packages/UI.Components/obj/Vite.MsBuild.yarn.marker
+apps/AdminPortal/obj/ViteKit.Msbuild.pnpm.marker
+apps/CustomerPortal/obj/ViteKit.Msbuild.npm.marker  
+packages/UI.Components/obj/ViteKit.Msbuild.yarn.marker
 ```
 
 **This is perfect!** Each project can use different package managers if needed.

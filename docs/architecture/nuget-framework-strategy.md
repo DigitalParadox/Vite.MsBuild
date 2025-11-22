@@ -1,4 +1,4 @@
-# NuGet Framework Strategy for Vite.MsBuild - 2026 Preview Ready! 🚀
+# NuGet Framework Strategy for ViteKit.Msbuild - 2026 Preview Ready! 🚀
 
 ## Current Multi-Targeting Setup ✅
 ```xml
@@ -113,7 +113,7 @@ Modern Projects (2026):
 
 ### Package Header:
 ```
-🌟 Vite.MsBuild v2.0.0
+🌟 ViteKit.Msbuild v2.0.0
 Framework-agnostic MSBuild integration for Vite in ASP.NET Core projects
 ⚡ Ready for .NET 10 & Visual Studio 2025
 

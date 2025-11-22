@@ -12,7 +12,7 @@ Using Vite without ASP.NET Core - static sites, Node.js apps, and standalone fro
 {: .fs-6 .fw-300 }
 
 {: .note }
-While Vite.MsBuild is designed for ASP.NET Core integration, Vite itself works great with many other setups. These examples show pure Vite usage.
+While ViteKit.Msbuild is designed for ASP.NET Core integration, Vite itself works great with many other setups. These examples show pure Vite usage.
 
 ## Static HTML/JavaScript Website
 
@@ -554,7 +554,7 @@ app.on('window-all-closed', () => {
 | **Vanilla JS SPA** | Standard Vite | No framework overhead | Manual routing/state |
 | **SSG (VitePress)** | VitePress | SEO-friendly, markdown | Limited interactivity |
 | **Electron** | Vite + Electron | Desktop app, native APIs | Larger bundle size |
-| **ASP.NET Core** | Vite.MsBuild | .NET ecosystem, typed APIs | Requires .NET runtime |
+| **ASP.NET Core** | ViteKit.Msbuild | .NET ecosystem, typed APIs | Requires .NET runtime |
 
 ## When to Use ASP.NET Core vs Alternatives
 

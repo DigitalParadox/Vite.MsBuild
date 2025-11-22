@@ -72,7 +72,7 @@ EnterpriseApp/
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Vite.MsBuild" Version="2.0.0" />
+    <PackageReference Include="ViteKit.Msbuild" Version="2.0.0" />
   </ItemGroup>
 
   <!-- Multi-SPA Configuration -->

@@ -1,8 +1,8 @@
-# Vite.MsBuild Command Construction Technical Specifications
+# ViteKit.Msbuild Command Construction Technical Specifications
 
 ## 📋 Overview
 
-This document defines the **authoritative specifications** for how Vite.MsBuild constructs commands across different scenarios. All test cases should align with these specifications.
+This document defines the **authoritative specifications** for how ViteKit.Msbuild constructs commands across different scenarios. All test cases should align with these specifications.
 
 ## 🎯 Command Construction Priority System
 

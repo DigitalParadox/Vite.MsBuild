@@ -13,7 +13,7 @@ Production-ready configurations for large-scale applications.
 {: .fs-6 .fw-300 }
 
 {: .warning }
-> These examples are designed for complex enterprise scenarios. Start with [Basic Examples](../basic/) if you're new to Vite.MsBuild.
+> These examples are designed for complex enterprise scenarios. Start with [Basic Examples](../basic/) if you're new to ViteKit.Msbuild.
 
 ## Enterprise Scenarios
 

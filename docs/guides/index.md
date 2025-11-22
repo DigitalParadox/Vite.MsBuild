@@ -45,4 +45,4 @@ Special features and capabilities.
 : Build failures, package manager conflicts, and performance issues.
 
 {: .note }
-> New to Vite.MsBuild? Start with **[Getting Started](../getting-started/)** first, then return to these guides.
+> New to ViteKit.Msbuild? Start with **[Getting Started](../getting-started/)** first, then return to these guides.

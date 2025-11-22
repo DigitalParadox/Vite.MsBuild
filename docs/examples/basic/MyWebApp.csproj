@@ -7,6 +7,6 @@
 
   <ItemGroup>
     <!-- This is all you need! -->
-    <PackageReference Include="Vite.MsBuild" Version="2.0.0" />
+    <PackageReference Include="ViteKit.Msbuild" Version="2.0.0" />
   </ItemGroup>
 </Project>

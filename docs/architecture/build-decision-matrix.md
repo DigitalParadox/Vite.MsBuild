@@ -8,7 +8,7 @@ nav_order: 2
 # Build Decision Matrix
 {: .fs-9 }
 
-Decision trees and scenario matrices for Vite.MsBuild build execution.
+Decision trees and scenario matrices for ViteKit.Msbuild build execution.
 {: .fs-6 .fw-300 }
 
 ## Primary Decision Tree
@@ -184,7 +184,7 @@ graph TB
 sequenceDiagram
     participant Dev as Developer
     participant MSB as MSBuild
-    participant Vite as Vite.MsBuild
+    participant Vite as ViteKit.Msbuild
     participant NPM as Package Manager
     participant V as Vite CLI
 
@@ -218,7 +218,7 @@ sequenceDiagram
     Vite->>V: pnpm run build
     V-->>Vite: Build success
     
-    Vite->>Vite: Create obj/Vite.MsBuild.default.marker
+    Vite->>Vite: Create obj/ViteKit.Msbuild.default.marker
     Vite-->>MSB: Build complete
     
     MSB->>Dev: Build succeeded
@@ -241,7 +241,7 @@ sequenceDiagram
 sequenceDiagram
     participant Dev as Developer
     participant MSB as MSBuild
-    participant Vite as Vite.MsBuild
+    participant Vite as ViteKit.Msbuild
 
     Dev->>MSB: dotnet build
     Note over MSB: Second build, no changes
@@ -284,7 +284,7 @@ sequenceDiagram
 sequenceDiagram
     participant Dev as Developer
     participant MSB as MSBuild
-    participant Vite as Vite.MsBuild
+    participant Vite as ViteKit.Msbuild
     participant V as Vite CLI
 
     Dev->>Dev: Edit src/App.vue
@@ -334,7 +334,7 @@ sequenceDiagram
 sequenceDiagram
     participant Dev as Developer
     participant MSB as MSBuild
-    participant Vite as Vite.MsBuild
+    participant Vite as ViteKit.Msbuild
     participant V as Vite CLI
 
     Note over Dev: Project has shared + admin configs
@@ -400,7 +400,7 @@ sequenceDiagram
 sequenceDiagram
     participant Dev as Developer
     participant MSB as MSBuild
-    participant Vite as Vite.MsBuild
+    participant Vite as ViteKit.Msbuild
     participant V as Vite CLI
 
     Dev->>Dev: Edit vite.config.ts
@@ -451,7 +451,7 @@ sequenceDiagram
         MSB->>P1: Build
         P1->>P1: EnsureNodeDependencies
         P1->>PM: Check shared marker
-        Note over PM: obj/Vite.MsBuild.NodeRestore.marker
+        Note over PM: obj/ViteKit.Msbuild.NodeRestore.marker
         PM-->>P1: Need install
         P1->>PM: npm install
         PM->>PM: Update shared marker
@@ -487,7 +487,7 @@ sequenceDiagram
 sequenceDiagram
     participant Dev as Developer
     participant MSB as MSBuild
-    participant Vite as Vite.MsBuild
+    participant Vite as ViteKit.Msbuild
     participant FS as File System
     participant V as Vite CLI
 
@@ -534,7 +534,7 @@ sequenceDiagram
     participant CI as CI Server
     participant Git as Git Clone
     participant MSB as MSBuild
-    participant Vite as Vite.MsBuild
+    participant Vite as ViteKit.Msbuild
     participant NPM as npm ci
     participant V as Vite CLI
 
@@ -544,7 +544,7 @@ sequenceDiagram
     
     CI->>MSB: dotnet restore
     MSB-->>CI: NuGet packages restored
-    Note over CI: Vite.MsBuild package installed
+    Note over CI: ViteKit.Msbuild package installed
     
     CI->>MSB: dotnet build
     
@@ -811,11 +811,11 @@ graph TB
     BuildIdDef --> BasePath
     GetBuildId --> BasePath[IntermediateOutputPath]
     
-    BasePath --> Construct[Construct Marker Path:<br/>$(IntermediateOutputPath)<br/>Vite.MsBuild.{BuildId}.marker]
+    BasePath --> Construct[Construct Marker Path:<br/>$(IntermediateOutputPath)<br/>ViteKit.Msbuild.{BuildId}.marker]
     
-    Construct --> Example1[Example:<br/>obj/Debug/net8.0/<br/>Vite.MsBuild.default.marker]
+    Construct --> Example1[Example:<br/>obj/Debug/net8.0/<br/>ViteKit.Msbuild.default.marker]
     
-    Construct --> Example2[Example:<br/>obj/Debug/net8.0/<br/>Vite.MsBuild.admin.marker]
+    Construct --> Example2[Example:<br/>obj/Debug/net8.0/<br/>ViteKit.Msbuild.admin.marker]
     
     Example1 --> Usage
     Example2 --> Usage
@@ -833,10 +833,10 @@ graph TB
 
 | Scenario | BuildId | Marker Path |
 |----------|---------|-------------|
-| Single config, default | `default` | `obj/Debug/net8.0/Vite.MsBuild.default.marker` |
-| Multi-config: admin | `admin` | `obj/Debug/net8.0/Vite.MsBuild.admin.marker` |
-| Multi-config: shared | `shared` | `obj/Debug/net8.0/Vite.MsBuild.shared.marker` |
-| Release build | `default` | `obj/Release/net8.0/Vite.MsBuild.default.marker` |
+| Single config, default | `default` | `obj/Debug/net8.0/ViteKit.Msbuild.default.marker` |
+| Multi-config: admin | `admin` | `obj/Debug/net8.0/ViteKit.Msbuild.admin.marker` |
+| Multi-config: shared | `shared` | `obj/Debug/net8.0/ViteKit.Msbuild.shared.marker` |
+| Release build | `default` | `obj/Release/net8.0/ViteKit.Msbuild.default.marker` |
 
 ## Incremental Build Input/Output Decision Tree
 
@@ -857,7 +857,7 @@ graph TB
     
     CSLevel --> ForEachConfig[For Each Config]
     
-    ForEachConfig --> GetMarker[Get Marker Path:<br/>obj/Vite.MsBuild.{BuildId}.marker]
+    ForEachConfig --> GetMarker[Get Marker Path:<br/>obj/ViteKit.Msbuild.{BuildId}.marker]
     
     GetMarker --> MarkerExists{Marker<br/>Exists?}
     
@@ -1056,8 +1056,8 @@ Fix:
 | Cache Type | Location | Invalidated By | Purpose |
 |------------|----------|----------------|---------|
 | Input Files Cache | `obj/Vite.InputFiles.cache` | Config/package.json change | Fast file collection |
-| Build Marker | `obj/Vite.MsBuild.{BuildId}.marker` | Successful build | Incremental build tracking |
-| Node Restore Marker | `obj/Vite.MsBuild.NodeRestore.marker` | Lock file change | Prevent duplicate installs |
+| Build Marker | `obj/ViteKit.Msbuild.{BuildId}.marker` | Successful build | Incremental build tracking |
+| Node Restore Marker | `obj/ViteKit.Msbuild.NodeRestore.marker` | Lock file change | Prevent duplicate installs |
 | MSBuild Incremental | Built-in | Inputs/Outputs | Fast target skip |
 
 ## Optimization Decision Points

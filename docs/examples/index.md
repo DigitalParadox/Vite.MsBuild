@@ -5,10 +5,10 @@ parent: Examples
 nav_order: 1
 ---
 
-# Vite.MsBuild Examples
+# ViteKit.Msbuild Examples
 {: .fs-9 }
 
-Comprehensive examples showing different usage scenarios for Vite.MsBuild in ASP.NET Core projects.
+Comprehensive examples showing different usage scenarios for ViteKit.Msbuild in ASP.NET Core projects.
 {: .fs-6 .fw-300 }
 
 {: .note }
@@ -77,7 +77,7 @@ Advanced configurations for monorepo setups.
 
 ## 🎯 **Choose Your Example**
 
-### **New to Vite.MsBuild?**
+### **New to ViteKit.Msbuild?**
 Start with **[Basic Setup](basic/README.md)** to understand the fundamentals.
 
 ### **Using a Specific Framework?**

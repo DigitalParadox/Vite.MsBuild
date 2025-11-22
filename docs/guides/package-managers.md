@@ -45,7 +45,7 @@ Problem/
 ## **Current Limitation** 
 Our system currently uses a **single shared marker**:
 ```xml
-<NodeRestoreMarker>$(ViteProjectRoot)obj\Vite.MsBuild.NodeRestore.marker</NodeRestoreMarker>
+<NodeRestoreMarker>$(ViteProjectRoot)obj\ViteKit.Msbuild.NodeRestore.marker</NodeRestoreMarker>
 ```
 
 **Problem**: If different projects use different package managers, they'll overwrite each other's marker files!
@@ -55,33 +55,33 @@ Our system currently uses a **single shared marker**:
 ### **Strategy 1: Package Manager Specific Markers**
 ```xml
 <!-- Separate marker per package manager -->
-<NodeRestoreMarker Condition="'$(PackageManager)' == 'npm'">$(ViteProjectRoot)obj\Vite.MsBuild.npm.marker</NodeRestoreMarker>
-<NodeRestoreMarker Condition="'$(PackageManager)' == 'pnpm'">$(ViteProjectRoot)obj\Vite.MsBuild.pnpm.marker</NodeRestoreMarker>
-<NodeRestoreMarker Condition="'$(PackageManager)' == 'yarn'">$(ViteProjectRoot)obj\Vite.MsBuild.yarn.marker</NodeRestoreMarker>
-<NodeRestoreMarker Condition="'$(PackageManager)' == 'bun'">$(ViteProjectRoot)obj\Vite.MsBuild.bun.marker</NodeRestoreMarker>
+<NodeRestoreMarker Condition="'$(PackageManager)' == 'npm'">$(ViteProjectRoot)obj\ViteKit.Msbuild.npm.marker</NodeRestoreMarker>
+<NodeRestoreMarker Condition="'$(PackageManager)' == 'pnpm'">$(ViteProjectRoot)obj\ViteKit.Msbuild.pnpm.marker</NodeRestoreMarker>
+<NodeRestoreMarker Condition="'$(PackageManager)' == 'yarn'">$(ViteProjectRoot)obj\ViteKit.Msbuild.yarn.marker</NodeRestoreMarker>
+<NodeRestoreMarker Condition="'$(PackageManager)' == 'bun'">$(ViteProjectRoot)obj\ViteKit.Msbuild.bun.marker</NodeRestoreMarker>
 ```
 
 ### **Strategy 2: Lock File Based Markers**
 ```xml
 <!-- Marker based on actual lock file -->
-<NodeRestoreMarker Condition="Exists('$(ViteProjectRoot)package-lock.json')">$(ViteProjectRoot)obj\Vite.MsBuild.package-lock.marker</NodeRestoreMarker>
-<NodeRestoreMarker Condition="Exists('$(ViteProjectRoot)pnpm-lock.yaml')">$(ViteProjectRoot)obj\Vite.MsBuild.pnpm-lock.marker</NodeRestoreMarker>
-<NodeRestoreMarker Condition="Exists('$(ViteProjectRoot)yarn.lock')">$(ViteProjectRoot)obj\Vite.MsBuild.yarn-lock.marker</NodeRestoreMarker>
-<NodeRestoreMarker Condition="Exists('$(ViteProjectRoot)bun.lockb')">$(ViteProjectRoot)obj\Vite.MsBuild.bun-lock.marker</NodeRestoreMarker>
+<NodeRestoreMarker Condition="Exists('$(ViteProjectRoot)package-lock.json')">$(ViteProjectRoot)obj\ViteKit.Msbuild.package-lock.marker</NodeRestoreMarker>
+<NodeRestoreMarker Condition="Exists('$(ViteProjectRoot)pnpm-lock.yaml')">$(ViteProjectRoot)obj\ViteKit.Msbuild.pnpm-lock.marker</NodeRestoreMarker>
+<NodeRestoreMarker Condition="Exists('$(ViteProjectRoot)yarn.lock')">$(ViteProjectRoot)obj\ViteKit.Msbuild.yarn-lock.marker</NodeRestoreMarker>
+<NodeRestoreMarker Condition="Exists('$(ViteProjectRoot)bun.lockb')">$(ViteProjectRoot)obj\ViteKit.Msbuild.bun-lock.marker</NodeRestoreMarker>
 ```
 
 ### **Strategy 3: Hybrid Approach (Recommended)**
 ```xml
 <!-- Primary marker for detected package manager -->
-<NodeRestoreMarker>$(ViteProjectRoot)obj\Vite.MsBuild.$(PackageManager).marker</NodeRestoreMarker>
+<NodeRestoreMarker>$(ViteProjectRoot)obj\ViteKit.Msbuild.$(PackageManager).marker</NodeRestoreMarker>
 
 <!-- Cleanup old markers when package manager changes -->
 <Target Name="_CleanupOldPackageManagerMarkers" BeforeTargets="EnsureNodeDependencies">
     <ItemGroup>
-        <_OldMarkers Include="$(ViteProjectRoot)obj\Vite.MsBuild.npm.marker" Condition="'$(PackageManager)' != 'npm'" />
-        <_OldMarkers Include="$(ViteProjectRoot)obj\Vite.MsBuild.pnpm.marker" Condition="'$(PackageManager)' != 'pnpm'" />
-        <_OldMarkers Include="$(ViteProjectRoot)obj\Vite.MsBuild.yarn.marker" Condition="'$(PackageManager)' != 'yarn'" />
-        <_OldMarkers Include="$(ViteProjectRoot)obj\Vite.MsBuild.bun.marker" Condition="'$(PackageManager)' != 'bun'" />
+        <_OldMarkers Include="$(ViteProjectRoot)obj\ViteKit.Msbuild.npm.marker" Condition="'$(PackageManager)' != 'npm'" />
+        <_OldMarkers Include="$(ViteProjectRoot)obj\ViteKit.Msbuild.pnpm.marker" Condition="'$(PackageManager)' != 'pnpm'" />
+        <_OldMarkers Include="$(ViteProjectRoot)obj\ViteKit.Msbuild.yarn.marker" Condition="'$(PackageManager)' != 'yarn'" />
+        <_OldMarkers Include="$(ViteProjectRoot)obj\ViteKit.Msbuild.bun.marker" Condition="'$(PackageManager)' != 'bun'" />
     </ItemGroup>
     
     <Delete Files="@(_OldMarkers)" ContinueOnError="true" />
