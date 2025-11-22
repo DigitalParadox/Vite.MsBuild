@@ -1,10 +1,10 @@
 <Project>
 
     <!-- 
-    Vite.MsBuild | Build Targets (Streamlined Alpha Version)
+    ViteKit.MsBuild | Build Targets (Streamlined Alpha Version)
     
     High-performance MSBuild integration using C# tasks instead of complex XML logic.
-    Automatically imported after Vite.MsBuild.props.
+    Automatically imported after ViteKit.MsBuild.props.
     -->
 
     <!-- Load C# Tasks (if available in .NET 6+ environments) -->
@@ -67,7 +67,7 @@
     <Target Name="ShowViteDiagnostics" 
         Condition="'$(ViteShowDiagnostics)' == 'true'">
         
-        <Message Text="🔍 Vite.MsBuild Diagnostics:" Importance="high" />
+        <Message Text="🔍 ViteKit.MsBuild Diagnostics:" Importance="high" />
         <Message Text="  ViteProjectRoot: $(ViteProjectRoot)" Importance="high" />
         <Message Text="  ViteConfigFile: $(ViteConfigFile)" Importance="high" />
         <Message Text="  ViteOutputDir: $(ViteOutputDir)" Importance="high" />

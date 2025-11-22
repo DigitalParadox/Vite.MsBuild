@@ -1,7 +1,7 @@
 <Project>
 
     <!-- 
-    Vite.MsBuild | MSBuild Integration for Vite
+    ViteKit.MsBuild | MSBuild Integration for Vite
     
     Framework-agnostic MSBuild integration for Vite in ASP.NET Core projects.
     Supports: Vue, React, Svelte, Solid, Preact, and vanilla JS/TS
@@ -10,7 +10,7 @@
     ===========
     
     Install via NuGet:
-      dotnet add package Vite.MsBuild
+      dotnet add package ViteKit.MsBuild
     
     The package auto-enables when installed. To disable:
       <EnableViteBuild>false</EnableViteBuild>
@@ -37,8 +37,8 @@
       (Optional) Validate .env files exist (default: silent)
       <ViteMissingEnvAction>warn</ViteMissingEnvAction>  (silent, warn, or error)
       
-      (Optional) Enable/disable ANSI colors in Vite output (default: true)
-      <ViteEnableColors>false</ViteEnableColors>  (useful for CI/CD)
+      (Optional) Enable/disable ANSI colors in Vite output (default: false)
+      <ViteEnableColors>true</ViteEnableColors>  (enable if terminal supports ANSI)
       
       (Optional) Use npx/dlx fallback when Vite not in package.json (default: false)
       <ViteUseDlxFallback>true</ViteUseDlxFallback>  (useful for testing without local installs)
@@ -99,7 +99,7 @@
     
     Documentation
     =============
-    https://github.com/DigitalParadox/Vite.MsBuild#readme
+    https://github.com/DigitalParadox/ViteKit.MsBuild#readme
   -->
 
     <!-- ====================================================================== -->
@@ -114,7 +114,7 @@
 
         <!-- Detect if loaded from NuGet package vs Directory.Build.props -->
         <!-- NuGet packages are in .nuget/packages/ path -->
-        <_ViteLoadedFromPackage Condition="$(MSBuildThisFileFullPath.Contains('.nuget')) OR $(MSBuildThisFileFullPath.Contains('packages\Vite.MsBuild'))">true</_ViteLoadedFromPackage>
+        <_ViteLoadedFromPackage Condition="$(MSBuildThisFileFullPath.Contains('.nuget')) OR $(MSBuildThisFileFullPath.Contains('packages\ViteKit.MsBuild'))">true</_ViteLoadedFromPackage>
         <_ViteLoadedFromPackage Condition="'$(_ViteLoadedFromPackage)' == ''">false</_ViteLoadedFromPackage>
         
         <!-- EnableViteBuild: Auto-enable if loaded from NuGet package, opt-in if Directory.Build.props -->
@@ -176,8 +176,8 @@
         <VitePackageManagerConflictAction Condition="'$(VitePackageManagerConflictAction)' == ''">warn</VitePackageManagerConflictAction>
         <VitePackageManagerConflictAction Condition="'$(CI)' == 'true' AND '$(VitePackageManagerConflictAction)' == 'warn'">error</VitePackageManagerConflictAction>
 
-        <!-- ViteEnableColors - enable ANSI color codes in Vite output (default: true) -->
-        <ViteEnableColors Condition="'$(ViteEnableColors)' == ''">true</ViteEnableColors>
+        <!-- ViteEnableColors - enable ANSI color codes in Vite output (default: false for better MSBuild compatibility) -->
+        <ViteEnableColors Condition="'$(ViteEnableColors)' == ''">false</ViteEnableColors>
 
         <!-- ViteUseDlxFallback - use npx/pnpm dlx/yarn dlx/bun x when Vite not in package.json (default: false) -->
         <ViteUseDlxFallback Condition="'$(ViteUseDlxFallback)' == ''">false</ViteUseDlxFallback>
@@ -218,10 +218,10 @@
 
         <!-- Marker files - Microsoft SDK pattern: Always in IntermediateOutputPath (obj/) -->
         <!-- Vite build marker - tracks successful Vite builds per target framework -->
-        <ViteBuildMarker>$(IntermediateOutputPath)$(TargetFramework).Vite.MsBuild.Build.marker</ViteBuildMarker>
+        <ViteBuildMarker>$(IntermediateOutputPath)$(TargetFramework).ViteKit.Msbuild.Build.marker</ViteBuildMarker>
 
         <!-- Node restore marker - tracks successful npm/pnpm/yarn/bun install -->
-        <NodeRestoreMarker>$(ViteProjectRoot)obj\Vite.MsBuild.NodeRestore.marker</NodeRestoreMarker>
+        <NodeRestoreMarker>$(ViteProjectRoot)obj\ViteKit.Msbuild.NodeRestore.marker</NodeRestoreMarker>
 
         <!-- Working directory - use repo root where package.json and node_modules are located -->
         <ViteWorkingDirectory>$(ViteProjectRoot)</ViteWorkingDirectory>
