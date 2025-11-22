@@ -1,4 +1,4 @@
-# Copilot Instructions for Vite.MsBuild
+# Copilot Instructions for ViteKit.Msbuild
 
 Framework-agnostic MSBuild integration for Vite in ASP.NET Core projects. This is a **NuGet package** that provides MSBuild targets for seamless Vite integration.
 
@@ -6,20 +6,20 @@ Framework-agnostic MSBuild integration for Vite in ASP.NET Core projects. This i
 
 This project creates a **NuGet package** with MSBuild integration files, not a consumer application:
 
-- **`build/Vite.MsBuild.props`** - Property defaults, auto-detection logic, imported BEFORE user's .csproj
-- **`build/Vite.MsBuild.targets`** - Build targets and validation logic, imported AFTER user's .csproj  
-- **`ViteKit.MsBuild.nuspec`** - NuGet package manifest (internal: ViteKit, public package: Vite.MsBuild)
+- **`build/ViteKit.Msbuild.props`** - Property defaults, auto-detection logic, imported BEFORE user's .csproj
+- **`build/ViteKit.Msbuild.targets`** - Build targets and validation logic, imported AFTER user's .csproj  
+- **`ViteKit.MsBuild.nuspec`** - NuGet package manifest (internal: ViteKit, public package: ViteKit.Msbuild)
 - **`build-package.ps1`** - PowerShell build script for creating the .nupkg
 
 ### Naming Convention
-- **External/Public**: `Vite.MsBuild` (NuGet package ID, GitHub repo, root directory)
+- **External/Public**: `ViteKit.Msbuild` (NuGet package ID, GitHub repo, root directory)
 - **Internal/Code**: `ViteKit.MsBuild` (namespaces, assemblies, project files, directories)
 
 ### MSBuild Import Order
 ```
-1. Vite.MsBuild.props (sets defaults)
+1. ViteKit.Msbuild.props (sets defaults)
 2. User's .csproj (can override properties)
-3. Vite.MsBuild.targets (build logic)
+3. ViteKit.Msbuild.targets (build logic)
 ```
 
 ## Documentation Standards
@@ -82,7 +82,7 @@ Uses `Inputs`/`Outputs` with marker files in `obj/` directory:
 ### Parallel Build Safety
 Uses shared marker file for npm install to prevent conflicts:
 ```xml
-<NodeRestoreMarker>$(ViteProjectRoot)obj\Vite.MsBuild.NodeRestore.marker</NodeRestoreMarker>
+<NodeRestoreMarker>$(ViteProjectRoot)obj\ViteKit.Msbuild.NodeRestore.marker</NodeRestoreMarker>
 ```
 
 ## Development Workflows
@@ -93,7 +93,7 @@ Uses shared marker file for npm install to prevent conflicts:
 .\build-package.ps1 -Version "1.0.0"
 
 # Test locally in consumer project
-dotnet add package Vite.MsBuild --source .\nupkg
+dotnet add package ViteKit.Msbuild --source .\nupkg
 ```
 
 ### Verbosity Mapping
@@ -108,7 +108,7 @@ MSBuild verbosity automatically maps to Vite log levels:
 
 **Zero-config (auto-enables from NuGet):**
 ```xml
-<PackageReference Include="Vite.MsBuild" Version="1.0.0" />
+<PackageReference Include="ViteKit.Msbuild" Version="1.0.0" />
 ```
 
 **Customization:**
