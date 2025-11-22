@@ -55,7 +55,7 @@ jobs:
         bun --version
 
     - name: Restore dependencies
-      run: dotnet restore tests/Vite.MsBuild.IntegrationTests
+      run: dotnet restore tests/ViteKit.Msbuild.IntegrationTests
 
     - name: Prepare test package
       shell: pwsh
@@ -76,7 +76,7 @@ jobs:
 
     - name: Run integration tests
       run: |
-        dotnet test tests/Vite.MsBuild.IntegrationTests \
+        dotnet test tests/ViteKit.Msbuild.IntegrationTests \
           --configuration Release \
           --verbosity normal \
           --logger trx \
@@ -125,7 +125,7 @@ jobs:
         Write-Host "📦 Testing package structure..."
         
         # Verify all required files exist
-        @("build/Vite.MsBuild.props", "build/Vite.MsBuild.targets", "Vite.MsBuild.nuspec") | ForEach-Object {
+        @("build/ViteKit.Msbuild.props", "build/ViteKit.Msbuild.targets", "ViteKit.Msbuild.nuspec") | ForEach-Object {
           if (-not (Test-Path $_)) {
             throw "Required file missing: $_"
           }
@@ -133,8 +133,8 @@ jobs:
         
         # Validate XML syntax
         try {
-          [xml]::new().Load((Resolve-Path 'build/Vite.MsBuild.props').Path)
-          [xml]::new().Load((Resolve-Path 'build/Vite.MsBuild.targets').Path)
+          [xml]::new().Load((Resolve-Path 'build/ViteKit.Msbuild.props').Path)
+          [xml]::new().Load((Resolve-Path 'build/ViteKit.Msbuild.targets').Path)
           Write-Host "✅ XML syntax is valid"
         } catch {
           throw "XML syntax error: $($_.Exception.Message)"
@@ -158,8 +158,8 @@ jobs:
             <TargetFramework>net8.0</TargetFramework>
             <ViteBuildTiming>AfterCSharp</ViteBuildTiming>
           </PropertyGroup>
-          <Import Project="../nupkg/test-package/build/Vite.MsBuild.props" />
-          <Import Project="../nupkg/test-package/build/Vite.MsBuild.targets" />
+          <Import Project="../nupkg/test-package/build/ViteKit.Msbuild.props" />
+          <Import Project="../nupkg/test-package/build/ViteKit.Msbuild.targets" />
         </Project>
         "@  | Out-File "TestProject.csproj"
           
