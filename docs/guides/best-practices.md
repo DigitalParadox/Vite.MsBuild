@@ -8,7 +8,7 @@ nav_order: 5
 # Best Practices
 {: .fs-9 }
 
-Best practices for configuring and using Vite.MsBuild in your ASP.NET Core projects.
+Best practices for configuring and using ViteKit.Msbuild in your ASP.NET Core projects.
 {: .fs-6 .fw-300 }
 
 ## MSBuild Configuration
@@ -38,7 +38,7 @@ For multi-project solutions, use `Directory.Build.props` at the solution root:
 <!-- Directory.Build.props -->
 <Project>
   <PropertyGroup>
-    <!-- Shared Vite.MsBuild settings for all projects -->
+    <!-- Shared ViteKit.Msbuild settings for all projects -->
     <PackageManager>pnpm</PackageManager>
     <ViteBuildTiming>BeforeCSharp</ViteBuildTiming>
     <ViteMode Condition="'$(Configuration)' == 'Release'">production</ViteMode>
@@ -47,7 +47,7 @@ For multi-project solutions, use `Directory.Build.props` at the solution root:
   
   <ItemGroup>
     <!-- Single source of truth for package version -->
-    <PackageReference Include="Vite.MsBuild" Version="2.0.0" />
+    <PackageReference Include="ViteKit.Msbuild" Version="2.0.0" />
   </ItemGroup>
 </Project>
 ```
@@ -98,7 +98,7 @@ Map MSBuild configurations to Vite modes appropriately:
 
 ### Leverage Incremental Builds
 
-Vite.MsBuild automatically tracks file changes. Help it by organizing files properly:
+ViteKit.Msbuild automatically tracks file changes. Help it by organizing files properly:
 
 ```xml
 <ItemGroup>
@@ -134,7 +134,7 @@ Vite.MsBuild automatically tracks file changes. Help it by organizing files prop
   with:
     path: |
       wwwroot/dist
-      obj/Vite.MsBuild.*.marker
+      obj/ViteKit.Msbuild.*.marker
     key: vite-${{ hashFiles('**/package-lock.json', 'vite.config.ts') }}
 ```
 
@@ -202,7 +202,7 @@ Vite.MsBuild automatically tracks file changes. Help it by organizing files prop
 
 ### Let Auto-Detection Work
 
-**Best:** Don't specify, let Vite.MsBuild detect from lock files:
+**Best:** Don't specify, let ViteKit.Msbuild detect from lock files:
 
 ```xml
 <PropertyGroup>
@@ -233,7 +233,7 @@ git add yarn.lock          # yarn
 git add bun.lockb          # bun
 ```
 
-**Why:** Vite.MsBuild uses lock files to:
+**Why:** ViteKit.Msbuild uses lock files to:
 1. Auto-detect package manager
 2. Ensure consistent builds across environments
 3. Enable proper incremental builds
@@ -249,7 +249,7 @@ wwwroot/assets/
 *.local
 
 # MSBuild markers (incremental build tracking)
-obj/Vite.MsBuild.*.marker
+obj/ViteKit.Msbuild.*.marker
 obj/NodeRestore.marker
 
 # Node modules
@@ -423,7 +423,7 @@ dotnet build -bl:build.binlog
 
 ### Parallel Builds
 
-Vite.MsBuild is parallel-build safe. Use MSBuild parallelism:
+ViteKit.Msbuild is parallel-build safe. Use MSBuild parallelism:
 
 ```bash
 # Build with maximum parallelism
@@ -437,7 +437,7 @@ dotnet build -m:4
 
 ### From Custom Targets
 
-If you have custom Vite targets, you can disable Vite.MsBuild selectively:
+If you have custom Vite targets, you can disable ViteKit.Msbuild selectively:
 
 ```xml
 <PropertyGroup>
@@ -452,7 +452,7 @@ If you have custom Vite targets, you can disable Vite.MsBuild selectively:
 
 ### From NPM Scripts
 
-Vite.MsBuild can coexist with npm scripts:
+ViteKit.Msbuild can coexist with npm scripts:
 
 ```json
 {

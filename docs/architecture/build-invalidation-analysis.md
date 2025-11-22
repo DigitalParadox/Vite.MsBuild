@@ -114,7 +114,7 @@ if (File.Exists(config.ConfigFile))
 
 **2. MSBuild-Level Detection**
 ```xml
-<!-- build/Vite.MsBuild.targets line 236 -->
+<!-- build/ViteKit.Msbuild.targets line 236 -->
 Inputs="@(ViteInputFiles);$(ViteConfigFile);$(MSBuildProjectFile)"
 ```
 

@@ -1,45 +1,45 @@
-# Vite.MsBuild Package Structure
+# ViteKit.Msbuild Package Structure
 
 Complete NuGet package for Vite MSBuild integration.
 
 ## Directory Structure
 
 ```
-packages/Vite.MsBuild/
+packages/ViteKit.Msbuild/
 ├── build/
-│   ├── Vite.MsBuild.props          ← Properties, defaults, ItemGroups
-│   └── Vite.MsBuild.targets        ← All build targets
+│   ├── ViteKit.Msbuild.props          ← Properties, defaults, ItemGroups
+│   └── ViteKit.Msbuild.targets        ← All build targets
 ├── nupkg/                           ← Generated package output (created by build script)
 ├── README.md                        ← Package documentation
-├── Vite.MsBuild.nuspec             ← NuGet package manifest
+├── ViteKit.Msbuild.nuspec             ← NuGet package manifest
 └── build-package.ps1               ← Build script
 ```
 
 ## Building the Package
 
 ```powershell
-cd packages/Vite.MsBuild
+cd packages/ViteKit.Msbuild
 .\build-package.ps1 -Version "1.0.0"
 ```
 
-Output: `nupkg/Vite.MsBuild.1.0.0.nupkg`
+Output: `nupkg/ViteKit.Msbuild.1.0.0.nupkg`
 
 ## Testing Locally
 
 ```bash
 # In a test project
-dotnet add package Vite.MsBuild --source D:\tattoomachinegirl-piranha\packages\Vite.MsBuild\nupkg
+dotnet add package ViteKit.Msbuild --source D:\tattoomachinegirl-piranha\packages\ViteKit.Msbuild\nupkg
 ```
 
 ## Publishing to NuGet.org
 
 ```powershell
-nuget push nupkg\Vite.MsBuild.1.0.0.nupkg -Source nuget.org -ApiKey YOUR_API_KEY
+nuget push nupkg\ViteKit.Msbuild.1.0.0.nupkg -Source nuget.org -ApiKey YOUR_API_KEY
 ```
 
 ## File Breakdown
 
-### Vite.MsBuild.props (166 lines)
+### ViteKit.Msbuild.props (166 lines)
 
 **Imported BEFORE user's .csproj**
 
@@ -51,7 +51,7 @@ Contains:
 - dotnet watch integration
 - Publishing ItemGroup
 
-### Vite.MsBuild.targets (~600 lines)
+### ViteKit.Msbuild.targets (~600 lines)
 
 **Imported AFTER user's .csproj**
 

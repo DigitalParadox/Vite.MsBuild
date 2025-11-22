@@ -49,7 +49,7 @@ Enterprise.Web/
     <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
   
-  <PackageReference Include="Vite.MsBuild" Version="1.0.0" />
+  <PackageReference Include="ViteKit.Msbuild" Version="1.0.0" />
   
   <!-- Multiple Vite configurations -->
   <ItemGroup>
@@ -107,17 +107,17 @@ Enterprise.Web/
 Each SPA gets its own marker file:
 ```xml
 <!-- Current single marker -->
-<ViteBuildMarker>$(IntermediateOutputPath)$(TargetFramework).Vite.MsBuild.Build.marker</ViteBuildMarker>
+<ViteBuildMarker>$(IntermediateOutputPath)$(TargetFramework).ViteKit.Msbuild.Build.marker</ViteBuildMarker>
 
 <!-- Enhanced: Per-SPA markers -->
-<ViteBuildMarker>$(IntermediateOutputPath)$(TargetFramework).Vite.MsBuild.%(ViteConfigs.BuildId).marker</ViteBuildMarker>
+<ViteBuildMarker>$(IntermediateOutputPath)$(TargetFramework).ViteKit.Msbuild.%(ViteConfigs.BuildId).marker</ViteBuildMarker>
 ```
 
 **Results in:**
 ```
-obj/net8.0.Vite.MsBuild.admin.marker      ← Admin SPA build state
-obj/net8.0.Vite.MsBuild.customer.marker   ← Customer SPA build state  
-obj/net8.0.Vite.MsBuild.partner.marker    ← Partner SPA build state
+obj/net8.0.ViteKit.Msbuild.admin.marker      ← Admin SPA build state
+obj/net8.0.ViteKit.Msbuild.customer.marker   ← Customer SPA build state  
+obj/net8.0.ViteKit.Msbuild.partner.marker    ← Partner SPA build state
 ```
 
 ### **Enhanced MSBuild Targets**
@@ -127,7 +127,7 @@ obj/net8.0.Vite.MsBuild.partner.marker    ← Partner SPA build state
 <Target Name="ViteBuildMultipleConfigs" 
         Condition="'@(ViteConfigs)' != ''" 
         Inputs="@(ViteConfigs);@(ViteInputFiles)" 
-        Outputs="@(ViteConfigs->'$(IntermediateOutputPath)$(TargetFramework).Vite.MsBuild.%(BuildId).marker')">
+        Outputs="@(ViteConfigs->'$(IntermediateOutputPath)$(TargetFramework).ViteKit.Msbuild.%(BuildId).marker')">
   
   <!-- Build each config sequentially or in parallel -->
   <MSBuild Projects="$(MSBuildProjectFile)" 
@@ -142,7 +142,7 @@ obj/net8.0.Vite.MsBuild.partner.marker    ← Partner SPA build state
         WorkingDirectory="$(ViteProjectRoot)" />
   
   <!-- Write marker file -->
-  <Touch Files="$(IntermediateOutputPath)$(TargetFramework).Vite.MsBuild.$(ViteSingleBuildId).marker" 
+  <Touch Files="$(IntermediateOutputPath)$(TargetFramework).ViteKit.Msbuild.$(ViteSingleBuildId).marker" 
          AlwaysCreate="true" />
 </Target>
 ```

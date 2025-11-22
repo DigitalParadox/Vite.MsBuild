@@ -1,4 +1,4 @@
-# Vite.MsBuild Test Cases Review Document
+# ViteKit.Msbuild Test Cases Review Document
 
 ## 📋 Purpose
 

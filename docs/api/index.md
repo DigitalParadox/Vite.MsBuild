@@ -78,7 +78,7 @@ Comprehensive configuration scenarios.
 
 ### Zero Configuration
 ```xml
-<PackageReference Include="Vite.MsBuild" Version="2.0.0" />
+<PackageReference Include="ViteKit.Msbuild" Version="2.0.0" />
 ```
 
 ### Basic Configuration  
@@ -107,4 +107,4 @@ The API reference is essential for:
 - Understanding all available configuration options
 - Implementing custom build scenarios  
 - Troubleshooting configuration issues
-- Extending Vite.MsBuild functionality
+- Extending ViteKit.Msbuild functionality

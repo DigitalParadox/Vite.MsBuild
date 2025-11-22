@@ -2,7 +2,7 @@
 
 ## Local Repository
 
-✅ **Location**: `D:\tattoomachinegirl-piranha\packages\Vite.MsBuild`  
+✅ **Location**: `D:\tattoomachinegirl-piranha\packages\ViteKit.Msbuild`  
 ✅ **Branch**: `main`  
 ✅ **Initial Commit**: `1249c0c`  
 ✅ **Tagged**: `v1.0.0`  
@@ -16,17 +16,17 @@
 ├── LICENSE                  ← MIT License
 ├── README.md                ← User documentation (7.7 KB)
 ├── PACKAGE.md               ← Internal documentation (3.7 KB)
-├── Vite.MsBuild.nuspec     ← NuGet manifest
+├── ViteKit.Msbuild.nuspec     ← NuGet manifest
 ├── build-package.ps1       ← Build script
 └── build/
-    ├── Vite.MsBuild.props
-    └── Vite.MsBuild.targets
+    ├── ViteKit.Msbuild.props
+    └── ViteKit.Msbuild.targets
 ```
 
 ## Commit Message
 
 ```
-feat: initial release of Vite.MsBuild package
+feat: initial release of ViteKit.Msbuild package
 
 - Framework-agnostic MSBuild integration for Vite
 - Auto-detection of package.json and vite.config
@@ -47,7 +47,7 @@ Supports: Vue, React, Svelte, Solid, Preact, vanilla JS/TS
 
 Go to: https://github.com/new
 
-- **Name**: `Vite.MsBuild`
+- **Name**: `ViteKit.Msbuild`
 - **Description**: Framework-agnostic MSBuild integration for Vite in ASP.NET Core projects
 - **Public** or **Private**: Your choice
 - **Do NOT initialize** with README, .gitignore, or license (we have them)
@@ -55,10 +55,10 @@ Go to: https://github.com/new
 ### 2. Add Remote and Push
 
 ```bash
-cd packages/Vite.MsBuild
+cd packages/ViteKit.Msbuild
 
 # Add remote
-git remote add origin https://github.com/DigitalParadox/Vite.MsBuild.git
+git remote add origin https://github.com/DigitalParadox/ViteKit.Msbuild.git
 
 # Push main branch
 git push -u origin main
@@ -77,18 +77,18 @@ Check that you see:
 
 ### 4. Update Package URLs
 
-After pushing, update these URLs in `Vite.MsBuild.nuspec`:
+After pushing, update these URLs in `ViteKit.Msbuild.nuspec`:
 
 ```xml
-<projectUrl>https://github.com/DigitalParadox/Vite.MsBuild</projectUrl>
-<repository type="git" url="https://github.com/DigitalParadox/Vite.MsBuild" />
+<projectUrl>https://github.com/DigitalParadox/ViteKit.Msbuild</projectUrl>
+<repository type="git" url="https://github.com/DigitalParadox/ViteKit.Msbuild" />
 ```
 
 And in `README.md`:
 
 ```markdown
-Issues and PRs welcome at: https://github.com/DigitalParadox/Vite.MsBuild
-Full documentation: https://github.com/DigitalParadox/Vite.MsBuild#readme
+Issues and PRs welcome at: https://github.com/DigitalParadox/ViteKit.Msbuild
+Full documentation: https://github.com/DigitalParadox/ViteKit.Msbuild#readme
 ```
 
 ### 5. Build and Publish Package
@@ -98,7 +98,7 @@ Full documentation: https://github.com/DigitalParadox/Vite.MsBuild#readme
 .\build-package.ps1 -Version "1.0.0"
 
 # Publish to NuGet.org
-nuget push nupkg\Vite.MsBuild.1.0.0.nupkg -Source nuget.org -ApiKey YOUR_API_KEY
+nuget push nupkg\ViteKit.Msbuild.1.0.0.nupkg -Source nuget.org -ApiKey YOUR_API_KEY
 ```
 
 ## Alternative: Use as Git Submodule
@@ -110,7 +110,7 @@ If you want to keep this in the same repo:
 cd d:\tattoomachinegirl-piranha
 
 # Add as submodule
-git submodule add https://github.com/DigitalParadox/Vite.MsBuild.git packages/Vite.MsBuild
+git submodule add https://github.com/DigitalParadox/ViteKit.Msbuild.git packages/ViteKit.Msbuild
 ```
 
 ## Development Workflow
@@ -118,7 +118,7 @@ git submodule add https://github.com/DigitalParadox/Vite.MsBuild.git packages/Vi
 ### Making Changes
 
 ```bash
-cd packages/Vite.MsBuild
+cd packages/ViteKit.Msbuild
 
 # Create feature branch
 git checkout -b feature/new-feature
@@ -139,7 +139,7 @@ git push -u origin feature/new-feature
 ### Releasing New Version
 
 ```bash
-# Update version in Vite.MsBuild.nuspec
+# Update version in ViteKit.Msbuild.nuspec
 # Update PACKAGE.md version history
 
 # Commit
@@ -155,7 +155,7 @@ git push origin v1.1.0
 
 # Build and publish
 .\build-package.ps1 -Version "1.1.0"
-nuget push nupkg\Vite.MsBuild.1.1.0.nupkg -Source nuget.org -ApiKey YOUR_API_KEY
+nuget push nupkg\ViteKit.Msbuild.1.1.0.nupkg -Source nuget.org -ApiKey YOUR_API_KEY
 ```
 
 ## Git Configuration
@@ -167,7 +167,7 @@ Current configuration:
 
 ## Benefits of Separate Repository
 
-✅ **Independent versioning** - Can release Vite.MsBuild separately  
+✅ **Independent versioning** - Can release ViteKit.Msbuild separately  
 ✅ **Cleaner history** - Package changes isolated from main project  
 ✅ **Easier contribution** - Others can fork and contribute to just the package  
 ✅ **CI/CD ready** - Can set up GitHub Actions for package builds  

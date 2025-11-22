@@ -9,7 +9,7 @@ nav_order: 3
 # Svelte + TypeScript Example
 {: .fs-9 }
 
-Complete example showing Vite.MsBuild with Svelte and TypeScript.
+Complete example showing ViteKit.Msbuild with Svelte and TypeScript.
 {: .fs-6 .fw-300 }
 
 ## Project Structure
@@ -44,7 +44,7 @@ SvelteWebApp/
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Vite.MsBuild" Version="2.0.0" />
+    <PackageReference Include="ViteKit.Msbuild" Version="2.0.0" />
   </ItemGroup>
 
   <PropertyGroup>

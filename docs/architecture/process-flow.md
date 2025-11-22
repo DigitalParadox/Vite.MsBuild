@@ -5,7 +5,7 @@ parent: Architecture
 nav_order: 1
 ---
 
-# Vite.MsBuild Process Flow
+# ViteKit.Msbuild Process Flow
 {: .fs-9 }
 
 Complete execution flow from MSBuild invocation to Vite build completion.
@@ -16,9 +16,9 @@ Complete execution flow from MSBuild invocation to Vite build completion.
 ```mermaid
 graph TB
     A[dotnet build] --> B[MSBuild Evaluation]
-    B --> C[Vite.MsBuild.props Imported]
+    B --> C[ViteKit.Msbuild.props Imported]
     C --> D[Project .csproj Evaluated]
-    D --> E[Vite.MsBuild.targets Imported]
+    D --> E[ViteKit.Msbuild.targets Imported]
     E --> F{EnableViteBuild?}
     F -->|false| Z[Skip Vite Build]
     F -->|true| G[Execute Build Pipeline]
@@ -33,11 +33,11 @@ graph TB
 
 ```mermaid
 graph LR
-    A[NuGet Package Loaded] --> B[Vite.MsBuild.props]
+    A[NuGet Package Loaded] --> B[ViteKit.Msbuild.props]
     B --> C[Set Property Defaults]
     C --> D[Auto-detect Project Root]
     D --> E[User .csproj Evaluated]
-    E --> F[Vite.MsBuild.targets]
+    E --> F[ViteKit.Msbuild.targets]
 ```
 
 **Key Actions:**
@@ -177,7 +177,7 @@ graph TB
 ```
 
 **Incremental Install Logic:**
-- Uses marker file: `obj/Vite.MsBuild.NodeRestore.marker`
+- Uses marker file: `obj/ViteKit.Msbuild.NodeRestore.marker`
 - Compares timestamps: marker vs lock file
 - Parallel-build safe (shared marker across projects)
 
@@ -309,7 +309,7 @@ graph TB
 ```
 
 **Marker Files:**
-- Location: `obj/Vite.MsBuild.{BuildId}.marker`
+- Location: `obj/ViteKit.Msbuild.{BuildId}.marker`
 - Purpose: Track last successful build time
 - Compared against: Input files, config files, dependency markers
 
@@ -541,7 +541,7 @@ flowchart TB
     subgraph "Phase 8: Output Generation"
         direction TB
         P8A["Build Outputs"]
-        P8B["Marker File:<br/>obj/Vite.MsBuild.{BuildId}.marker<br/>• Timestamp = completion time<br/>• Used for incremental builds"]
+        P8B["Marker File:<br/>obj/ViteKit.Msbuild.{BuildId}.marker<br/>• Timestamp = completion time<br/>• Used for incremental builds"]
         P8C["Asset Files:<br/>{ViteOutputDir}/**/*<br/>• JS bundles<br/>• CSS files<br/>• Assets<br/>• index.html"]
         P8D["Build Status:<br/>• Success/Failure<br/>• Duration<br/>• Logs"]
     end
@@ -636,7 +636,7 @@ graph TB
         direction TB
         CS1[OrchestrateBuildTask]
         CS2[For Each Config:<br/>IsBuildRequired]
-        CS3[Marker Path:<br/>obj/Vite.MsBuild.{BuildId}.marker]
+        CS3[Marker Path:<br/>obj/ViteKit.Msbuild.{BuildId}.marker]
         CS4{Marker Exists?}
         CS5[Return true<br/>MUST BUILD]
         CS6[Get Marker Timestamp]
@@ -676,7 +676,7 @@ graph TB
         OUT6[Areas: wwwroot/{area}]
         OUT7[User Override]
         OUT8[Final Output Path]
-        OUT9[Marker File Path:<br/>obj/Vite.MsBuild.{BuildId}.marker]
+        OUT9[Marker File Path:<br/>obj/ViteKit.Msbuild.{BuildId}.marker]
         OUT10[Asset Files:<br/>{OutputDir}/**/*]
         
         OUT1 --> OUT3
@@ -719,7 +719,7 @@ graph LR
     end
     
     subgraph "Build Time Usage"
-        BUILD["<b>Build Execution</b><br/>• Command: npm run build<br/>• Args: --config {ConfigFile}<br/>         --mode {EffectiveMode}<br/>         --outDir {OutputDir}<br/>• WorkingDir: {ProjectRoot}<br/>• Marker: obj/Vite.MsBuild.{BuildId}.marker"]
+        BUILD["<b>Build Execution</b><br/>• Command: npm run build<br/>• Args: --config {ConfigFile}<br/>         --mode {EffectiveMode}<br/>         --outDir {OutputDir}<br/>• WorkingDir: {ProjectRoot}<br/>• Marker: obj/ViteKit.Msbuild.{BuildId}.marker"]
     end
     
     START ==> CONF
@@ -747,7 +747,7 @@ graph TB
     
     subgraph "Build Execution"
         B1["Build shared<br/>Timestamp: 10:30:00"]
-        B2["Update shared marker:<br/>obj/Vite.MsBuild.shared.marker<br/>LastWriteTime: 10:30:00"]
+        B2["Update shared marker:<br/>obj/ViteKit.Msbuild.shared.marker<br/>LastWriteTime: 10:30:00"]
         
         B3["Check admin IsBuildRequired?"]
         B4["Compare: admin marker (10:25:00)<br/>vs shared marker (10:30:00)"]
@@ -788,7 +788,7 @@ graph TB
 graph TB
     subgraph "File System State"
         FS1["Source Files:<br/>src/App.vue: 10:35:00<br/>src/main.ts: 10:20:00<br/>src/styles.css: 10:15:00"]
-        FS2["Marker File:<br/>obj/Vite.MsBuild.default.marker<br/>LastWriteTime: 10:30:00"]
+        FS2["Marker File:<br/>obj/ViteKit.Msbuild.default.marker<br/>LastWriteTime: 10:30:00"]
         FS3["Config File:<br/>vite.config.ts: 10:10:00"]
     end
     
@@ -901,7 +901,7 @@ ViteInputFiles: [
 ]
 
 ViteConfigFile: D:\MyProject\vite.admin.config.ts (LastWrite: 10:10:00)
-Marker: D:\MyProject\obj\Vite.MsBuild.admin.marker (LastWrite: 10:30:00)
+Marker: D:\MyProject\obj\ViteKit.Msbuild.admin.marker (LastWrite: 10:30:00)
 
 BUILD DECISION:
 ===============
@@ -939,7 +939,7 @@ BUILD OUTPUTS GENERATED:
    - D:\MyProject\wwwroot\admin\index.html
 
 2. Marker File:
-   - D:\MyProject\obj\Vite.MsBuild.admin.marker
+   - D:\MyProject\obj\ViteKit.Msbuild.admin.marker
    - LastWriteTime: 10:35:15 (after successful build)
 
 3. Build Status:
@@ -985,7 +985,7 @@ graph LR
 When `ViteShowDiagnostics=true`:
 
 ```
-[BUILD] Vite.MsBuild Diagnostic Information
+[BUILD] ViteKit.Msbuild Diagnostic Information
 ========================================
 
 Configurations (2):
@@ -1082,7 +1082,7 @@ graph TB
 
 **Files Removed:**
 - `wwwroot/dist/` (or configured output)
-- `obj/Vite.MsBuild.*.marker`
+- `obj/ViteKit.Msbuild.*.marker`
 - `obj/Vite.InputFiles.cache`
 - `obj/NodeRestore.marker` (optional)
 

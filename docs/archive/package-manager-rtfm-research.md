@@ -267,7 +267,7 @@ public void Package_Managers_Should_Provide_Build_Context_To_Vite()
     // Vite configs often need to know build context
     // Expected Environment: {
     //   "VITE_PACKAGE_MANAGER": "npm|yarn|pnpm|bun",  // For conditional config
-    //   "VITE_BUILD_TOOL": "vite.msbuild",            // Identifies MSBuild integration
+    //   "VITE_BUILD_TOOL": "ViteKit.Msbuild",            // Identifies MSBuild integration
     //   "VITE_PROJECT_ROOT": "/path/to/project"        // For relative path resolution
     // }
 }

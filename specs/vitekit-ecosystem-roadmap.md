@@ -8,7 +8,7 @@
 
 ## 🎯 Overview
 
-This document outlines the planned evolution of the Vite.MsBuild ecosystem into a comprehensive ViteKit toolkit for .NET developers. The vision is to provide seamless Vite integration across the entire .NET stack with best-in-class developer experience.
+This document outlines the planned evolution of the ViteKit.Msbuild ecosystem into a comprehensive ViteKit toolkit for .NET developers. The vision is to provide seamless Vite integration across the entire .NET stack with best-in-class developer experience.
 
 ---
 
@@ -17,7 +17,7 @@ This document outlines the planned evolution of the Vite.MsBuild ecosystem into 
 ### Current State (v1.0)
 
 ```
-Vite.MsBuild
+ViteKit.Msbuild
 ├── MSBuild targets and tasks
 ├── Command factories
 └── Build-time asset compilation
@@ -26,7 +26,7 @@ Vite.MsBuild
 ### Target State (v2.0+)
 
 ```
-Vite.MsBuild (Build Integration)
+ViteKit.Msbuild (Build Integration)
 ├── MSBuild targets & tasks
 ├── Command factories
 └── Build-time asset compilation

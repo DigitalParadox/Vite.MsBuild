@@ -25,17 +25,17 @@ export default defineConfig({
 
 **MSBuild integration:**
 ```xml
-<!-- Only ONE .csproj needs Vite.MsBuild (typically the "main" app) -->
+<!-- Only ONE .csproj needs ViteKit.Msbuild (typically the "main" app) -->
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
   
-  <PackageReference Include="Vite.MsBuild" Version="1.0.0" />
+  <PackageReference Include="ViteKit.Msbuild" Version="1.0.0" />
   <!-- 
   ✅ Uses: repo-root/vite.config.ts
   ✅ Builds: admin + customer + mobile all in one pass
-  ✅ Marker: obj/net8.0.Vite.MsBuild.Build.marker
+  ✅ Marker: obj/net8.0.ViteKit.Msbuild.Build.marker
   -->
 </Project>
 ```
@@ -56,7 +56,7 @@ export default defineConfig({
     <TargetFrameworks>net8.0;net48</TargetFrameworks>
   </PropertyGroup>
   
-  <PackageReference Include="Vite.MsBuild" Version="1.0.0" />
+  <PackageReference Include="ViteKit.Msbuild" Version="1.0.0" />
   
   <!-- Different Vite configs per target framework -->
   <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0'">
@@ -76,8 +76,8 @@ export default defineConfig({
 
 1. **✅ Per-Framework Markers**:
    ```
-   obj/net8.0.Vite.MsBuild.Build.marker    ← Modern build state
-   obj/net48.Vite.MsBuild.Build.marker     ← Legacy build state
+   obj/net8.0.ViteKit.Msbuild.Build.marker    ← Modern build state
+   obj/net48.ViteKit.Msbuild.Build.marker     ← Legacy build state
    ```
 
 2. **✅ Conditional Configurations**:
@@ -148,7 +148,7 @@ export default defineConfig({
 
 **Current marker file logic:**
 ```xml
-<ViteBuildMarker>$(IntermediateOutputPath)$(TargetFramework).Vite.MsBuild.Build.marker</ViteBuildMarker>
+<ViteBuildMarker>$(IntermediateOutputPath)$(TargetFramework).ViteKit.Msbuild.Build.marker</ViteBuildMarker>
 ```
 
 **This gives us:**

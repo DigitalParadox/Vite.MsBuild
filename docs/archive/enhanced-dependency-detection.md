@@ -1,4 +1,4 @@
-# Enhanced Dependency Detection for Vite.MsBuild
+# Enhanced Dependency Detection for ViteKit.Msbuild
 
 ## Current Implementation vs Industry Standard
 

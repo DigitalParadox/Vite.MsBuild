@@ -9,7 +9,7 @@ has_children: true
 # Framework Examples
 {: .fs-9 }
 
-Complete examples for popular frontend frameworks with Vite.MsBuild.
+Complete examples for popular frontend frameworks with ViteKit.Msbuild.
 {: .fs-6 .fw-300 }
 
 Each example includes full project setup, configuration, and ASP.NET Core integration.
@@ -41,7 +41,7 @@ Svelte application with TypeScript integration.
 
 All framework examples demonstrate:
 
-- ✅ **Zero-configuration** Vite.MsBuild setup
+- ✅ **Zero-configuration** ViteKit.Msbuild setup
 - ✅ **TypeScript** integration
 - ✅ **Hot Module Replacement** during development
 - ✅ **Production optimization** for release builds

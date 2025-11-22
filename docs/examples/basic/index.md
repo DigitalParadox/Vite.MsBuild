@@ -6,14 +6,14 @@ nav_order: 1
 has_children: true
 ---
 
-# Basic Vite.MsBuild Usage
+# Basic ViteKit.Msbuild Usage
 {: .fs-9 }
 
 This example shows the simplest possible setup with zero configuration.
 {: .fs-6 .fw-300 }
 
 {: .highlight }
-Perfect starting point for first-time users - get Vite.MsBuild working in under 5 minutes.
+Perfect starting point for first-time users - get ViteKit.Msbuild working in under 5 minutes.
 
 ## Project Structure
 
@@ -41,7 +41,7 @@ MyWebApp/
 
   <ItemGroup>
     <!-- This is all you need! -->
-    <PackageReference Include="Vite.MsBuild" Version="2.0.0" />
+    <PackageReference Include="ViteKit.Msbuild" Version="2.0.0" />
   </ItemGroup>
 </Project>
 ```
@@ -106,7 +106,7 @@ dotnet run
 
 ## What Happens
 
-1. **Auto-Detection**: Vite.MsBuild automatically detects your `package.json` and `vite.config.ts`
+1. **Auto-Detection**: ViteKit.Msbuild automatically detects your `package.json` and `vite.config.ts`
 2. **Package Manager**: Automatically detects npm and runs `npm ci` if needed
 3. **Build Integration**: Vite build runs automatically during `dotnet build`
 4. **Output**: Built assets appear in `wwwroot/dist/`

@@ -6,30 +6,30 @@ description: "Framework-agnostic MSBuild integration for Vite in ASP.NET Core pr
 permalink: /
 ---
 
-# Vite.MsBuild
+# ViteKit.Msbuild
 {: .fs-9 }
 
 Framework-agnostic MSBuild integration for Vite in ASP.NET Core projects
 {: .fs-6 .fw-300 }
 
 [Get started now](getting-started/){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 }
-[View on GitHub](https://github.com/DigitalParadox/Vite.MsBuild){: .btn .fs-5 .mb-4 .mb-md-0 }
+[View on GitHub](https://github.com/DigitalParadox/ViteKit.Msbuild){: .btn .fs-5 .mb-4 .mb-md-0 }
 
 ---
 
 {: .highlight }
 > **Seamlessly integrate Vite with ASP.NET Core** - Build Vue, React, Svelte, or any Vite-supported framework directly from `dotnet build`.
 
-[![NuGet Package](https://img.shields.io/nuget/v/Vite.MsBuild)](https://www.nuget.org/packages/Vite.MsBuild)
-[![Build Status](https://github.com/DigitalParadox/Vite.MsBuild/workflows/CI/badge.svg)](https://github.com/DigitalParadox/Vite.MsBuild/actions)
-[![Tests](https://img.shields.io/badge/tests-192%20passing-brightgreen)](https://github.com/DigitalParadox/Vite.MsBuild/actions)
+[![NuGet Package](https://img.shields.io/nuget/v/ViteKit.Msbuild)](https://www.nuget.org/packages/ViteKit.Msbuild)
+[![Build Status](https://github.com/DigitalParadox/ViteKit.Msbuild/workflows/CI/badge.svg)](https://github.com/DigitalParadox/ViteKit.Msbuild/actions)
+[![Tests](https://img.shields.io/badge/tests-192%20passing-brightgreen)](https://github.com/DigitalParadox/ViteKit.Msbuild/actions)
 
 ## Quick start
 
 ### Install the package
 
 ```bash
-dotnet add package Vite.MsBuild
+dotnet add package ViteKit.Msbuild
 ```
 
 ### Create your Vite config

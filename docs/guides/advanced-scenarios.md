@@ -8,14 +8,14 @@ nav_order: 4
 # Advanced Scenarios
 {: .fs-9 }
 
-Advanced configuration patterns and real-world scenarios for Vite.MsBuild.
+Advanced configuration patterns and real-world scenarios for ViteKit.Msbuild.
 {: .fs-6 .fw-300 }
 
 ## Development vs Production Builds
 
 ### Automatic Mode Mapping
 
-Vite.MsBuild automatically maps MSBuild configurations to Vite modes:
+ViteKit.Msbuild automatically maps MSBuild configurations to Vite modes:
 
 ```bash
 # Development mode
@@ -370,7 +370,7 @@ public class ViteHelper
 # Build multiple projects in parallel
 dotnet build -m:4
 
-# Vite.MsBuild handles npm install conflicts automatically
+# ViteKit.Msbuild handles npm install conflicts automatically
 ```
 
 ### Output Compression
@@ -438,7 +438,7 @@ RUN npm ci
 # Copy source code
 COPY MyApp/ .
 
-# Build application (includes Vite build via Vite.MsBuild)
+# Build application (includes Vite build via ViteKit.Msbuild)
 RUN dotnet build -c Release -o /app/build
 
 # Publish stage
@@ -590,6 +590,68 @@ dotnet build /p:EnableViteBuildTiming=true
 # Vite build completed in 2.3s
 # C# compilation completed in 1.5s
 # Total build time: 3.8s
+```
+
+## Custom Clean Targets
+
+ViteKit.Msbuild cleans only its own build state (marker files and Vite cache). It does NOT remove build outputs since output locations can vary based on your Vite configuration.
+
+### Clean Vite Build Outputs
+
+To clean your Vite build outputs, create a custom target in your `.csproj`:
+
+```xml
+<Target Name="CleanViteOutputs" BeforeTargets="Clean">
+  <!-- Remove your specific output directory -->
+  <RemoveDir Directories="$(ProjectDir)wwwroot\dist" Condition="Exists('$(ProjectDir)wwwroot\dist')" />
+</Target>
+```
+
+### Run npm Clean Script
+
+If you have a `clean` script in `package.json`:
+
+```json
+{
+  "scripts": {
+    "clean": "rimraf dist"
+  }
+}
+```
+
+Call it from MSBuild:
+
+```xml
+<Target Name="RunNpmClean" BeforeTargets="Clean">
+  <Exec Command="npm run clean" WorkingDirectory="$(ProjectDir)" />
+</Target>
+```
+
+### Clean Multiple Output Directories
+
+For projects with multiple Vite configs and output locations:
+
+```xml
+<Target Name="CleanAllViteOutputs" BeforeTargets="Clean">
+  <ItemGroup>
+    <ViteOutputDirs Include="$(ProjectDir)wwwroot\app" />
+    <ViteOutputDirs Include="$(ProjectDir)wwwroot\admin" />
+    <ViteOutputDirs Include="$(ProjectDir)wwwroot\public" />
+  </ItemGroup>
+  
+  <RemoveDir Directories="@(ViteOutputDirs)" Condition="Exists('%(ViteOutputDirs.Identity)')" />
+</Target>
+```
+
+### Conditional Clean
+
+Only clean Vite outputs in specific configurations:
+
+```xml
+<Target Name="CleanViteOutputs" BeforeTargets="Clean" Condition="'$(Configuration)' == 'Release'">
+  <!-- Only clean in Release mode -->
+  <RemoveDir Directories="$(ProjectDir)wwwroot\dist" />
+</Target>
 ```
 
 ## Additional Resources

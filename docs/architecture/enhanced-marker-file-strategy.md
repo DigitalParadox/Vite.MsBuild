@@ -1,10 +1,10 @@
-# Enhanced Marker File Strategy for Vite.MsBuild
+# Enhanced Marker File Strategy for ViteKit.Msbuild
 
 ## Current Marker File System 📋
 
 We already have a solid foundation:
-- ✅ **ViteBuildMarker**: `obj/net8.0.Vite.MsBuild.Build.marker` (per-framework)
-- ✅ **NodeRestoreMarker**: `obj/Vite.MsBuild.NodeRestore.marker` (shared)
+- ✅ **ViteBuildMarker**: `obj/net8.0.ViteKit.Msbuild.Build.marker` (per-framework)
+- ✅ **NodeRestoreMarker**: `obj/ViteKit.Msbuild.NodeRestore.marker` (shared)
 - ✅ **Microsoft SDK Pattern**: Uses `IntermediateOutputPath` for automatic cleanup
 - ✅ **Incremental Build**: Standard `Inputs`/`Outputs` timestamp comparison
 
