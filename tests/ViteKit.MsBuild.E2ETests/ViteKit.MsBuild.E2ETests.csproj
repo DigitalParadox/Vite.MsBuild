@@ -24,7 +24,10 @@
   
   <!-- Copy the Tasks DLL to build/ directory where targets expect it -->
   <Target Name="CopyTasksDllToBuild" AfterTargets="Build">
-    <Copy SourceFiles="$(OutputPath)ViteKit.MsBuild.Tasks.dll" DestinationFolder="$(OutputPath)build\" />
+    <ItemGroup>
+      <TasksDll Include="$(OutputPath)ViteKit.MsBuild.Tasks.dll" />
+    </ItemGroup>
+    <Copy SourceFiles="@(TasksDll)" DestinationFolder="$(OutputPath)build\" Condition="Exists('%(TasksDll.Identity)')" />
   </Target>
 
   <!-- Include test projects as content so they're copied to output -->
