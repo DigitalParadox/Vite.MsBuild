@@ -8,13 +8,13 @@ namespace ViteKit.MsBuild.Tasks
 {
     /// <summary>
     /// Custom task factory that enables namespaced Vite configuration syntax
-    /// like <Vite.MsBuild.ViteConfig Name="..." Config="..." />
+    /// like <ViteKit.Msbuild.ViteConfig Name="..." Config="..." />
     /// </summary>
     public class ViteTaskFactory : ITaskFactory
     {
         private TaskPropertyInfo[] _parameters = Array.Empty<TaskPropertyInfo>();
 
-        public string FactoryName => "Vite.MsBuild.ViteConfig";
+        public string FactoryName => "ViteKit.Msbuild.ViteConfig";
 
         public Type TaskType => typeof(ViteConfig);
 
@@ -69,7 +69,7 @@ namespace ViteKit.MsBuild.Tasks
 
     /// <summary>
     /// Alternative approach: Direct namespaced task registration
-    /// This allows for <Vite.MsBuild.ViteConfig> syntax without custom factory
+    /// This allows for <ViteKit.Msbuild.ViteConfig> syntax without custom factory
     /// </summary>
     public class NamespacedViteConfig : ViteConfig
     {

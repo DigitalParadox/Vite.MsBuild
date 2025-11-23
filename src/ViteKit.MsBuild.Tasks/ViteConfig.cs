@@ -6,7 +6,7 @@ namespace ViteKit.MsBuild.Tasks
 {
     /// <summary>
     /// Simple, intuitive MSBuild task for defining Vite build configurations.
-    /// Can be used as either &lt;ViteConfig&gt; or &lt;Vite.MsBuild.Tasks.ViteConfig&gt;
+    /// Can be used as either &lt;ViteConfig&gt; or &lt;ViteKit.Msbuild.Tasks.ViteConfig&gt;
     /// </summary>
     public class ViteConfig : Microsoft.Build.Utilities.Task
     {

@@ -12,10 +12,10 @@
     <NoWarn>$(NoWarn);NU1902;NU1903</NoWarn>
     
     <!-- Package info -->
-    <PackageId>Vite.MsBuild.Tasks</PackageId>
+    <PackageId>ViteKit.Msbuild.Tasks</PackageId>
     <Version>1.0.0</Version>
-    <Description>MSBuild tasks for Vite.MsBuild integration</Description>
-    <Company>Vite.MsBuild</Company>
+    <Description>MSBuild tasks for ViteKit.Msbuild integration</Description>
+    <Company>ViteKit.Msbuild</Company>
     
     <!-- Don't include in main package - this is internal -->
     <IncludeInPackage>false</IncludeInPackage>
@@ -24,8 +24,8 @@
   <!-- MSBuild references -->
   <ItemGroup>
     <!-- MSBuild 17.x for .NET 6+ / .NET 8+ / .NET 9+ - Visual Studio 2022+ -->
-    <PackageReference Include="Microsoft.Build.Tasks.Core" Version="17.11.4" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.11.4" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Build.Tasks.Core" Version="17.11.48" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.11.48" PrivateAssets="all" />
   </ItemGroup>
 
 </Project>
