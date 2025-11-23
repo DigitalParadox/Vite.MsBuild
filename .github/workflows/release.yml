@@ -218,7 +218,7 @@ jobs:
           if ($subject -match '^(?<type>[a-zA-Z]+)(\([^)]*\))?(!)?:\s*(?<desc>.+)$') {
             $type = $matches.type.ToLower()
             $desc = $matches.desc
-            if ($categories.ContainsKey($type)) {
+            if ($categories.Contains($type)) {
               $buckets[$type] += "* `$hash` $desc"
             } else {
               $buckets['other'] += "* `$hash` $subject"
