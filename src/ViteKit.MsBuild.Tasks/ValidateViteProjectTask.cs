@@ -259,7 +259,7 @@ namespace ViteKit.MsBuild.Tasks
             if (HasPackageJson && HasViteConfig && !HasNodeModules)
             {
                 Log.LogMessage(MessageImportance.High, "");
-                Log.LogMessage(MessageImportance.High, "[OK] Welcome to Vite.MsBuild!");
+                Log.LogMessage(MessageImportance.High, "[OK] Welcome to ViteKit.Msbuild!");
                 Log.LogMessage(MessageImportance.High, "");
                 Log.LogMessage(MessageImportance.High, "[OK] Your project is configured for automatic Vite builds");
                 Log.LogMessage(MessageImportance.High, $"[PKG] Package manager: {PackageManager}");

@@ -11,6 +11,7 @@ namespace ViteKit.MsBuild.Tasks
     /// <summary>
     /// High-performance C# task to replace 300+ lines of XML package manager detection logic
     /// Detects package manager from lock files, handles conflicts, provides specific guidance
+    /// Supports monorepo scenarios by walking up from vite config to find package.json
     /// </summary>
     public class DetectPackageManagerTask : Task
     {
@@ -20,7 +21,11 @@ namespace ViteKit.MsBuild.Tasks
         [Required]
         public string ViteProjectRoot { get; set; } = string.Empty;
 
+        public string ViteConfigFile { get; set; } = string.Empty; // Optional: for better package.json discovery
+
         public string ConflictAction { get; set; } = "warn"; // warn, error
+
+        public bool SkipPackageManagerValidation { get; set; } = false; // Skip PATH validation (useful for testing/CI without package managers installed)
 
         [Output]
         public string PackageManager { get; set; } = string.Empty;
@@ -36,6 +41,9 @@ namespace ViteKit.MsBuild.Tasks
 
         [Output]
         public string InstallCommand { get; set; } = string.Empty;
+        
+        [Output]
+        public string ResolvedPackageJsonPath { get; set; } = string.Empty; // Path where package.json was found
 
         private static readonly Dictionary<string, string> LockFileToPackageManager = new()
         {
@@ -45,13 +53,12 @@ namespace ViteKit.MsBuild.Tasks
             { "package-lock.json", "npm" }
         };
 
-        private static readonly Dictionary<string, string> InstallCommands = new()
+        // Use the new package manager abstraction for command building
+        private string GetInstallCommandForPackageManager(string packageManagerName, bool hasLockFile)
         {
-            { "bun", "bun install --frozen-lockfile" },
-            { "pnpm", "pnpm install --frozen-lockfile" },
-            { "yarn", "yarn install --frozen-lockfile" },
-            { "npm", "npm ci" }
-        };
+            var pm = PackageManagers.PackageManagerFactory.CreateByName(packageManagerName);
+            return pm.GetInstallCommand(ViteProjectRoot, hasLockFile);
+        }
 
         public override bool Execute()
         {
@@ -74,10 +81,13 @@ namespace ViteKit.MsBuild.Tasks
                 if (detectedLockFiles.Count == 0)
                 {
                     // No lock files, check for package.json packageManager field
-                    PackageManager = DetectFromPackageJson() ?? "npm";
-                    InstallCommand = InstallCommands[PackageManager];
-                    Log.LogMessage(MessageImportance.Normal, $"No lock files found, using {PackageManager} as default");
-                    return true;
+                    PackageManager = DetectFromPackageJson(ViteProjectRoot) ?? "npm";
+                    
+                    // No lock file exists, use regular install (will generate lock file)
+                    InstallCommand = GetInstallCommandForPackageManager(PackageManager, false);
+                    Log.LogMessage(MessageImportance.Normal, $"No lock files found, using {PackageManager} with regular install");
+                    
+                    return ValidatePackageManagerInstalled();
                 }
 
                 if (detectedLockFiles.Count == 1)
@@ -85,13 +95,16 @@ namespace ViteKit.MsBuild.Tasks
                     // Single lock file - clean scenario
                     var lockFileName = Path.GetFileName(detectedLockFiles[0]);
                     PackageManager = LockFileToPackageManager[lockFileName];
-                    InstallCommand = InstallCommands[PackageManager];
+                    
+                    // Lock file exists, use frozen install
+                    InstallCommand = GetInstallCommandForPackageManager(PackageManager, true);
                     Log.LogMessage(MessageImportance.Normal, $"Detected package manager: {PackageManager} from {lockFileName}");
-                    return true;
+                    
+                    return ValidatePackageManagerInstalled();
                 }
 
                 // Multiple lock files - conflict scenario
-                return HandleConflicts(detectedLockFiles);
+                return HandleConflicts(detectedLockFiles, ViteProjectRoot);
             }
             catch (Exception ex)
             {
@@ -100,14 +113,14 @@ namespace ViteKit.MsBuild.Tasks
             }
         }
 
-        private bool HandleConflicts(List<string> conflictingFiles)
+        private bool HandleConflicts(List<string> conflictingFiles, string packageJsonDir)
         {
             HasConflicts = true;
 
             // Convert to ITaskItem array for MSBuild, sorted for predictable order
             ConflictingFiles = conflictingFiles
                 .OrderBy(f => Path.GetFileName(f))
-                .Select(f => new TaskItem(f))
+                .Select(f => new TaskItem(f) as ITaskItem)
                 .ToArray();
 
             // Use priority order: bun → pnpm → yarn → npm
@@ -118,36 +131,44 @@ namespace ViteKit.MsBuild.Tasks
             if (selectedLockFile != null)
             {
                 PackageManager = LockFileToPackageManager[selectedLockFile];
-                InstallCommand = InstallCommands[PackageManager];
-                CleanupCommand = GenerateCleanupCommand(PackageManager);
+                InstallCommand = GetInstallCommandForPackageManager(PackageManager, true);
+                CleanupCommand = GenerateCleanupCommand(PackageManager, packageJsonDir);
 
                 var conflictFileNames = string.Join(", ", conflictingFiles.Select(Path.GetFileName));
 
+                // ConflictAction: "error" = fail build, "warn" = log warning, "none"/"" = suppress
                 if (ConflictAction == "error")
                 {
                     Log.LogError($"Multiple package manager lock files detected: {conflictFileNames}. This causes dependency conflicts and must be resolved before building.");
+                    
+                    // Provide specific guidance
+                    Log.LogMessage(MessageImportance.High, $"[INFO] To resolve with {PackageManager}:");
+                    Log.LogMessage(MessageImportance.High, $"   {CleanupCommand}");
+                    Log.LogMessage(MessageImportance.Normal, $"[INFO] Then commit the updated {PackageManager} lock file to your repository.");
+                    
+                    return false;
                 }
-                else
+                else if (ConflictAction == "warn")
                 {
                     Log.LogWarning($"Multiple package manager lock files detected: {conflictFileNames}. This may cause dependency conflicts.");
+                    
+                    // Provide specific guidance
+                    Log.LogMessage(MessageImportance.High, $"[INFO] To resolve with {PackageManager}:");
+                    Log.LogMessage(MessageImportance.High, $"   {CleanupCommand}");
+                    Log.LogMessage(MessageImportance.Normal, $"[INFO] Then commit the updated {PackageManager} lock file to your repository.");
                 }
+                // else: "none" or empty = suppress message (user knows what they're doing)
 
-                // Provide specific guidance
-                Log.LogMessage(MessageImportance.High, $"[INFO] To resolve with {PackageManager}:");
-                Log.LogMessage(MessageImportance.High, $"   {CleanupCommand}");
-                Log.LogMessage(MessageImportance.Normal, $"[INFO] Then commit the updated {PackageManager} lock file to your repository.");
-
-                // Return false for error, true for warning
-                return ConflictAction != "error";
+                return ValidatePackageManagerInstalled();
             }
 
             Log.LogError("Unable to resolve package manager from conflicting lock files");
             return false;
         }
 
-        private string? DetectFromPackageJson()
+        private string? DetectFromPackageJson(string packageJsonDir)
         {
-            var packageJsonPath = Path.Combine(ViteProjectRoot, "package.json");
+            var packageJsonPath = Path.Combine(packageJsonDir, "package.json");
             if (!File.Exists(packageJsonPath))
                 return null;
 
@@ -178,7 +199,9 @@ namespace ViteKit.MsBuild.Tasks
                         var atIndex = packageManagerValue.IndexOf('@');
                         var pmName = atIndex > 0 ? packageManagerValue.Substring(0, atIndex) : packageManagerValue;
 
-                        if (InstallCommands.ContainsKey(pmName))
+                        // Validate it's a known package manager
+                        var validManagers = new[] { "npm", "pnpm", "yarn", "bun" };
+                        if (validManagers.Contains(pmName.ToLowerInvariant()))
                         {
                             Log.LogMessage(MessageImportance.Normal, $"Using package manager from package.json: {pmName}");
                             
@@ -200,17 +223,95 @@ namespace ViteKit.MsBuild.Tasks
             return null;
         }
 
-        private string GenerateCleanupCommand(string chosenPackageManager)
+        private string GenerateCleanupCommand(string chosenPackageManager, string packageJsonDir)
         {
             // Only remove lock files that actually exist and aren't the chosen one
             var filesToRemove = LockFileToPackageManager.Keys
                 .Where(lockFile => LockFileToPackageManager[lockFile] != chosenPackageManager)
-                .Where(lockFile => File.Exists(Path.Combine(ViteProjectRoot, lockFile))) // Only existing files
+                .Where(lockFile => File.Exists(Path.Combine(packageJsonDir, lockFile))) // Only existing files
                 .OrderBy(lockFile => lockFile) // Sort alphabetically for predictable output
                 .ToList();
 
             var rmCommand = string.Join(" ", filesToRemove);
-            return $"rm {rmCommand} && {InstallCommands[chosenPackageManager]}";
+            return $"rm {rmCommand} && {GetInstallCommandForPackageManager(chosenPackageManager, true)}";
+        }
+
+        private bool ValidatePackageManagerInstalled()
+        {
+            if (SkipPackageManagerValidation)
+            {
+                Log.LogMessage(MessageImportance.Low, $"Skipping package manager validation for '{PackageManager}'");
+                return true;
+            }
+
+            try
+            {
+                // Check if package manager is in PATH
+                var processStartInfo = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = OperatingSystem.IsWindows() ? "where" : "which",
+                    Arguments = PackageManager,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                using var process = System.Diagnostics.Process.Start(processStartInfo);
+                if (process == null)
+                {
+                    LogPackageManagerNotFound();
+                    return false;
+                }
+
+                process.WaitForExit();
+
+                if (process.ExitCode != 0)
+                {
+                    LogPackageManagerNotFound();
+                    return false;
+                }
+
+                Log.LogMessage(MessageImportance.Low, $"✓ Package manager '{PackageManager}' is installed");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.LogMessage(MessageImportance.Low, $"Could not verify package manager installation: {ex.Message}");
+                // Don't fail on verification errors, let the actual install command fail if needed
+                return true;
+            }
+        }
+
+        private void LogPackageManagerNotFound()
+        {
+            Log.LogError($"Package manager '{PackageManager}' is not installed or not in PATH.");
+            Log.LogMessage(MessageImportance.High, $"[ERROR] To fix this issue, install {PackageManager}:");
+            
+            switch (PackageManager)
+            {
+                case "pnpm":
+                    Log.LogMessage(MessageImportance.High, "   npm install -g pnpm");
+                    Log.LogMessage(MessageImportance.High, "   OR use Corepack: corepack enable && corepack prepare pnpm@latest --activate");
+                    break;
+                case "yarn":
+                    Log.LogMessage(MessageImportance.High, "   npm install -g yarn");
+                    Log.LogMessage(MessageImportance.High, "   OR use Corepack: corepack enable && corepack prepare yarn@stable --activate");
+                    break;
+                case "bun":
+                    if (OperatingSystem.IsWindows())
+                    {
+                        Log.LogMessage(MessageImportance.High, "   powershell -c \"irm bun.sh/install.ps1 | iex\"");
+                    }
+                    else
+                    {
+                        Log.LogMessage(MessageImportance.High, "   curl -fsSL https://bun.sh/install | bash");
+                    }
+                    break;
+                case "npm":
+                    Log.LogMessage(MessageImportance.High, "   npm is included with Node.js. Install Node.js from https://nodejs.org");
+                    break;
+            }
         }
     }
 }

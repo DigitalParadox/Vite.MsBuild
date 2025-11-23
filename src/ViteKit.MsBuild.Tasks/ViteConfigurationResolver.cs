@@ -24,6 +24,8 @@ namespace ViteKit.MsBuild.Tasks
 
         public string PackageManager { get; set; } = "npm";
 
+        public string? ViteBuildScript { get; set; }
+
         public ITaskItem[]? UserDefinedConfigs { get; set; }
 
         [Output]
@@ -103,6 +105,10 @@ namespace ViteKit.MsBuild.Tasks
                 var buildId = userConfig.GetMetadata("BuildId");
                 var outputDir = userConfig.GetMetadata("OutputDir");
                 var mode = userConfig.GetMetadata("Mode");
+                var packageManager = userConfig.GetMetadata("PackageManager");
+                var buildScript = userConfig.GetMetadata("BuildScript");
+                var dependsOn = userConfig.GetMetadata("DependsOn");
+                var linkDependencies = userConfig.GetMetadata("LinkDependencies");
 
                 // Resolve to absolute path and normalize path separators
                 if (!Path.IsPathRooted(configPath))
@@ -116,15 +122,32 @@ namespace ViteKit.MsBuild.Tasks
 
                 var config = new TaskItem(configPath);
                 
-                // Set metadata with smart defaults
+                // Set metadata with smart defaults (per-config metadata → global property fallback)
                 config.SetMetadata("ConfigFile", configPath);
                 config.SetMetadata("BuildId", string.IsNullOrEmpty(buildId) ? 
                     GenerateBuildId(configPath) : buildId);
-                config.SetMetadata("OutputDir", string.IsNullOrEmpty(outputDir) ? 
-                    GenerateOutputDir(configPath) : outputDir);
+                
+                // OutputDir: Only set if explicitly provided (remain unopinionated - let vite.config.ts define outDir)
+                if (!string.IsNullOrEmpty(outputDir))
+                    config.SetMetadata("OutputDir", outputDir);
+                else if (!string.IsNullOrEmpty(ViteOutputDir))
+                    config.SetMetadata("OutputDir", ViteOutputDir);
+                    
                 config.SetMetadata("Mode", string.IsNullOrEmpty(mode) ? ViteMode : mode);
-                config.SetMetadata("PackageManager", PackageManager);
+                config.SetMetadata("PackageManager", string.IsNullOrEmpty(packageManager) ? PackageManager : packageManager);
                 config.SetMetadata("ProjectRoot", ViteProjectRoot);
+                
+                // BuildScript (command type) - per-config metadata → global property fallback
+                if (!string.IsNullOrEmpty(buildScript))
+                    config.SetMetadata("BuildScript", buildScript);
+                else if (!string.IsNullOrEmpty(ViteBuildScript))
+                    config.SetMetadata("BuildScript", ViteBuildScript);
+
+                // Copy dependency metadata
+                if (!string.IsNullOrEmpty(dependsOn))
+                    config.SetMetadata("DependsOn", dependsOn);
+                if (!string.IsNullOrEmpty(linkDependencies))
+                    config.SetMetadata("LinkDependencies", linkDependencies);
 
                 // Detect architecture pattern
                 config.SetMetadata("Architecture", DetectArchitecture(configPath));
@@ -148,11 +171,19 @@ namespace ViteKit.MsBuild.Tasks
             var config = new TaskItem(configFile);
             config.SetMetadata("ConfigFile", configFile);
             config.SetMetadata("BuildId", "default");
-            config.SetMetadata("OutputDir", ViteOutputDir);
+            
+            // OutputDir: Only set if explicitly provided (remain unopinionated)
+            if (!string.IsNullOrEmpty(ViteOutputDir))
+                config.SetMetadata("OutputDir", ViteOutputDir);
+                
             config.SetMetadata("Mode", ViteMode);
             config.SetMetadata("PackageManager", PackageManager);
             config.SetMetadata("ProjectRoot", ViteProjectRoot);
             config.SetMetadata("Architecture", "SPA");
+            
+            // Set custom build script if provided
+            if (!string.IsNullOrEmpty(ViteBuildScript))
+                config.SetMetadata("BuildScript", ViteBuildScript);
 
             return config;
         }
@@ -182,6 +213,7 @@ namespace ViteKit.MsBuild.Tasks
             var fileName = Path.GetFileNameWithoutExtension(configPath);
             
             // Extract meaningful part from config file name
+            // vite.config.ts -> default (standard config)
             // vite.admin.config.ts -> admin
             // Areas/Admin/vite.config.ts -> admin
             
@@ -190,7 +222,9 @@ namespace ViteKit.MsBuild.Tasks
                 var parts = fileName.Split('.');
                 if (parts.Length >= 2 && parts[0] == "vite")
                 {
-                    return parts[1].ToLowerInvariant();
+                    var buildId = parts[1].ToLowerInvariant();
+                    // "vite.config.ts" should be treated as default, not "config"
+                    return buildId == "config" ? "default" : buildId;
                 }
             }
 
@@ -203,28 +237,10 @@ namespace ViteKit.MsBuild.Tasks
                 return parentDir.ToLowerInvariant();
             }
 
-            return Path.GetFileNameWithoutExtension(fileName).ToLowerInvariant();
+            return "default";
         }
 
-        private string GenerateOutputDir(string configPath)
-        {
-            var buildId = GenerateBuildId(configPath);
-            
-            if (buildId == "default" || string.IsNullOrEmpty(buildId))
-            {
-                return ViteOutputDir;
-            }
 
-            // Smart output directory based on architecture
-            var architecture = DetectArchitecture(configPath);
-            
-            return architecture switch
-            {
-                "Areas" => $"wwwroot/{buildId}",
-                "MultiSPA" => $"wwwroot/spa/{buildId}",
-                _ => $"wwwroot/{buildId}"
-            };
-        }
 
         private string DetectArchitecture(string configPath)
         {
