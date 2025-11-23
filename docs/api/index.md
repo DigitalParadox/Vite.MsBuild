@@ -67,9 +67,9 @@ Documentation for all MSBuild tasks.
 Comprehensive configuration scenarios.
 
 - Single SPA configuration
-- Multi-SPA configuration
 - Monorepo configuration
-- Enterprise patterns
+- Custom build scripts
+- Package manager selection
 
 {: .note }
 > This section provides the complete technical reference for all configuration options and MSBuild integration points.
@@ -92,12 +92,24 @@ Comprehensive configuration scenarios.
 ### Advanced Configuration
 ```xml
 <ItemGroup>
+  <!-- Multi-SPA configuration -->
   <ViteConfig Include="vite.config.ts">
     <BuildId>main</BuildId>
     <OutputDir>wwwroot/main</OutputDir>
     <Mode>production</Mode>
   </ViteConfig>
 </ItemGroup>
+
+<PropertyGroup>
+  <!-- Custom build script -->
+  <ViteBuildScript>build:production</ViteBuildScript>
+  
+  <!-- Direct Vite CLI calls -->
+  <DirectViteBuild>true</DirectViteBuild>
+  
+  <!-- Enable diagnostic logging -->
+  <ViteEnableDiagnostics>true</ViteEnableDiagnostics>
+</PropertyGroup>
 ```
 
 ## For Developers

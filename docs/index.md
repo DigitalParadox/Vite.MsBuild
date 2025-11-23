@@ -22,7 +22,7 @@ Framework-agnostic MSBuild integration for Vite in ASP.NET Core projects
 
 [![NuGet Package](https://img.shields.io/nuget/v/ViteKit.Msbuild)](https://www.nuget.org/packages/ViteKit.Msbuild)
 [![Build Status](https://github.com/DigitalParadox/ViteKit.Msbuild/workflows/CI/badge.svg)](https://github.com/DigitalParadox/ViteKit.Msbuild/actions)
-[![Tests](https://img.shields.io/badge/tests-192%20passing-brightgreen)](https://github.com/DigitalParadox/ViteKit.Msbuild/actions)
+[![Tests](https://img.shields.io/badge/tests-427%20passing-brightgreen)](https://github.com/DigitalParadox/ViteKit.Msbuild/actions)
 
 ## Quick start
 
@@ -85,7 +85,7 @@ MSBuild Native
 | Component | Status |
 |:----------|:-------|
 | Current Version | 2.0.0 |
-| Test Coverage | 192 tests passing (100% success rate) |
+| Test Coverage | 427 tests passing (100% success rate) |
 | Supported .NET | 6, 7, 8, 9 |
 | Node.js Required | 18+ |
 | Vite Supported | 4.0+ and 5.0+ |
