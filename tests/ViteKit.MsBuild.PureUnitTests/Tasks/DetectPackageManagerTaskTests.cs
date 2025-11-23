@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Text.Json;
 using ViteKit.MsBuild.Tasks;
-using ViteKit.MsBuild.PureUnitTests.Helpers;
+using ViteKit.MsBuild.PureUnitTests.Fixtures;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -14,12 +14,10 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
     /// </summary>
     public class DetectPackageManagerTaskTests : IDisposable
     {
-        private readonly ITestOutputHelper _output;
         private readonly string _tempDir;
 
         public DetectPackageManagerTaskTests(ITestOutputHelper output)
         {
-            _output = output;
             _tempDir = Path.Combine(Path.GetTempPath(), "ViteTest_" + Guid.NewGuid().ToString("N")[..8]);
             Directory.CreateDirectory(_tempDir);
         }
@@ -36,7 +34,8 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
         {
             return new DetectPackageManagerTask
             {
-                BuildEngine = new MockBuildEngine()
+                BuildEngine = new MockBuildEngine(),
+                SkipPackageManagerValidation = true // Skip PATH validation in unit tests
             };
         }
 
@@ -56,14 +55,14 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             Assert.Equal("npm", task.PackageManager);
             Assert.False(task.HasConflicts);
             Assert.Empty(task.ConflictingFiles);
-            Assert.Equal("npm ci", task.InstallCommand);
+            Assert.Equal("npm install", task.InstallCommand);
         }
 
         [Theory]
-        [InlineData("bun.lockb", "bun", "bun install --frozen-lockfile")]
-        [InlineData("pnpm-lock.yaml", "pnpm", "pnpm install --frozen-lockfile")]
-        [InlineData("yarn.lock", "yarn", "yarn install --frozen-lockfile")]
-        [InlineData("package-lock.json", "npm", "npm ci")]
+        [InlineData("bun.lockb", "bun", "bun install")]
+        [InlineData("pnpm-lock.yaml", "pnpm", "pnpm install")]
+        [InlineData("yarn.lock", "yarn", "yarn install")]
+        [InlineData("package-lock.json", "npm", "npm install")]
         public void DetectPackageManager_SingleLockFile_DetectsCorrectly(string lockFile, string expectedManager, string expectedInstall)
         {
             // Arrange
@@ -93,8 +92,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
 
             var task = CreateTask();
             task.ViteProjectRoot = _tempDir;
-            task.ConflictAction = "warn"
-            ;
+            task.ConflictAction = "warn";
 
             // Act
             var result = task.Execute();
@@ -106,6 +104,11 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             Assert.Contains("package-lock.json", task.ConflictingFiles[0].ItemSpec);
             Assert.Contains("yarn.lock", task.ConflictingFiles[1].ItemSpec);
             Assert.NotEmpty(task.CleanupCommand);
+            
+            // Verify warning was logged
+            var buildEngine = (MockBuildEngine)task.BuildEngine;
+            Assert.NotEmpty(buildEngine.LoggedWarnings);
+            Assert.Contains(buildEngine.LoggedWarnings, w => w.Message.Contains("Multiple package manager lock files detected"));
         }
 
         [Fact]
@@ -117,8 +120,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
 
             var task = CreateTask();
             task.ViteProjectRoot = _tempDir;
-            task.ConflictAction = "error"
-            ;
+            task.ConflictAction = "error";
 
             // Act
             var result = task.Execute();
@@ -126,6 +128,61 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             // Assert
             Assert.False(result, "Task should fail with error action");
             Assert.True(task.HasConflicts);
+            
+            // Verify error was logged (not warning)
+            var buildEngine = (MockBuildEngine)task.BuildEngine;
+            Assert.NotEmpty(buildEngine.LoggedErrors);
+            Assert.Contains(buildEngine.LoggedErrors, e => e.Message!.Contains("Multiple package manager lock files detected"));
+        }
+
+        [Fact]
+        public void DetectPackageManager_ConflictActionNone_SuppressesMessage()
+        {
+            // Arrange
+            File.WriteAllText(Path.Combine(_tempDir, "package-lock.json"), "{}");
+            File.WriteAllText(Path.Combine(_tempDir, "yarn.lock"), "# yarn");
+
+            var task = CreateTask();
+            task.ViteProjectRoot = _tempDir;
+            task.ConflictAction = "none";
+
+            // Act
+            var result = task.Execute();
+
+            // Assert
+            Assert.True(result, "Task should succeed");
+            Assert.True(task.HasConflicts);
+            Assert.Equal(2, task.ConflictingFiles.Length);
+            
+            // Verify NO warning or error was logged
+            var buildEngine = (MockBuildEngine)task.BuildEngine;
+            Assert.Empty(buildEngine.LoggedWarnings);
+            Assert.Empty(buildEngine.LoggedErrors);
+            Assert.NotEmpty(task.CleanupCommand); // Still generates cleanup command
+        }
+
+        [Fact]
+        public void DetectPackageManager_ConflictActionEmpty_SuppressesMessage()
+        {
+            // Arrange
+            File.WriteAllText(Path.Combine(_tempDir, "package-lock.json"), "{}");
+            File.WriteAllText(Path.Combine(_tempDir, "pnpm-lock.yaml"), "lockfileVersion: 5.4");
+
+            var task = CreateTask();
+            task.ViteProjectRoot = _tempDir;
+            task.ConflictAction = "";
+
+            // Act
+            var result = task.Execute();
+
+            // Assert
+            Assert.True(result, "Task should succeed");
+            Assert.True(task.HasConflicts);
+            
+            // Verify NO warning or error was logged
+            var buildEngine = (MockBuildEngine)task.BuildEngine;
+            Assert.Empty(buildEngine.LoggedWarnings);
+            Assert.Empty(buildEngine.LoggedErrors);
         }
 
         [Fact]
@@ -240,7 +297,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             Assert.True(result);
             Assert.Equal("pnpm", task.PackageManager); // pnpm wins priority
             Assert.Contains("rm package-lock.json yarn.lock", task.CleanupCommand);
-            Assert.Contains("pnpm install --frozen-lockfile", task.CleanupCommand);
+            Assert.Contains("pnpm install", task.CleanupCommand);
         }
 
         [Fact]
@@ -262,7 +319,8 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             Assert.True(result);
             Assert.Equal("npm", task.PackageManager);
             Assert.False(task.HasConflicts);
-            Assert.Equal("npm ci", task.InstallCommand);
+            Assert.Equal("npm install", task.InstallCommand);
         }
     }
 }
+

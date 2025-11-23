@@ -1,12 +1,12 @@
 using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 using System.Text.Json;
-using Xunit;
 using FluentAssertions;
 using ViteKit.MsBuild.Tasks;
+using Xunit;
 
-namespace Vite.MsBuild.PureUnitTests
+namespace ViteKit.MsBuild.PureUnitTests.Integration
 {
     /// <summary>
     /// Pure unit tests for error scenarios - previously tested via MSBuild integration

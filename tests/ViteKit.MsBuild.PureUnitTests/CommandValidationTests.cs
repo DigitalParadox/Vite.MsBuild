@@ -6,7 +6,7 @@ using Xunit;
 using FluentAssertions;
 using ViteKit.MsBuild.Tasks;
 
-namespace Vite.MsBuild.PureUnitTests
+namespace ViteKit.MsBuild.PureUnitTests
 {
     /// <summary>
     /// Pure unit tests for command validation - NO MSBuild execution required!

@@ -1,11 +1,11 @@
 using System;
-using System.IO;
 using System.Collections.Generic;
-using Xunit;
-using FluentAssertions;
+using System.IO;
 using System.Text.Json;
+using FluentAssertions;
+using Xunit;
 
-namespace ViteKit.MsBuild.PureUnitTests
+namespace ViteKit.MsBuild.PureUnitTests.Integration
 {
     /// <summary>
     /// Tests for Node.js dependency restoration logic
@@ -111,7 +111,7 @@ namespace ViteKit.MsBuild.PureUnitTests
             // Arrange: Project directory
             var projectDir = CreateTempDirectory();
             var objDir = Path.Combine(projectDir, "obj");
-            var markerFile = Path.Combine(objDir, "Vite.MsBuild.NodeRestore.marker");
+            var markerFile = Path.Combine(objDir, "ViteKit.Msbuild.NodeRestore.marker");
 
             // Ensure obj directory exists (like MSBuild would)
             Directory.CreateDirectory(objDir);
@@ -135,7 +135,7 @@ namespace ViteKit.MsBuild.PureUnitTests
             var projectDir = CreateTempDirectory();
             var packageJsonFile = Path.Combine(projectDir, "package.json");
             var objDir = Path.Combine(projectDir, "obj");
-            var markerFile = Path.Combine(objDir, "Vite.MsBuild.NodeRestore.marker");
+            var markerFile = Path.Combine(objDir, "ViteKit.Msbuild.NodeRestore.marker");
 
             Directory.CreateDirectory(objDir);
 
@@ -163,7 +163,7 @@ namespace ViteKit.MsBuild.PureUnitTests
             var projectDir = CreateTempDirectory();
             var packageJsonFile = Path.Combine(projectDir, "package.json");
             var objDir = Path.Combine(projectDir, "obj");
-            var markerFile = Path.Combine(objDir, "Vite.MsBuild.NodeRestore.marker");
+            var markerFile = Path.Combine(objDir, "ViteKit.Msbuild.NodeRestore.marker");
 
             Directory.CreateDirectory(objDir);
 
@@ -192,7 +192,7 @@ namespace ViteKit.MsBuild.PureUnitTests
             var packageJsonFile = Path.Combine(projectDir, "package.json");
             var lockFile = Path.Combine(projectDir, "package-lock.json");
             var objDir = Path.Combine(projectDir, "obj");
-            var markerFile = Path.Combine(objDir, "Vite.MsBuild.NodeRestore.marker");
+            var markerFile = Path.Combine(objDir, "ViteKit.Msbuild.NodeRestore.marker");
 
             Directory.CreateDirectory(objDir);
 

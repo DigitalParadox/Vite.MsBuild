@@ -1,14 +1,13 @@
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
-using Xunit;
 using FluentAssertions;
+using Microsoft.Build.Framework;
 using ViteKit.MsBuild.Tasks;
+using Xunit;
 
-namespace Vite.MsBuild.Tasks.Tests
+namespace ViteKit.Msbuild.Tasks.Tests
 {
     public class ViteCommandBuilderTests : IDisposable
     {

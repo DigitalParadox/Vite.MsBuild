@@ -1,11 +1,11 @@
 using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 using System.Text.Json;
-using Xunit;
 using FluentAssertions;
+using Xunit;
 
-namespace ViteKit.MsBuild.PureUnitTests
+namespace ViteKit.MsBuild.PureUnitTests.Integration
 {
     /// <summary>
     /// Tests for monorepo scenarios with package manager best practices
@@ -269,8 +269,8 @@ namespace ViteKit.MsBuild.PureUnitTests
             Directory.CreateDirectory(Path.Combine(projectB, "obj"));
 
             // Act: Create marker files for each project
-            var markerA = Path.Combine(projectA, "obj", "Vite.MsBuild.NodeRestore.marker");
-            var markerB = Path.Combine(projectB, "obj", "Vite.MsBuild.NodeRestore.marker");
+            var markerA = Path.Combine(projectA, "obj", "ViteKit.Msbuild.NodeRestore.marker");
+            var markerB = Path.Combine(projectB, "obj", "ViteKit.Msbuild.NodeRestore.marker");
             
             File.WriteAllText(markerA, $"Restored {DateTime.Now}");
             File.WriteAllText(markerB, $"Restored {DateTime.Now.AddMinutes(5)}");

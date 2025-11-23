@@ -16,8 +16,8 @@
     </PackageReference>
     <PackageReference Include="FluentAssertions" Version="6.12.0" />
     <!-- MSBuild 17.x for .NET 6+ testing -->
-    <PackageReference Include="Microsoft.Build.Framework" Version="17.11.4" />
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.11.4" />
+    <PackageReference Include="Microsoft.Build.Framework" Version="17.11.48" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.11.48" />
   </ItemGroup>
 
   <ItemGroup>
