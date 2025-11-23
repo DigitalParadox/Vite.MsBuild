@@ -63,12 +63,12 @@ jobs:
 
     - name: Pack NuGet package
       if: matrix.os == 'ubuntu-latest'
-      shell: bash
+      shell: pwsh
       run: |
-        dotnet pack src/ViteKit.MsBuild.Tasks/ViteKit.MsBuild.Tasks.csproj \
-          --configuration Release \
-          --no-build \
-          --output nupkg \
+        dotnet pack src/ViteKit.MsBuild.Tasks/ViteKit.MsBuild.Tasks.csproj `
+          --configuration Release `
+          --no-build `
+          --output nupkg `
           /p:PackageVersion=${{ steps.gitversion.outputs.semVer }}
 
     - name: Upload NuGet package
@@ -80,16 +80,17 @@ jobs:
         retention-days: 7
 
     - name: Run unit tests (all frameworks)
-      shell: bash
+      shell: pwsh
       run: |
-        dotnet test tests/ViteKit.MsBuild.PureUnitTests/ViteKit.MsBuild.PureUnitTests.csproj \
-          --configuration Release \
-          --no-build \
-          --verbosity normal \
-          --logger trx \
-          --logger "console;verbosity=detailed" \
-          --results-directory "${{ github.workspace }}/TestResults/" \
-          ${{ matrix.os == 'ubuntu-latest' && '--collect:"XPlat Code Coverage" --settings coverlet.runsettings' || '' }}
+        $coverageArgs = if ('${{ matrix.os }}' -eq 'ubuntu-latest') { '--collect:"XPlat Code Coverage" --settings coverlet.runsettings' } else { '' }
+        dotnet test tests/ViteKit.MsBuild.PureUnitTests/ViteKit.MsBuild.PureUnitTests.csproj `
+          --configuration Release `
+          --no-build `
+          --verbosity normal `
+          --logger trx `
+          --logger "console;verbosity=detailed" `
+          --results-directory "${{ github.workspace }}/TestResults/" `
+          $coverageArgs
 
     - name: Generate coverage report
       uses: danielpalme/ReportGenerator-GitHub-Action@5.3.11
