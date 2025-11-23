@@ -1,0 +1,20 @@
+{
+    "dotnet.defaultSolution": "Vite.MsBuild.sln",
+    "dotnet.enablePackageRestore": true,
+    "dotnet.unitTests.runSettingsPath": "tests/test.runsettings",
+    "files.exclude": {
+        "**/bin": true,
+        "**/obj": true,
+        "**/nupkg": true,
+        "**/.git": true,
+        "**/.vs": true
+    },
+    "search.exclude": {
+        "**/bin/**": true,
+        "**/obj/**": true,
+        "**/nupkg/**": true
+    },
+    "dotnet.codeLens.enableReferencesCodeLens": false,
+    "dotnet.codeLens.enableTestsCodeLens": true,
+    "chat.customAgentInSubagent.enabled": true
+}
