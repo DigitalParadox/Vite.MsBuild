@@ -1,0 +1,25 @@
+name: CI - Build and Unit Tests
+
+on:
+  push:
+  pull_request:
+    branches: [ master, stable, dev ]
+
+jobs:
+  build:
+    name: Build .NET ${{ matrix.dotnet-version }}
+    strategy:
+      matrix:
+        dotnet-version: ['8.0.x', '9.0.x', '10.0.x']
+    uses: ./.github/workflows/build.yml
+    with:
+      dotnet-version: '8.0.x'
+      configuration: 'Release'
+
+  unit-tests:
+    name: Unit Tests
+    needs: build
+    uses: ./.github/workflows/unit-tests.yml
+    with:
+      dotnet-version: '8.0.x'
+      configuration: 'Release'
