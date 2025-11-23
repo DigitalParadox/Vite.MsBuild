@@ -1,5 +1,10 @@
 name: CI - Build and Unit Tests
 
+permissions:
+  contents: write
+  packages: write
+  actions: read
+
 on:
   push:
   pull_request:
@@ -117,6 +122,29 @@ jobs:
         name: coverage-report
         path: CoverageReport/
         retention-days: 7
+
+    - name: Publish coverage summary
+      if: matrix.os == 'ubuntu-latest'
+      shell: pwsh
+      run: |
+        if (Test-Path CoverageReport/SummaryGithub.md) {
+          $content = Get-Content CoverageReport/SummaryGithub.md -Raw
+          "## Coverage Summary`n$content" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+        } else {
+          echo "Coverage summary file not found."
+        }
+
+    # Optional gating (disabled). Uncomment to enforce minimum coverage.
+    # - name: Enforce coverage threshold
+    #   if: matrix.os == 'ubuntu-latest'
+    #   shell: pwsh
+    #   run: |
+    #     $min = 70  # set desired minimum percentage
+    #     $file = 'CoverageReport/SummaryGithub.md'
+    #     if (!(Test-Path $file)) { Write-Error "Coverage summary missing" }
+    #     $line = (Select-String -Path $file -Pattern 'Line coverage').Line
+    #     if ($line -match '(\d+\.\d+)%') { $value = [double]$matches[1] } else { Write-Error "Could not parse coverage" }
+    #     if ($value -lt $min) { Write-Error "Coverage $value% below threshold $min%" } else { echo "Coverage $value% meets threshold $min%" }
 
     - name: Add coverage PR comment
       uses: marocchino/sticky-pull-request-comment@v2
