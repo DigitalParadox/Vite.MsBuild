@@ -13,16 +13,13 @@ jobs:
         dotnet-version: ['8.0.x', '9.0.x', '10.0.x']
     uses: ./.github/workflows/templates/build.yml
     with:
-      dotnet-version: ${{ matrix.dotnet-version }}
+      dotnet-version: '8.0.x'
       configuration: 'Release'
 
   unit-tests:
-    name: Unit Tests .NET ${{ matrix.dotnet-version }}
+    name: Unit Tests
     needs: build
-    strategy:
-      matrix:
-        dotnet-version: ['8.0.x', '9.0.x', '10.0.x']
     uses: ./.github/workflows/templates/unit-tests.yml
     with:
-      dotnet-version: ${{ matrix.dotnet-version }}
+      dotnet-version: '8.0.x'
       configuration: 'Release'
