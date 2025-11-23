@@ -256,6 +256,13 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             // Assert
             Assert.Equal(shouldSucceed, result);
             Assert.True(task.MissingEnvFiles.Length > 0); // Should detect missing env files
+            
+            // Verify expected missing files are detected
+            var expectedFiles = missingFiles.Split(';');
+            foreach (var file in expectedFiles)
+            {
+                Assert.Contains(file, task.MissingEnvFiles);
+            }
         }
 
         [Fact]

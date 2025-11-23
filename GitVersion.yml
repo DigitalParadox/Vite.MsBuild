@@ -1,0 +1,74 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/GitTools/GitVersion/main/schemas/6.0/GitVersion.configuration.json
+
+mode: ContinuousDelivery
+tag-prefix: '[vV]'
+major-version-bump-message: '\+semver:\s?(breaking|major)'
+minor-version-bump-message: '\+semver:\s?(feature|minor)'
+patch-version-bump-message: '\+semver:\s?(fix|patch)'
+no-bump-message: '\+semver:\s?(none|skip)'
+commit-message-incrementing: Enabled
+
+branches:
+  master:
+    mode: ContinuousDelivery
+    label: ''
+    increment: Patch
+    track-merge-target: false
+    regex: ^master$|^main$
+    tracks-release-branches: false
+    is-release-branch: true
+    
+  stable:
+    mode: ContinuousDeployment
+    label: 'beta'
+    increment: Patch
+    track-merge-target: false
+    regex: ^stable$
+    tracks-release-branches: false
+    is-release-branch: false
+    
+  develop:
+    mode: ContinuousDeployment
+    label: 'alpha'
+    increment: Minor
+    track-merge-target: true
+    regex: ^dev(elop)?(ment)?$
+    tracks-release-branches: true
+    is-release-branch: false
+    
+  feature:
+    mode: ContinuousDeployment
+    label: 'feat-{BranchName}'
+    increment: Inherit
+    regex: ^features?[/-]
+    source-branches: ['develop']
+    
+  hotfix:
+    mode: ContinuousDeployment
+    label: 'hotfix'
+    increment: Patch
+    regex: ^hotfix(es)?[/-]
+    source-branches: ['master', 'stable', 'main']
+    
+  release:
+    mode: ContinuousDelivery
+    label: 'rc'
+    increment: None
+    regex: ^releases?[/-]
+    source-branches: ['develop']
+    is-release-branch: true
+    
+  pull-request:
+    mode: ContinuousDeployment
+    label: 'pr'
+    increment: Inherit
+
+ignore:
+  sha: []
+
+merge-message-formats:
+  # Conventional Commits support
+  '(?:^|\\n)feat(\\(.+\\))?:': Minor
+  '(?:^|\\n)fix(\\(.+\\))?:': Patch
+  '(?:^|\\n)perf(\\(.+\\))?:': Patch
+  '(?:^|\\n)BREAKING[- ]CHANGE:': Major
