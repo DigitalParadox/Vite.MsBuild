@@ -1,4 +1,5 @@
 using FluentAssertions;
+using System.IO;
 using ViteKit.MsBuild.Tasks;
 using Xunit;
 
@@ -284,7 +285,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             {
                 BuildEngine = new Fixtures.MockBuildEngine(),
                 Name = "admin",
-                ConfigFile = "Areas/Admin/ClientApp/vite.config.ts"
+                ConfigFile = Path.Combine("Areas", "Admin", "ClientApp", "vite.config.ts")
             };
 
             // Act
@@ -292,7 +293,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
 
             // Assert
             result.Should().BeTrue();
-            task.CreatedConfig!.ItemSpec.Should().Be("Areas/Admin/ClientApp/vite.config.ts");
+            task.CreatedConfig!.ItemSpec.Should().Be(Path.Combine("Areas", "Admin", "ClientApp", "vite.config.ts"));
         }
 
         [Fact]
