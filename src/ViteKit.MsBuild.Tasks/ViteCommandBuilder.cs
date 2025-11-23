@@ -37,7 +37,7 @@ namespace ViteKit.MsBuild.Tasks
         /// Constructor with configuration provider for testing/mocking
         /// </summary>
         public ViteCommandBuilder(IViteBuildConfigurationProvider configProvider)
-            : this(configProvider?.GetConfiguration() ?? throw new ArgumentNullException(nameof(configProvider)), new ViteCommandFactory())
+            : this(configProvider.GetConfiguration() ?? throw new ArgumentNullException(nameof(configProvider)), new ViteCommandFactory())
         {
         }
 
@@ -46,7 +46,7 @@ namespace ViteKit.MsBuild.Tasks
         /// </summary>
         public ViteCommandBuilder(IViteBuildConfigurationProvider configProvider, IViteCommandFactory commandFactory)
         {
-            _config = configProvider?.GetConfiguration() ?? throw new ArgumentNullException(nameof(configProvider));
+            _config = configProvider.GetConfiguration() ?? throw new ArgumentNullException(nameof(configProvider));
             _commandFactory = commandFactory ?? throw new ArgumentNullException(nameof(commandFactory));
         }
 
