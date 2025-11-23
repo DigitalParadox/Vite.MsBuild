@@ -169,9 +169,7 @@ ShowViteDiagnostics (diagnostic only)
 
 ### Build Tasks
 - **`OrchestrateBuildTask`** - High-performance C# orchestration (replaces 21 complex XML targets)
-- **`DetectPackageManagerTask`** - Auto-detects package manager from lock files
 - **`CollectViteInputFilesTask`** - Gathers all frontend files for incremental builds
-- **`ValidateViteProjectTask`** - Validates project structure and configuration
 
 ### Build Timing Options
 - **`ViteBuildTiming=BeforeCSharp`** (default): Runs before `ResolveStaticWebAssetsInputs` 

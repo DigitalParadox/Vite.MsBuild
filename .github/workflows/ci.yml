@@ -60,6 +60,24 @@ jobs:
           /p:FileVersion=${{ steps.gitversion.outputs.assemblySemFileVer }} \
           /p:InformationalVersion=${{ steps.gitversion.outputs.informationalVersion }}
 
+    - name: Pack NuGet package
+      if: matrix.os == 'ubuntu-latest'
+      shell: bash
+      run: |
+        dotnet pack src/ViteKit.MsBuild.Tasks/ViteKit.MsBuild.Tasks.csproj \
+          --configuration Release \
+          --no-build \
+          --output nupkg \
+          /p:PackageVersion=${{ steps.gitversion.outputs.nuGetVersion }}
+
+    - name: Upload NuGet package
+      uses: actions/upload-artifact@v4
+      if: matrix.os == 'ubuntu-latest'
+      with:
+        name: nuget-package
+        path: nupkg/*.nupkg
+        retention-days: 7
+
     - name: Run unit tests (all frameworks)
       shell: bash
       run: |

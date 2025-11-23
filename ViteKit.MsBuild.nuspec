@@ -7,13 +7,13 @@
     <owners>DigitalParadox</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <license type="expression">MIT</license>
-    <projectUrl>https://github.com/DigitalParadox/ViteKit.MsBuild</projectUrl>
+    <projectUrl>https://github.com/DigitalParadox/ViteKit</projectUrl>
     <description>Framework-agnostic MSBuild integration for Vite in ASP.NET Core projects. Supports Vue, React, Svelte, Solid, Preact, and vanilla JS/TS with zero configuration.</description>
     <releaseNotes>Initial release with full Vite integration support.</releaseNotes>
     <copyright>Copyright © 2025 DigitalParadox</copyright>
     <tags>vite msbuild aspnetcore vue react svelte solid frontend bundler typescript javascript</tags>
     <readme>README.md</readme>
-    <repository type="git" url="https://github.com/DigitalParadox/ViteKit.MsBuild" />
+    <repository type="git" url="https://github.com/DigitalParadox/ViteKit" />
     <dependencies>
       <group targetFramework="net8.0" />
       <group targetFramework="net9.0" />

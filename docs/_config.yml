@@ -6,19 +6,23 @@ description: Framework-agnostic MSBuild integration for Vite in ASP.NET Core pro
 
 # GitHub repository info
 url: "https://digitalparadox.github.io"
-baseurl: "/ViteKit.Msbuild"
+baseurl: "/ViteKit"
 
 aux_links:
   "GitHub":
-    - "https://github.com/DigitalParadox/ViteKit.Msbuild"
+    - "https://github.com/DigitalParadox/ViteKit"
   "NuGet Package":
-    - "https://www.nuget.org/packages/ViteKit.Msbuild"
+    - "https://www.nuget.org/packages/ViteKit"
 
 # Footer configuration
 gh_edit_link: true
 gh_edit_link_text: "Edit this page on GitHub"
-gh_edit_repository: "https://github.com/DigitalParadox/ViteKit.Msbuild"
-gh_edit_branch: "main"
+gh_edit_repository: "https://github.com/DigitalParadox/ViteKit"
+gh_edit_branch: "dev"
+gh_edit_view_mode: "tree"
+
+# Footer
+footer_content: 'Copyright &copy; 2025 DigitalParadox. Distributed under the <a href="https://github.com/DigitalParadox/ViteKit/blob/dev/LICENSE">MIT license</a>.'
 
 # Search configuration
 search_enabled: true

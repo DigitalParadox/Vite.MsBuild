@@ -2,90 +2,91 @@
 layout: default
 title: Home
 nav_order: 1
-description: "Framework-agnostic MSBuild integration for Vite in ASP.NET Core projects"
+description: "ViteKit.Msbuild - Framework-agnostic MSBuild integration for Vite in ASP.NET Core projects"
 permalink: /
 ---
 
 # ViteKit.Msbuild
 {: .fs-9 }
 
-Framework-agnostic MSBuild integration for Vite in ASP.NET Core projects
+Framework-agnostic MSBuild integration for Vite in ASP.NET Core projects. Zero configuration, maximum flexibility.
 {: .fs-6 .fw-300 }
 
-[Get started now](getting-started/){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 }
-[View on GitHub](https://github.com/DigitalParadox/ViteKit.Msbuild){: .btn .fs-5 .mb-4 .mb-md-0 }
+[Get started now](getting-started){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 }
+[View on GitHub](https://github.com/DigitalParadox/ViteKit){: .btn .fs-5 .mb-4 .mb-md-0 }
 
 ---
 
-{: .highlight }
-> **Seamlessly integrate Vite with ASP.NET Core** - Build Vue, React, Svelte, or any Vite-supported framework directly from `dotnet build`.
+## Quick Start
 
-[![NuGet Package](https://img.shields.io/nuget/v/ViteKit.Msbuild)](https://www.nuget.org/packages/ViteKit.Msbuild)
-[![Build Status](https://github.com/DigitalParadox/ViteKit.Msbuild/workflows/CI/badge.svg)](https://github.com/DigitalParadox/ViteKit.Msbuild/actions)
-[![Tests](https://img.shields.io/badge/tests-427%20passing-brightgreen)](https://github.com/DigitalParadox/ViteKit.Msbuild/actions)
-
-## Quick start
-
-### Install the package
+Install the NuGet package:
 
 ```bash
 dotnet add package ViteKit.Msbuild
 ```
 
-### Create your Vite config
-
-```bash
-# Vue + TypeScript
-npm create vite@latest . -- --template vue-ts
-
-# React + TypeScript  
-npm create vite@latest . -- --template react-ts
-
-# Or any other Vite template
-```
-
-### Build your project
-
-```bash
-dotnet build
-```
-
-{: .new }
-That's it! Your Vite assets are now built automatically during MSBuild.
+That's it! Vite builds automatically run on `dotnet build`.
 
 ---
 
-## Key Features
+## Features
 
-Zero Configuration
-: Auto-detects your project structure and package manager
+**🚀 Zero Configuration**
+: Works out of the box with sensible defaults. No setup required.
 
-Incremental Builds
-: Only rebuilds when source files actually change  
+**🎯 Framework Agnostic**
+: Supports Vue, React, Svelte, Solid, Preact, and vanilla JS/TS.
 
-Parallel Build Safe
-: Prevents npm install conflicts in CI/CD
+**📦 Package Manager Detection**
+: Auto-detects npm, yarn, pnpm, or bun from lock files.
 
-Framework Agnostic
-: Vue, React, Svelte, Solid, Preact, vanilla JS/TS
+**🔧 Fully Customizable**
+: Override any setting via MSBuild properties.
 
-Package Manager Smart
-: Auto-detects npm, pnpm, yarn, or bun
-
-Enterprise Ready
-: Robust error handling and comprehensive logging
-
-MSBuild Native
-: Uses proper MSBuild targets, not hacky scripts
+**🏗️ Multi-SPA Support**
+: Build multiple Vite configurations in a single project.
 
 ---
 
-## Project Status
+## Why ViteKit.Msbuild?
 
-| Component | Status |
-|:----------|:-------|
-| Current Version | 2.0.0 |
-| Test Coverage | 427 tests passing (100% success rate) |
-| Supported .NET | 6, 7, 8, 9 |
-| Node.js Required | 18+ |
-| Vite Supported | 4.0+ and 5.0+ |
+### Before
+```xml
+<Target Name="BuildFrontend" BeforeTargets="Build">
+  <Exec Command="npm install" />
+  <Exec Command="npm run build" />
+</Target>
+```
+
+Known Issues: Manual configuration, poor MSBuild integration, no proper Clean target support.
+
+### After
+```xml
+<PackageReference Include="ViteKit.Msbuild" Version="*" />
+```
+
+Everything just works. Builds are fast. Integration is seamless.
+
+---
+
+## Supported Frameworks
+
+| Framework | Version | Status |
+|-----------|---------|--------|
+| .NET 8.0  | LTS     | ✅ Supported |
+| .NET 9.0  | STS     | ✅ Supported |
+| .NET 10.0 | LTS     | ✅ Supported |
+
+---
+
+## Community
+
+- [GitHub Issues](https://github.com/DigitalParadox/ViteKit/issues) - Bug reports and feature requests
+- [GitHub Discussions](https://github.com/DigitalParadox/ViteKit/discussions) - Questions and community support
+- [Contributing Guide](contributing) - Help improve ViteKit
+
+---
+
+## License
+
+ViteKit.Msbuild is distributed under the [MIT license](https://github.com/DigitalParadox/ViteKit/blob/dev/LICENSE).
