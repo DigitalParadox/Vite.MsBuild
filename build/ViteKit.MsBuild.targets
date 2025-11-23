@@ -26,12 +26,13 @@
     Discovers and resolves Vite configurations from vite.config files
     ============================================================================
     -->
-    <Target Name="_ResolveViteConfigurations" BeforeTargets="ViteRestore;ViteBuild">
+    <Target Name="_ResolveViteConfigurations" BeforeTargets="ViteRestore;ViteBuild" DependsOnTargets="_ResolveViteMode">
         <!-- Capture user-defined configs before resolving -->
         <ItemGroup>
             <_UserDefinedViteConfig Include="@(ViteConfig)" />
         </ItemGroup>
         
+        <!-- Resolve configurations (discovers config files, sets defaults) -->
         <ViteConfigurationResolver
             ViteProjectRoot="$(ViteProjectRoot)"
             ViteOutputDir="$(ViteOutputDir)"
@@ -42,7 +43,7 @@
             <Output TaskParameter="ResolvedConfigs" ItemName="_ResolvedViteConfig" />
         </ViteConfigurationResolver>
         
-        <!-- Replace ViteConfig with resolved configs -->
+        <!-- Replace ViteConfig with fully resolved configs -->
         <ItemGroup>
             <ViteConfig Remove="@(ViteConfig)" />
             <ViteConfig Include="@(_ResolvedViteConfig)" />
@@ -55,7 +56,7 @@
     Resolves ViteMode from Configuration if not explicitly set
     ============================================================================
     -->
-    <Target Name="_ResolveViteMode" BeforeTargets="ViteRestore;ViteBuild" DependsOnTargets="_ResolveViteConfigurations">
+    <Target Name="_ResolveViteMode" BeforeTargets="_ResolveViteConfigurations">
         <PropertyGroup>
             <ViteMode Condition="'$(ViteMode)' == '' AND '$(Configuration)' == 'Debug'">development</ViteMode>
             <ViteMode Condition="'$(ViteMode)' == '' AND '$(Configuration)' == 'Release'">production</ViteMode>
@@ -79,7 +80,6 @@
         <!-- Orchestrator builds the restore task pipeline -->
         <OrchestrateBuildTask
             ViteProjectRoot="$(ViteProjectRoot)"
-            ViteConfigFile="$(ViteConfigFile)"
             ViteOutputDir="$(ViteOutputDir)"
             ViteMode="$(ViteMode)"
             ViteLogLevel="$(ViteLogLevel)"
