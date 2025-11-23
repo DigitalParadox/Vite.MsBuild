@@ -1,13 +1,13 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
-using System.Collections.Generic;
-using Xunit;
-using Xunit.Abstractions;
 using FluentAssertions;
 using ViteKit.MsBuild.Tasks;
+using Xunit;
+using Xunit.Abstractions;
 
-namespace Vite.MsBuild.PureUnitTests
+namespace ViteKit.MsBuild.PureUnitTests.Factories
 {
     /// <summary>
     /// Debug tests to understand what's happening with our factory pattern

@@ -1,12 +1,12 @@
 using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 using System.Text.Json;
-using Xunit;
 using FluentAssertions;
 using ViteKit.MsBuild.Tasks;
+using Xunit;
 
-namespace ViteKit.MsBuild.PureUnitTests
+namespace ViteKit.MsBuild.PureUnitTests.Factories
 {
     /// <summary>
     /// Comprehensive tests for factory pattern edge cases and robustness

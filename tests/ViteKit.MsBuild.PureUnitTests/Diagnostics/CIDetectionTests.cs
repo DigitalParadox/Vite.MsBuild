@@ -191,3 +191,4 @@ namespace ViteKit.MsBuild.PureUnitTests.Diagnostics
         }
     }
 }
+

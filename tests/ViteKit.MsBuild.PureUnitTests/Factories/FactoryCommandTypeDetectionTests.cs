@@ -1,12 +1,12 @@
 using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 using System.Text.Json;
-using Xunit;
 using FluentAssertions;
 using ViteKit.MsBuild.Tasks;
+using Xunit;
 
-namespace Vite.MsBuild.PureUnitTests
+namespace ViteKit.MsBuild.PureUnitTests.Factories
 {
     /// <summary>
     /// Tests for the factory's command type detection and decision-making logic
@@ -359,3 +359,4 @@ namespace Vite.MsBuild.PureUnitTests
         }
     }
 }
+

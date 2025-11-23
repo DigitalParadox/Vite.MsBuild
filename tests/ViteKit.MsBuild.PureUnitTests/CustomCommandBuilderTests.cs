@@ -4,7 +4,7 @@ using Xunit;
 using FluentAssertions;
 using ViteKit.MsBuild.Tasks;
 
-namespace Vite.MsBuild.PureUnitTests
+namespace ViteKit.MsBuild.PureUnitTests
 {
     /// <summary>
     /// Tests for CustomCommandBuilder to validate literal command execution

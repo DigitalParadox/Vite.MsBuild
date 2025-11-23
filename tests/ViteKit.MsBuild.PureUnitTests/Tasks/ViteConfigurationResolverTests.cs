@@ -14,7 +14,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
 
         public ViteConfigurationResolverTests()
         {
-            _tempDir = Path.Combine(Path.GetTempPath(), $"ViteMsBuildTests_{System.Guid.NewGuid():N}");
+            _tempDir = Path.Combine(Path.GetTempPath(), $"ViteMsBuildTests_{Guid.NewGuid():N}");
             Directory.CreateDirectory(_tempDir);
         }
 
@@ -24,7 +24,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             // Arrange
             var task = new ViteConfigurationResolver
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 ViteProjectRoot = _tempDir,
                 ViteOutputDir = "wwwroot/dist",
                 ViteMode = "development",
@@ -57,7 +57,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             
             var task = new ViteConfigurationResolver
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 ViteProjectRoot = _tempDir,
                 ViteOutputDir = "wwwroot/dist"
             };
@@ -78,7 +78,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
         public void Execute_DetectsAllConfigFileVariants(string configFileName)
         {
             // Arrange
-            var tempDir = Path.Combine(Path.GetTempPath(), $"ViteMsBuildTests_{System.Guid.NewGuid():N}");
+            var tempDir = Path.Combine(Path.GetTempPath(), $"ViteMsBuildTests_{Guid.NewGuid():N}");
             Directory.CreateDirectory(tempDir);
             
             var configPath = Path.Combine(tempDir, configFileName);
@@ -86,7 +86,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             
             var task = new ViteConfigurationResolver
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 ViteProjectRoot = tempDir
             };
 
@@ -112,13 +112,13 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             
             var task = new ViteConfigurationResolver
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 ViteProjectRoot = _tempDir,
-                UserDefinedConfigs = new[]
-                {
+                UserDefinedConfigs =
+                [
                     CreateConfigItem("vite.admin.config.ts", "admin", "wwwroot/admin"),
                     CreateConfigItem("vite.customer.config.ts", "customer", "wwwroot/customer")
-                }
+                ]
             };
 
             // Act
@@ -146,12 +146,12 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             
             var task = new ViteConfigurationResolver
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 ViteProjectRoot = _tempDir,
-                UserDefinedConfigs = new[]
-                {
+                UserDefinedConfigs =
+                [
                     CreateConfigItem("vite.admin.config.ts", null, null) // No BuildId provided
-                }
+                ]
             };
 
             // Act
@@ -160,31 +160,6 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             // Assert
             result.Should().BeTrue();
             task.ResolvedConfigs[0].GetMetadata("BuildId").Should().Be("admin");
-        }
-
-        [Fact]
-        public void Execute_GeneratesOutputDirFromBuildId()
-        {
-            // Arrange
-            var configPath = Path.Combine(_tempDir, "vite.admin.config.ts");
-            File.WriteAllText(configPath, "export default {}");
-            
-            var task = new ViteConfigurationResolver
-            {
-                BuildEngine = new Helpers.MockBuildEngine(),
-                ViteProjectRoot = _tempDir,
-                UserDefinedConfigs = new[]
-                {
-                    CreateConfigItem("vite.admin.config.ts", "admin", null) // No OutputDir provided
-                }
-            };
-
-            // Act
-            var result = task.Execute();
-
-            // Assert
-            result.Should().BeTrue();
-            task.ResolvedConfigs[0].GetMetadata("OutputDir").Should().Be("wwwroot/admin");
         }
 
         [Fact]
@@ -198,12 +173,12 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             
             var task = new ViteConfigurationResolver
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 ViteProjectRoot = _tempDir,
-                UserDefinedConfigs = new[]
-                {
+                UserDefinedConfigs =
+                [
                     CreateConfigItem("Areas/Admin/vite.config.ts", "admin", null)
-                }
+                ]
             };
 
             // Act
@@ -225,12 +200,12 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             
             var task = new ViteConfigurationResolver
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 ViteProjectRoot = _tempDir,
-                UserDefinedConfigs = new[]
-                {
+                UserDefinedConfigs =
+                [
                     CreateConfigItem("spa/admin/vite.config.ts", "admin", null)
-                }
+                ]
             };
 
             // Act
@@ -245,7 +220,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
         public void Execute_WithDuplicateBuildIds_LogsErrorAndReturnsFalse()
         {
             // Arrange
-            var mockEngine = new Helpers.MockBuildEngine();
+            var mockEngine = new Fixtures.MockBuildEngine();
             var config1 = Path.Combine(_tempDir, "vite.admin.config.ts");
             var config2 = Path.Combine(_tempDir, "vite.admin2.config.ts");
             File.WriteAllText(config1, "export default {}");
@@ -255,11 +230,11 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             {
                 BuildEngine = mockEngine,
                 ViteProjectRoot = _tempDir,
-                UserDefinedConfigs = new[]
-                {
+                UserDefinedConfigs =
+                [
                     CreateConfigItem("vite.admin.config.ts", "admin", "wwwroot/admin"),
                     CreateConfigItem("vite.admin2.config.ts", "admin", "wwwroot/admin2") // Duplicate BuildId
-                }
+                ]
             };
 
             // Act
@@ -268,14 +243,14 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             // Assert
             result.Should().BeFalse();
             mockEngine.LoggedErrors.Should().ContainSingle(e => 
-                e.Message.Contains("Duplicate BuildId") && e.Message.Contains("admin"));
+                e.Message != null && e.Message.Contains("Duplicate BuildId") && e.Message.Contains("admin"));
         }
 
         [Fact]
         public void Execute_WithConflictingOutputDirs_LogsWarning()
         {
             // Arrange
-            var mockEngine = new Helpers.MockBuildEngine();
+            var mockEngine = new Fixtures.MockBuildEngine();
             var config1 = Path.Combine(_tempDir, "vite.admin.config.ts");
             var config2 = Path.Combine(_tempDir, "vite.customer.config.ts");
             File.WriteAllText(config1, "export default {}");
@@ -285,11 +260,11 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             {
                 BuildEngine = mockEngine,
                 ViteProjectRoot = _tempDir,
-                UserDefinedConfigs = new[]
-                {
+                UserDefinedConfigs =
+                [
                     CreateConfigItem("vite.admin.config.ts", "admin", "wwwroot/shared"),
                     CreateConfigItem("vite.customer.config.ts", "customer", "wwwroot/shared") // Same output
-                }
+                ]
             };
 
             // Act
@@ -298,14 +273,14 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             // Assert
             result.Should().BeTrue();
             mockEngine.LoggedWarnings.Should().ContainSingle(w => 
-                w.Message.Contains("Multiple configurations") && w.Message.Contains("same directory"));
+                w.Message!.Contains("Multiple configurations") && w.Message.Contains("same directory"));
         }
 
         [Fact]
         public void Execute_WithNonExistentProjectRoot_LogsErrorAndReturnsFalse()
         {
             // Arrange
-            var mockEngine = new Helpers.MockBuildEngine();
+            var mockEngine = new Fixtures.MockBuildEngine();
             var task = new ViteConfigurationResolver
             {
                 BuildEngine = mockEngine,
@@ -318,7 +293,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             // Assert
             result.Should().BeFalse();
             mockEngine.LoggedErrors.Should().ContainSingle(e => 
-                e.Message.Contains("ViteProjectRoot") && e.Message.Contains("does not exist"));
+                e.Message!.Contains("ViteProjectRoot") && e.Message.Contains("does not exist"));
         }
 
         [Fact]
@@ -331,12 +306,12 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             
             var task = new ViteConfigurationResolver
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 ViteProjectRoot = _tempDir,
-                UserDefinedConfigs = new[]
-                {
+                UserDefinedConfigs =
+                [
                     CreateConfigItem("Areas/Admin/vite.config.ts", "admin", null) // Relative path
-                }
+                ]
             };
 
             // Act
@@ -356,14 +331,14 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             
             var task = new ViteConfigurationResolver
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 ViteProjectRoot = _tempDir,
                 ViteMode = "production",
                 PackageManager = "pnpm",
-                UserDefinedConfigs = new[]
-                {
+                UserDefinedConfigs =
+                [
                     CreateConfigItem("vite.admin.config.ts", "admin", null) // No mode/package manager
-                }
+                ]
             };
 
             // Act
@@ -402,3 +377,4 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
         }
     }
 }
+

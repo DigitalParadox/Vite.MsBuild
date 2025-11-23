@@ -14,13 +14,13 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             // Arrange
             var task = new ViteConfigDependencyResolver
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
-                ViteConfigurations = new[]
-                {
+                BuildEngine = new Fixtures.MockBuildEngine(),
+                ViteConfigurations =
+                [
                     CreateConfig("admin", "vite.admin.config.ts"),
                     CreateConfig("customer", "vite.customer.config.ts"),
                     CreateConfig("shared", "vite.shared.config.ts")
-                }
+                ]
             };
 
             // Act
@@ -39,12 +39,12 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             // Arrange
             var task = new ViteConfigDependencyResolver
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
-                ViteConfigurations = new[]
-                {
+                BuildEngine = new Fixtures.MockBuildEngine(),
+                ViteConfigurations =
+                [
                     CreateConfig("app", "vite.app.config.ts", "shared"), // Depends on shared
                     CreateConfig("shared", "vite.shared.config.ts")      // No dependencies
-                }
+                ]
             };
 
             // Act
@@ -63,13 +63,13 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             // Arrange
             var task = new ViteConfigDependencyResolver
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
-                ViteConfigurations = new[]
-                {
+                BuildEngine = new Fixtures.MockBuildEngine(),
+                ViteConfigurations =
+                [
                     CreateConfig("app", "vite.app.config.ts", "shared,components"), // Depends on both
                     CreateConfig("shared", "vite.shared.config.ts"),                 // No dependencies
                     CreateConfig("components", "vite.components.config.ts")          // No dependencies
-                }
+                ]
             };
 
             // Act
@@ -97,13 +97,13 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             // Arrange
             var task = new ViteConfigDependencyResolver
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
-                ViteConfigurations = new[]
-                {
+                BuildEngine = new Fixtures.MockBuildEngine(),
+                ViteConfigurations =
+                [
                     CreateConfig("level3", "vite.level3.config.ts", "level2"),
                     CreateConfig("level2", "vite.level2.config.ts", "level1"),
                     CreateConfig("level1", "vite.level1.config.ts")
-                }
+                ]
             };
 
             // Act
@@ -121,15 +121,15 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
         public void Execute_WithCircularDependency_ReturnsFalseAndLogsError()
         {
             // Arrange
-            var mockEngine = new Helpers.MockBuildEngine();
+            var mockEngine = new Fixtures.MockBuildEngine();
             var task = new ViteConfigDependencyResolver
             {
                 BuildEngine = mockEngine,
-                ViteConfigurations = new[]
-                {
+                ViteConfigurations =
+                [
                     CreateConfig("a", "vite.a.config.ts", "b"),
                     CreateConfig("b", "vite.b.config.ts", "a") // Circular!
-                }
+                ]
             };
 
             // Act
@@ -137,23 +137,23 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
 
             // Assert
             result.Should().BeFalse();
-            mockEngine.LoggedErrors.Should().ContainSingle(e => e.Message.Contains("Circular dependency"));
+            mockEngine.LoggedErrors.Should().Contain(e => e.Message != null && e.Message.Contains("Circular dependency"));
         }
 
         [Fact]
         public void Execute_WithComplexCircularDependency_DetectsCircle()
         {
             // Arrange
-            var mockEngine = new Helpers.MockBuildEngine();
+            var mockEngine = new Fixtures.MockBuildEngine();
             var task = new ViteConfigDependencyResolver
             {
                 BuildEngine = mockEngine,
-                ViteConfigurations = new[]
-                {
+                ViteConfigurations =
+                [
                     CreateConfig("a", "vite.a.config.ts", "b"),
                     CreateConfig("b", "vite.b.config.ts", "c"),
                     CreateConfig("c", "vite.c.config.ts", "a") // Circle: a->b->c->a
-                }
+                ]
             };
 
             // Act
@@ -161,21 +161,21 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
 
             // Assert
             result.Should().BeFalse();
-            mockEngine.LoggedErrors.Should().ContainSingle(e => e.Message.Contains("Circular dependency"));
+            mockEngine.LoggedErrors.Should().ContainSingle(e => e.Message != null && e.Message.Contains("Circular dependency"));
         }
 
         [Fact]
         public void Execute_WithMissingDependency_LogsErrorAndReturnsFalse()
         {
             // Arrange
-            var mockEngine = new Helpers.MockBuildEngine();
+            var mockEngine = new Fixtures.MockBuildEngine();
             var task = new ViteConfigDependencyResolver
             {
                 BuildEngine = mockEngine,
-                ViteConfigurations = new[]
-                {
+                ViteConfigurations =
+                [
                     CreateConfig("app", "vite.app.config.ts", "nonexistent")
-                }
+                ]
             };
 
             // Act
@@ -184,21 +184,21 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             // Assert
             result.Should().BeFalse();
             mockEngine.LoggedErrors.Should().ContainSingle(e => 
-                e.Message.Contains("depends on") && e.Message.Contains("nonexistent") && e.Message.Contains("does not exist"));
+                e.Message != null && e.Message.Contains("depends on") && e.Message.Contains("nonexistent") && e.Message.Contains("does not exist"));
         }
 
         [Fact]
         public void Execute_WithMissingBuildId_LogsErrorAndReturnsFalse()
         {
             // Arrange
-            var mockEngine = new Helpers.MockBuildEngine();
+            var mockEngine = new Fixtures.MockBuildEngine();
             var config = new TaskItem("vite.config.ts");
             // Don't set BuildId metadata
             
             var task = new ViteConfigDependencyResolver
             {
                 BuildEngine = mockEngine,
-                ViteConfigurations = new[] { config }
+                ViteConfigurations = [config]
             };
 
             // Act
@@ -206,7 +206,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
 
             // Assert
             result.Should().BeFalse(); // BuildId is required
-            mockEngine.LoggedErrors.Should().ContainSingle(e => e.Message.Contains("missing BuildId"));
+            mockEngine.LoggedErrors.Should().ContainSingle(e => e.Message != null && e.Message.Contains("missing BuildId"));
         }
 
         [Fact]
@@ -220,14 +220,14 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             //      app
             var task = new ViteConfigDependencyResolver
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
-                ViteConfigurations = new[]
-                {
+                BuildEngine = new Fixtures.MockBuildEngine(),
+                ViteConfigurations =
+                [
                     CreateConfig("app", "vite.app.config.ts", "ui,data"),
                     CreateConfig("ui", "vite.ui.config.ts", "core"),
                     CreateConfig("data", "vite.data.config.ts", "core"),
                     CreateConfig("core", "vite.core.config.ts")
-                }
+                ]
             };
 
             // Act
@@ -258,13 +258,13 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             // Arrange
             var task = new ViteConfigDependencyResolver
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
-                ViteConfigurations = new[]
-                {
+                BuildEngine = new Fixtures.MockBuildEngine(),
+                ViteConfigurations =
+                [
                     CreateConfig("app", "vite.app.config.ts", " shared , components "), // Extra whitespace
                     CreateConfig("shared", "vite.shared.config.ts"),
                     CreateConfig("components", "vite.components.config.ts")
-                }
+                ]
             };
 
             // Act
@@ -282,14 +282,14 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             // Arrange
             var task = new ViteConfigDependencyResolver
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
-                ViteConfigurations = new[]
-                {
+                BuildEngine = new Fixtures.MockBuildEngine(),
+                ViteConfigurations =
+                [
                     CreateConfig("level3", "vite.level3.config.ts", "level2"),
                     CreateConfig("level2", "vite.level2.config.ts", "level1a,level1b"),
                     CreateConfig("level1a", "vite.level1a.config.ts"),
                     CreateConfig("level1b", "vite.level1b.config.ts")
-                }
+                ]
             };
 
             // Act
@@ -312,12 +312,12 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             // Arrange
             var task = new ViteConfigDependencyResolver
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
-                ViteConfigurations = new[]
-                {
+                BuildEngine = new Fixtures.MockBuildEngine(),
+                ViteConfigurations =
+                [
                     CreateConfig("app", "vite.app.config.ts", ""),
                     CreateConfig("shared", "vite.shared.config.ts")
-                }
+                ]
             };
 
             // Act
@@ -342,3 +342,4 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
         }
     }
 }
+

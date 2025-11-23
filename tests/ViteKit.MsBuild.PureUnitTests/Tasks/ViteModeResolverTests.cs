@@ -14,7 +14,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             // Arrange
             var task = new ViteModeResolver
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 ViteConfigs = new[]
                 {
                     CreateConfig("admin", "vite.admin.config.ts")
@@ -37,7 +37,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             // Arrange
             var task = new ViteModeResolver
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 ViteConfigs = new[]
                 {
                     CreateConfig("admin", "vite.admin.config.ts")
@@ -63,7 +63,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             
             var task = new ViteModeResolver
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 ViteConfigs = new[] { config },
                 DefaultMode = "development"
             };
@@ -82,7 +82,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             // Arrange
             var task = new ViteModeResolver
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 ViteConfigs = new[]
                 {
                     CreateConfig("admin", "vite.admin.config.ts")
@@ -120,7 +120,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             
             var task = new ViteModeResolver
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 ViteConfigs = new[] { adminConfig, customerConfig, sharedConfig },
                 Properties = new[]
                 {
@@ -153,7 +153,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             // Arrange
             var task = new ViteModeResolver
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 ViteConfigs = new[]
                 {
                     CreateConfig("admin", "vite.admin.config.ts"),
@@ -182,7 +182,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             // Arrange
             var task = new ViteModeResolver
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 ViteConfigs = new[]
                 {
                     CreateConfig("Admin", "vite.admin.config.ts") // Capital A
@@ -211,7 +211,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             
             var task = new ViteModeResolver
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 ViteConfigs = new[] { config },
                 ViteMode = "production",
                 DefaultMode = "development"
@@ -234,7 +234,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             
             var task = new ViteModeResolver
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 ViteConfigs = new[] { config },
                 ViteMode = null, // Null global mode
                 DefaultMode = "development"
@@ -254,7 +254,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             // Arrange
             var task = new ViteModeResolver
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 ViteConfigs = new[]
                 {
                     CreateConfig("admin", "vite.admin.config.ts")
@@ -291,7 +291,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             
             var task = new ViteModeResolver
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 ViteConfigs = new[] { adminConfig, customerConfig, sharedConfig },
                 Properties = new[]
                 {
@@ -328,7 +328,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             
             var task = new ViteModeResolver
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 ViteConfigs = new[] { config },
                 ViteMode = "production",
                 DefaultMode = "development"
@@ -352,7 +352,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             // Arrange
             var task = new ViteModeResolver
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 ViteConfigs = System.Array.Empty<ITaskItem>(),
                 DefaultMode = "development"
             };
@@ -380,3 +380,4 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
         }
     }
 }
+

@@ -1,14 +1,14 @@
 using Microsoft.Build.Framework;
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using System;
 
-namespace ViteKit.MsBuild.PureUnitTests.Helpers
+namespace ViteKit.MsBuild.PureUnitTests.Fixtures
 {
     /// <summary>
     /// Mock implementation of IBuildEngine for testing MSBuild tasks
     /// </summary>
-    internal class MockBuildEngine : IBuildEngine
+    public class MockBuildEngine : IBuildEngine
     {
         public bool ContinueOnError { get; set; }
         public int LineNumberOfTaskNode { get; set; }
@@ -44,3 +44,4 @@ namespace ViteKit.MsBuild.PureUnitTests.Helpers
         }
     }
 }
+

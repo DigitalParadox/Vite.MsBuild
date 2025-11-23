@@ -12,7 +12,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
 
         public ValidateViteConfigTests()
         {
-            _tempDir = Path.Combine(Path.GetTempPath(), $"ViteMsBuildTests_{System.Guid.NewGuid():N}");
+            _tempDir = Path.Combine(Path.GetTempPath(), $"ViteMsBuildTests_{Guid.NewGuid():N}");
             Directory.CreateDirectory(_tempDir);
         }
 
@@ -31,7 +31,7 @@ export default defineConfig({
             
             var task = new ValidateViteConfig
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 ConfigPath = configPath
             };
 
@@ -49,7 +49,7 @@ export default defineConfig({
             // Arrange
             var task = new ValidateViteConfig
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 ConfigPath = "/nonexistent/vite.config.ts"
             };
 
@@ -70,7 +70,7 @@ export default defineConfig({
             
             var task = new ValidateViteConfig
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 ConfigPath = configPath
             };
 
@@ -91,7 +91,7 @@ export default defineConfig({
             
             var task = new ValidateViteConfig
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 ConfigPath = configPath
             };
 
@@ -112,7 +112,7 @@ export default defineConfig({
             
             var task = new ValidateViteConfig
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 ConfigPath = configPath
             };
 
@@ -140,7 +140,7 @@ export default {
             
             var task = new ValidateViteConfig
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 ConfigPath = configPath
             };
 
@@ -161,7 +161,7 @@ export default {
             
             var task = new ValidateViteConfig
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 ConfigPath = configPath
             };
 
@@ -182,7 +182,7 @@ export default {
             
             var task = new ValidateViteConfig
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 ConfigPath = configPath,
                 ExpectedOutputDir = "wwwroot/dist"
             };
@@ -204,7 +204,7 @@ export default {
             
             var task = new ValidateViteConfig
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 ConfigPath = configPath,
                 ExpectedOutputDir = "wwwroot/dist"
             };
@@ -230,7 +230,7 @@ export default {
             
             var task = new ValidateViteConfig
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 ConfigPath = configPath,
                 ExpectedOutputDir = "wwwroot/dist"
             };
@@ -252,7 +252,7 @@ export default {
             
             var task = new ValidateViteConfig
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 ConfigPath = configPath,
                 ExpectedOutputDir = "wwwroot/dist"
             };
@@ -289,7 +289,7 @@ export default defineConfig({
             
             var task = new ValidateViteConfig
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 ConfigPath = configPath
             };
 
@@ -310,7 +310,7 @@ export default defineConfig({
             
             var task = new ValidateViteConfig
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 ConfigPath = configPath
             };
 
@@ -331,7 +331,7 @@ export default defineConfig({
             
             var task = new ValidateViteConfig
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 ConfigPath = configPath
             };
 
@@ -347,7 +347,7 @@ export default defineConfig({
         public void Execute_LogsWarningsToMSBuild()
         {
             // Arrange
-            var mockEngine = new Helpers.MockBuildEngine();
+            var mockEngine = new Fixtures.MockBuildEngine();
             var configPath = Path.Combine(_tempDir, "vite.config.ts");
             File.WriteAllText(configPath, "const config = {}"); // Missing export
             
@@ -362,7 +362,7 @@ export default defineConfig({
 
             // Assert
             result.Should().BeTrue();
-            mockEngine.LoggedWarnings.Should().ContainSingle(w => w.Message.Contains("export statement"));
+            mockEngine.LoggedWarnings.Should().ContainSingle(w => w.Message != null && w.Message.Contains("export statement"));
         }
 
         public void Dispose()
@@ -381,3 +381,4 @@ export default defineConfig({
         }
     }
 }
+

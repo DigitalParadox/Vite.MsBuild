@@ -1,9 +1,10 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using FluentAssertions;
 using Microsoft.Build.Framework;
-using ViteKit.MsBuild.PureUnitTests.Helpers;
+using ViteKit.MsBuild.PureUnitTests.Fixtures;
 using ViteKit.MsBuild.Tasks;
 using Xunit;
 
@@ -29,7 +30,11 @@ namespace ViteKit.MsBuild.PureUnitTests.Integration
         {
             if (Directory.Exists(_tempDir))
             {
-                try { Directory.Delete(_tempDir, true); } catch { }
+                try { Directory.Delete(_tempDir, true); }
+                catch
+                {
+                    // ignored
+                }
             }
         }
 
@@ -73,6 +78,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Integration
             dependencyResolver.OrderedConfigurations.Should().HaveCount(1);
 
             // Step 3: Resolve Modes
+            Debug.Assert(dependencyResolver.OrderedConfigurations != null, "dependencyResolver.OrderedConfigurations != null");
             var modeResolver = new ViteModeResolver
             {
                 BuildEngine = _buildEngine,
@@ -94,7 +100,6 @@ namespace ViteKit.MsBuild.PureUnitTests.Integration
                 PackageManager = "npm",
                 ViteMode = "production",
                 ViteConfigurations = modeResolver.ResolvedConfigs,
-                IntermediateOutputPath = Path.Combine(_tempDir, "obj")
             };
 
             // Verify the orchestrator validates inputs correctly
@@ -185,14 +190,14 @@ namespace ViteKit.MsBuild.PureUnitTests.Integration
             modeResolver.ResolvedConfigs.Should().HaveCount(3);
 
             // Verify mode overrides
-            var sharedConfig_resolved = modeResolver.ResolvedConfigs!.First(c => c.GetMetadata("BuildId") == "shared");
-            sharedConfig_resolved.GetMetadata("EffectiveMode").Should().Be("development"); // Uses global
+            var sharedConfigResolved = modeResolver.ResolvedConfigs!.First(c => c.GetMetadata("BuildId") == "shared");
+            sharedConfigResolved.GetMetadata("EffectiveMode").Should().Be("development"); // Uses global
 
-            var adminConfig_resolved = modeResolver.ResolvedConfigs!.First(c => c.GetMetadata("BuildId") == "admin");
-            adminConfig_resolved.GetMetadata("EffectiveMode").Should().Be("staging"); // Uses config-specific property
+            var adminConfigResolved = modeResolver.ResolvedConfigs!.First(c => c.GetMetadata("BuildId") == "admin");
+            adminConfigResolved.GetMetadata("EffectiveMode").Should().Be("staging"); // Uses config-specific property
 
-            var customerConfig_resolved = modeResolver.ResolvedConfigs!.First(c => c.GetMetadata("BuildId") == "customer");
-            customerConfig_resolved.GetMetadata("EffectiveMode").Should().Be("production"); // Uses config-specific property
+            var customerConfigResolved = modeResolver.ResolvedConfigs!.First(c => c.GetMetadata("BuildId") == "customer");
+            customerConfigResolved.GetMetadata("EffectiveMode").Should().Be("production"); // Uses config-specific property
         }
 
         [Fact(Skip = "TODO: Circular dependency detection needs enhancement - currently only detects after topological sort")]
@@ -233,7 +238,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Integration
 
             var depsResolved = dependencyResolver.Execute();
             depsResolved.Should().BeFalse();
-            _buildEngine.LoggedErrors.Should().Contain(e => e.Message.Contains("Circular dependency"));
+            _buildEngine.LoggedErrors.Should().Contain(e => e.Message!.Contains("Circular dependency"));
         }
 
         [Fact(Skip = "TODO: Architecture detection needs file system setup - test infrastructure needs enhancement")]
@@ -318,7 +323,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Integration
 
             var configResolved = configResolver.Execute();
             configResolved.Should().BeFalse();
-            _buildEngine.LoggedErrors.Should().Contain(e => e.Message.Contains("Duplicate BuildId"));
+            _buildEngine.LoggedErrors.Should().Contain(e => e.Message!.Contains("Duplicate BuildId"));
         }
 
         [Fact(Skip = "TODO: Add validation for conflicting OutputDir in ViteConfigurationResolver")]
@@ -349,7 +354,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Integration
 
             var configResolved = configResolver.Execute();
             configResolved.Should().BeFalse();
-            _buildEngine.LoggedErrors.Should().Contain(e => e.Message.Contains("Duplicate OutputDir"));
+            _buildEngine.LoggedErrors.Should().Contain(e => e.Message!.Contains("Duplicate OutputDir"));
         }
 
         [Fact]
@@ -527,3 +532,4 @@ namespace ViteKit.MsBuild.PureUnitTests.Integration
         }
     }
 }
+

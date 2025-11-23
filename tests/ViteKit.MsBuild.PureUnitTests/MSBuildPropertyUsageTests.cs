@@ -4,7 +4,7 @@ using Xunit;
 using FluentAssertions;
 using ViteKit.MsBuild.Tasks;
 
-namespace Vite.MsBuild.PureUnitTests
+namespace ViteKit.MsBuild.PureUnitTests
 {
     /// <summary>
     /// Tests for MSBuild property usage in CustomCommand and Config paths

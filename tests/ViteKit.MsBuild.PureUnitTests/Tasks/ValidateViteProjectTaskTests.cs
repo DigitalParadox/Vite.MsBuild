@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Text.Json;
 using ViteKit.MsBuild.Tasks;
-using ViteKit.MsBuild.PureUnitTests.Helpers;
+using ViteKit.MsBuild.PureUnitTests.Fixtures;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -410,4 +410,5 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
         }
     }
 }
+
 

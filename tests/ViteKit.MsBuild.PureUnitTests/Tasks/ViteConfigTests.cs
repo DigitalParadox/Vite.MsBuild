@@ -12,7 +12,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             // Arrange
             var task = new ViteConfig
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 Name = "admin",
                 ConfigFile = "vite.admin.config.ts"
             };
@@ -33,7 +33,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             // Arrange
             var task = new ViteConfig
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 Name = "admin",
                 ConfigFile = "vite.admin.config.ts",
                 OutputDir = "wwwroot/admin",
@@ -71,7 +71,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             // Arrange
             var task = new ViteConfig
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 Name = "admin",
                 ConfigFile = "vite.admin.config.ts",
                 OutputDir = null,
@@ -98,7 +98,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             // Arrange
             var task = new ViteConfig
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 Name = "admin",
                 ConfigFile = "vite.admin.config.ts",
                 EnableColors = false
@@ -118,7 +118,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             // Arrange
             var task = new ViteConfig
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 Name = "admin",
                 ConfigFile = "vite.admin.config.ts",
                 LinkDependencies = false
@@ -138,7 +138,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             // Arrange
             var task = new ViteConfig
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 Name = "admin",
                 ConfigFile = "vite.admin.config.ts",
                 EnableColors = null,
@@ -162,7 +162,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             // Arrange
             var task = new ViteConfig
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 Name = "admin",
                 ConfigFile = "vite.admin.config.ts",
                 OutputDir = "",
@@ -188,7 +188,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             // Arrange
             var task = new ViteConfig
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 Name = "app",
                 ConfigFile = "vite.app.config.ts",
                 DependsOn = "shared,components,utils"
@@ -213,7 +213,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             // Arrange
             var task = new ViteConfig
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 Name = "admin",
                 ConfigFile = "vite.admin.config.ts",
                 LogLevel = logLevel
@@ -237,7 +237,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             // Arrange
             var task = new ViteConfig
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 Name = "admin",
                 ConfigFile = "vite.admin.config.ts",
                 PackageManager = packageManager
@@ -262,7 +262,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             // Arrange
             var task = new ViteConfig
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 Name = "admin",
                 ConfigFile = "vite.admin.config.ts",
                 Mode = mode
@@ -282,7 +282,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             // Arrange
             var task = new ViteConfig
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 Name = "admin",
                 ConfigFile = "Areas/Admin/ClientApp/vite.config.ts"
             };
@@ -301,7 +301,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             // Arrange
             var task = new ViteConfig
             {
-                BuildEngine = new Helpers.MockBuildEngine(),
+                BuildEngine = new Fixtures.MockBuildEngine(),
                 Name = "admin",
                 ConfigFile = "vite.admin.config.ts",
                 OutputDir = "wwwroot/spa/admin/dist"
@@ -316,3 +316,4 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
         }
     }
 }
+
