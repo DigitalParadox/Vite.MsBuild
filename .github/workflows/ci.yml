@@ -90,7 +90,7 @@ jobs:
           '--verbosity','normal'
           '--logger','trx'
           '--logger','console;verbosity=detailed'
-          '--results-directory','${{ github.workspace }}/TestResults/'
+          '--results-directory','${{ github.workspace }}/TestResults'
         )
         if ('${{ matrix.os }}' -eq 'ubuntu-latest') {
           # Use msbuild coverlet properties (multi-target produces per-TFM files in coverage dir)
@@ -137,6 +137,6 @@ jobs:
       uses: dorny/test-reporter@v1
       if: always()
       with:
-        name: Unit Test Results
-        path: "${{ github.workspace }}/TestResults/*.trx"
+        name: Unit Test Results (${{ matrix.os }})
+        path: "TestResults/**/*.trx"
         reporter: dotnet-trx
