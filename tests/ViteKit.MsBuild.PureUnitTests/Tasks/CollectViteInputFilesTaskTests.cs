@@ -221,7 +221,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
 
             var fileItem = task.ViteInputFiles[0];
             Assert.Equal(filePath, fileItem.ItemSpec);
-            Assert.Equal("test.ts", Path.GetFileName(fileItem.GetMetadata("RelativePath")));
+            Assert.Equal("test.ts", Path.GetFileName(fileItem.ItemSpec));
             Assert.Equal(".ts", fileItem.GetMetadata("Extension"));
             Assert.NotEmpty(fileItem.GetMetadata("LastWriteTime"));
             Assert.NotEmpty(fileItem.GetMetadata("Length"));

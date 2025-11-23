@@ -177,7 +177,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
                 ViteProjectRoot = _tempDir,
                 UserDefinedConfigs =
                 [
-                    CreateConfigItem("Areas/Admin/vite.config.ts", "admin", null)
+                    CreateConfigItem(Path.Combine("Areas", "Admin", "vite.config.ts"), "admin", null)
                 ]
             };
 
@@ -204,7 +204,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
                 ViteProjectRoot = _tempDir,
                 UserDefinedConfigs =
                 [
-                    CreateConfigItem("spa/admin/vite.config.ts", "admin", null)
+                    CreateConfigItem(Path.Combine("spa", "admin", "vite.config.ts"), "admin", null)
                 ]
             };
 
@@ -310,7 +310,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
                 ViteProjectRoot = _tempDir,
                 UserDefinedConfigs =
                 [
-                    CreateConfigItem("Areas/Admin/vite.config.ts", "admin", null) // Relative path
+                    CreateConfigItem(Path.Combine("Areas", "Admin", "vite.config.ts"), "admin", null) // Relative path
                 ]
             };
 
