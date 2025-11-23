@@ -4,7 +4,7 @@
 
 [![NuGet Package](https://img.shields.io/nuget/v/ViteKit.Msbuild)](https://www.nuget.org/packages/ViteKit.Msbuild)
 [![Build Status](https://github.com/DigitalParadox/ViteKit.Msbuild/workflows/CI/badge.svg)](https://github.com/DigitalParadox/ViteKit.Msbuild/actions)
-[![Tests](https://img.shields.io/badge/tests-434%20passing-brightgreen)](https://github.com/DigitalParadox/ViteKit.Msbuild/actions)
+[![Tests](https://img.shields.io/badge/tests-427%20passing-brightgreen)](https://github.com/DigitalParadox/ViteKit.Msbuild/actions)
 
 **Seamlessly integrate Vite with ASP.NET Core** - Build Vue, React, Svelte, or any Vite-supported framework directly from `dotnet build`.
 
@@ -205,6 +205,8 @@ For complex applications with multiple frontend entry points:
   </ViteConfig>
 </ItemGroup>
 ```
+
+See the [Multi-SPA Guide](docs/guides/multi-spa.md) for complete documentation.
 
 ### Monorepo Project Structure
 
@@ -442,7 +444,7 @@ dotnet test
 
 ### Test Coverage
 
-Current test coverage: **434 tests passing** (100% pass rate)
+Current test coverage: **427 tests passing** (100% pass rate)
 
 - ✅ **Core Tasks**: ValidateViteProjectTask, DetectPackageManagerTask, CollectViteInputFilesTask
 - ✅ **Resolver Tasks**: ViteConfigurationResolver, ViteConfigDependencyResolver, ViteModeResolver

@@ -15,7 +15,7 @@ Comprehensive information about the test suite and testing strategies.
 ## Test Coverage Status
 
 {: .highlight }
-> **192 tests passing** with 100% success rate across all scenarios.
+> **427 tests passing** with 100% success rate across all scenarios.
 
 ## Testing Strategy
 
@@ -61,7 +61,7 @@ This section contains:
 
 | Metric | Status |
 |:-------|:-------|
-| Unit Tests | 192 passing |
+| Unit Tests | 427 passing |
 | Success Rate | 100% |
 | Core Task Coverage | Complete |
 | Package Manager Coverage | All 4 supported |
