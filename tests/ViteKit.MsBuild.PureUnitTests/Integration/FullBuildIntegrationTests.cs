@@ -278,20 +278,18 @@ namespace ViteKit.MsBuild.PureUnitTests.Integration
             configResolved.Should().BeTrue();
             configResolver.ResolvedConfigs.Should().HaveCount(3);
 
-            // Verify architecture detection
+            // Verify config resolution (Architecture metadata removed)
             var areaConfigResolved = configResolver.ResolvedConfigs.First(c => 
                 c.GetMetadata("ConfigFile").Contains("Areas"));
-            areaConfigResolved.GetMetadata("Architecture").Should().Be("Areas");
             areaConfigResolved.GetMetadata("OutputDir").Should().Be("wwwroot/admin");
 
             var spaConfigResolved = configResolver.ResolvedConfigs.First(c => 
                 c.GetMetadata("ConfigFile").Contains("spa"));
-            spaConfigResolved.GetMetadata("Architecture").Should().Be("MultiSPA");
             spaConfigResolved.GetMetadata("OutputDir").Should().Be("wwwroot/spa/customer");
 
             var rootConfigResolved = configResolver.ResolvedConfigs.First(c => 
                 c.GetMetadata("BuildId") == "default");
-            rootConfigResolved.GetMetadata("Architecture").Should().Be("SPA");
+            rootConfigResolved.Should().NotBeNull();
         }
 
         [Fact(Skip = "TODO: Validation for duplicate BuildId exists but test setup needs adjustment")]
