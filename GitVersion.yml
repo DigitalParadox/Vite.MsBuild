@@ -2,7 +2,7 @@
 
 mode: ContinuousDeployment
 tag-prefix: '[vV]'
-major-version-bump-message: '\+semver:\s?(breaking|major)'
+major-version-bump-message: '\+semver:\s?(major)'
 minor-version-bump-message: '\+semver:\s?(feature|minor)'
 patch-version-bump-message: '\+semver:\s?(fix|patch)'
 no-bump-message: '\+semver:\s?(none|skip)'
@@ -37,8 +37,8 @@ ignore:
   sha: []
 
 merge-message-formats:
-  # Conventional Commits support
+  # Conventional Commits support (Major bumps ONLY via explicit +semver: major directive)
   '(?:^|\\n)feat(\\(.+\\))?:': Minor
   '(?:^|\\n)fix(\\(.+\\))?:': Patch
   '(?:^|\\n)perf(\\(.+\\))?:': Patch
-  '(?:^|\\n)BREAKING[- ]CHANGE:': Major
+  # Removed automatic BREAKING CHANGE major bump; require +semver: major instead
