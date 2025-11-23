@@ -93,7 +93,12 @@ jobs:
           '--results-directory','${{ github.workspace }}/TestResults/'
         )
         if ('${{ matrix.os }}' -eq 'ubuntu-latest') {
-          $testArgs += @('--collect','XPlat Code Coverage','--settings','coverlet.runsettings')
+          # Use msbuild coverlet properties (multi-target produces per-TFM files in coverage dir)
+          $testArgs += @(
+            '/p:CollectCoverage=true',
+            '/p:CoverletOutputFormat=cobertura',
+            '/p:CoverletOutput=${{ github.workspace }}/TestResults/coverage/'
+          )
         }
         & dotnet @testArgs
 
@@ -101,7 +106,7 @@ jobs:
       uses: danielpalme/ReportGenerator-GitHub-Action@5.3.11
       if: matrix.os == 'ubuntu-latest'
       with:
-        reports: 'TestResults/**/coverage.cobertura.xml'
+        reports: 'TestResults/coverage/*.cobertura.xml'
         targetdir: 'CoverageReport'
         reporttypes: 'Html;MarkdownSummaryGithub'
 
