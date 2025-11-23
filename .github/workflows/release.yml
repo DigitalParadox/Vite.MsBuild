@@ -139,6 +139,7 @@ jobs:
       assemblySemVer: ${{ steps.gitversion.outputs.assemblySemVer }}
       semFileVer: ${{ steps.gitversion.outputs.assemblySemFileVer }}
       informational: ${{ steps.gitversion.outputs.informationalVersion }}
+      effectiveSemVer: ${{ steps.effective.outputs.effective }}
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -157,6 +158,38 @@ jobs:
         useConfigFile: true
         configFilePath: GitVersion.yml
 
+    - name: Debug GitVersion outputs
+      run: |
+        echo "Branch ref: $GITHUB_REF"
+        echo "FullSemVer=${{ steps.gitversion.outputs.fullSemVer }}"
+        echo "SemVer=${{ steps.gitversion.outputs.semVer }}"
+        echo "AssemblySemVer=${{ steps.gitversion.outputs.assemblySemVer }}"
+        echo "InformationalVersion=${{ steps.gitversion.outputs.informationalVersion }}"
+        echo "BranchName=${{ steps.gitversion.outputs.branchName }}"
+        echo "PreReleaseLabel=${{ steps.gitversion.outputs.preReleaseLabel }}"
+
+    - name: Determine Effective Prerelease Label
+      id: effective
+      shell: bash
+      run: |
+        raw="${{ steps.gitversion.outputs.semVer }}"
+        ref="$GITHUB_REF"
+        if [[ "$raw" == *"-"* ]]; then
+          echo "EFFECTIVE_SEMVER=$raw" >> $GITHUB_ENV
+          echo "effective=$raw" >> $GITHUB_OUTPUT
+        else
+          if [[ "$ref" == "refs/heads/dev" ]]; then
+            new="$raw-alpha.$GITHUB_RUN_NUMBER"
+          elif [[ "$ref" == "refs/heads/stable" ]]; then
+            new="$raw-beta.$GITHUB_RUN_NUMBER"
+          else
+            new="$raw"
+          fi
+          echo "EFFECTIVE_SEMVER=$new" >> $GITHUB_ENV
+          echo "effective=$new" >> $GITHUB_OUTPUT
+          echo "Forced prerelease label: $new (ref=$ref raw=$raw)"
+        fi
+
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4
       with:
@@ -170,7 +203,7 @@ jobs:
         dotnet build ViteKit.MsBuild.sln \
           --configuration Release \
           --no-restore \
-          /p:Version=${{ steps.gitversion.outputs.semVer }} \
+          /p:Version=${{ steps.effective.outputs.effective }} \
           /p:AssemblyVersion=${{ steps.gitversion.outputs.assemblySemVer }} \
           /p:FileVersion=${{ steps.gitversion.outputs.assemblySemFileVer }} \
           /p:InformationalVersion=${{ steps.gitversion.outputs.informationalVersion }}
@@ -181,8 +214,8 @@ jobs:
           --configuration Release \
           --no-build \
           --output nupkg \
-          /p:PackageVersion=${{ steps.gitversion.outputs.semVer }} \
-          /p:Version=${{ steps.gitversion.outputs.semVer }} \
+          /p:PackageVersion=${{ steps.effective.outputs.effective }} \
+          /p:Version=${{ steps.effective.outputs.effective }} \
           /p:AssemblyVersion=${{ steps.gitversion.outputs.assemblySemVer }} \
           /p:FileVersion=${{ steps.gitversion.outputs.assemblySemFileVer }} \
           /p:InformationalVersion=${{ steps.gitversion.outputs.informationalVersion }}
@@ -247,7 +280,7 @@ jobs:
     - name: Upload NuGet package artifact
       uses: actions/upload-artifact@v4
       with:
-        name: nuget-package-${{ steps.gitversion.outputs.semVer }}
+        name: nuget-package-${{ steps.effective.outputs.effective }}
         path: nupkg/*.nupkg
         retention-days: 90
 
@@ -267,12 +300,13 @@ jobs:
     name: Publish Prerelease
     runs-on: ubuntu-latest
     needs: [pack, test-cross]
-    if: contains(needs.pack.outputs.semVer, '-')
+    # Run for dev/stable branch commits OR any effective semver with a hyphen
+    if: startsWith(github.ref, 'refs/heads/dev') || startsWith(github.ref, 'refs/heads/stable') || contains(needs.pack.outputs.effectiveSemVer, '-')
     steps:
     - name: Download package artifact
       uses: actions/download-artifact@v4
       with:
-        name: nuget-package-${{ needs.pack.outputs.semVer }}
+        name: nuget-package-${{ needs.pack.outputs.effectiveSemVer }}
         path: nupkg
     - name: Push to GitHub Packages (prerelease)
       run: |
@@ -306,7 +340,7 @@ jobs:
     - name: Download package artifact
       uses: actions/download-artifact@v4
       with:
-        name: nuget-package-${{ needs.pack.outputs.semVer }}
+        name: nuget-package-${{ needs.pack.outputs.effectiveSemVer }}
         path: nupkg
     - name: Push to NuGet.org (stable)
       run: |

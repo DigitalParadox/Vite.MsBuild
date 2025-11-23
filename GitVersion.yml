@@ -28,11 +28,12 @@ branches:
     is-release-branch: false
     
   develop:
+    # Ensure dev branch always produces alpha prerelease labels.
     mode: ContinuousDeployment
     label: 'alpha'
     increment: Minor
     track-merge-target: true
-    regex: ^dev(elop)?(ment)?$
+    regex: ^dev$|^dev(elop)?(ment)?$  # Explicitly match 'dev' and full forms
     tracks-release-branches: true
     is-release-branch: false
     
