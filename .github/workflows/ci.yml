@@ -86,7 +86,7 @@ jobs:
           --verbosity normal \
           --logger trx \
           --logger "console;verbosity=detailed" \
-          --results-directory TestResults \
+          --results-directory "${{ github.workspace }}/TestResults/" \
           ${{ matrix.os == 'ubuntu-latest' && '--collect:"XPlat Code Coverage" --settings coverlet.runsettings' || '' }}
 
     - name: Generate coverage report
@@ -125,5 +125,5 @@ jobs:
       if: always()
       with:
         name: Unit Test Results
-        path: TestResults/*.trx
+        path: "${{ github.workspace }}/TestResults/*.trx"
         reporter: dotnet-trx
