@@ -1,0 +1,37 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": ".NET Core Test",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-tests",
+            "program": "dotnet",
+            "args": [
+                "test",
+                "tests/Vite.MsBuild.IntegrationTests/Vite.MsBuild.IntegrationTests.csproj",
+                "--verbosity",
+                "normal"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "stopAtEntry": false
+        },
+        {
+            "name": ".NET Core Test (Detailed)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-tests",
+            "program": "dotnet",
+            "args": [
+                "test",
+                "tests/Vite.MsBuild.IntegrationTests/Vite.MsBuild.IntegrationTests.csproj",
+                "--verbosity",
+                "detailed"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "stopAtEntry": false
+        }
+    ]
+}
