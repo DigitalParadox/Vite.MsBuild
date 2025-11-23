@@ -84,7 +84,12 @@ jobs:
       run: |
         $coverageArgs = @()
         if ('${{ matrix.os }}' -eq 'ubuntu-latest') {
-          $coverageArgs = @('--collect:"XPlat Code Coverage"', '--settings', 'coverlet.runsettings')
+          $coverageArgs = @(
+            '--collect',
+            '"XPlat Code Coverage"',
+            '--settings',
+            'coverlet.runsettings'
+          )
         }
         dotnet test tests/ViteKit.MsBuild.PureUnitTests/ViteKit.MsBuild.PureUnitTests.csproj `
           --configuration Release `
