@@ -149,9 +149,6 @@ namespace ViteKit.MsBuild.Tasks
                 if (!string.IsNullOrEmpty(linkDependencies))
                     config.SetMetadata("LinkDependencies", linkDependencies);
 
-                // Detect architecture pattern
-                config.SetMetadata("Architecture", DetectArchitecture(configPath));
-
                 configs.Add(config);
             }
 
@@ -179,7 +176,6 @@ namespace ViteKit.MsBuild.Tasks
             config.SetMetadata("Mode", ViteMode);
             config.SetMetadata("PackageManager", PackageManager);
             config.SetMetadata("ProjectRoot", ViteProjectRoot);
-            config.SetMetadata("Architecture", "SPA");
             
             // Set custom build script if provided
             if (!string.IsNullOrEmpty(ViteBuildScript))
@@ -242,31 +238,9 @@ namespace ViteKit.MsBuild.Tasks
 
 
 
-        private string DetectArchitecture(string configPath)
-        {
-            var relativePath = GetRelativePathCompat(ViteProjectRoot, configPath);
-            
-            if (relativePath.StartsWith("Areas", StringComparison.OrdinalIgnoreCase))
-            {
-                return "Areas";
-            }
-            
-            if (relativePath.Contains("spa", StringComparison.OrdinalIgnoreCase) ||
-                relativePath.Contains("apps", StringComparison.OrdinalIgnoreCase))
-            {
-                return "MultiSPA";
-            }
 
-            return "SPA";
-        }
 
-        private string GetRelativePathCompat(string basePath, string fullPath)
-        {
-            // .NET Standard 2.0 compatible relative path
-            var baseUri = new Uri(basePath.TrimEnd('\\') + "\\");
-            var fullUri = new Uri(fullPath);
-            return Uri.UnescapeDataString(baseUri.MakeRelativeUri(fullUri).ToString().Replace('/', '\\'));
-        }
+
 
         private bool ValidateConfigurations(List<TaskItem> configs)
         {
@@ -309,7 +283,7 @@ namespace ViteKit.MsBuild.Tasks
                 }
 
                 Log.LogMessage(MessageImportance.Low, 
-                    $"[OK] Validated config: {buildId} → {outputDir} ({config.GetMetadata("Architecture")})");
+                    $"[OK] Validated config: {buildId} → {outputDir}");
             }
 
             return true;

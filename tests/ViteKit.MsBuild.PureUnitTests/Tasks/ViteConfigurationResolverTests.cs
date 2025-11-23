@@ -45,7 +45,6 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             config.GetMetadata("OutputDir").Should().Be("wwwroot/dist");
             config.GetMetadata("Mode").Should().Be("development");
             config.GetMetadata("PackageManager").Should().Be("npm");
-            config.GetMetadata("Architecture").Should().Be("SPA");
         }
 
         [Fact]
@@ -162,59 +161,7 @@ namespace ViteKit.MsBuild.PureUnitTests.Tasks
             task.ResolvedConfigs[0].GetMetadata("BuildId").Should().Be("admin");
         }
 
-        [Fact]
-        public void Execute_DetectsAreasArchitecture()
-        {
-            // Arrange
-            var areasDir = Path.Combine(_tempDir, "Areas", "Admin");
-            Directory.CreateDirectory(areasDir);
-            var configPath = Path.Combine(areasDir, "vite.config.ts");
-            File.WriteAllText(configPath, "export default {}");
-            
-            var task = new ViteConfigurationResolver
-            {
-                BuildEngine = new Fixtures.MockBuildEngine(),
-                ViteProjectRoot = _tempDir,
-                UserDefinedConfigs =
-                [
-                    CreateConfigItem(Path.Combine("Areas", "Admin", "vite.config.ts"), "admin", null)
-                ]
-            };
 
-            // Act
-            var result = task.Execute();
-
-            // Assert
-            result.Should().BeTrue();
-            task.ResolvedConfigs[0].GetMetadata("Architecture").Should().Be("Areas");
-        }
-
-        [Fact]
-        public void Execute_DetectsMultiSpaArchitecture()
-        {
-            // Arrange
-            var spaDir = Path.Combine(_tempDir, "spa", "admin");
-            Directory.CreateDirectory(spaDir);
-            var configPath = Path.Combine(spaDir, "vite.config.ts");
-            File.WriteAllText(configPath, "export default {}");
-            
-            var task = new ViteConfigurationResolver
-            {
-                BuildEngine = new Fixtures.MockBuildEngine(),
-                ViteProjectRoot = _tempDir,
-                UserDefinedConfigs =
-                [
-                    CreateConfigItem(Path.Combine("spa", "admin", "vite.config.ts"), "admin", null)
-                ]
-            };
-
-            // Act
-            var result = task.Execute();
-
-            // Assert
-            result.Should().BeTrue();
-            task.ResolvedConfigs[0].GetMetadata("Architecture").Should().Be("MultiSPA");
-        }
 
         [Fact]
         public void Execute_WithDuplicateBuildIds_LogsErrorAndReturnsFalse()
