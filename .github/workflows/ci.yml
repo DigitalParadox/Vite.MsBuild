@@ -82,23 +82,20 @@ jobs:
     - name: Run unit tests (all frameworks)
       shell: pwsh
       run: |
-        $coverageArgs = @()
+        $testArgs = @(
+          'test'
+          'tests/ViteKit.MsBuild.PureUnitTests/ViteKit.MsBuild.PureUnitTests.csproj'
+          '--configuration','Release'
+          '--no-build'
+          '--verbosity','normal'
+          '--logger','trx'
+          '--logger','console;verbosity=detailed'
+          '--results-directory','${{ github.workspace }}/TestResults/'
+        )
         if ('${{ matrix.os }}' -eq 'ubuntu-latest') {
-          $coverageArgs = @(
-            '--collect',
-            '"XPlat Code Coverage"',
-            '--settings',
-            'coverlet.runsettings'
-          )
+          $testArgs += @('--collect','XPlat Code Coverage','--settings','coverlet.runsettings')
         }
-        dotnet test tests/ViteKit.MsBuild.PureUnitTests/ViteKit.MsBuild.PureUnitTests.csproj `
-          --configuration Release `
-          --no-build `
-          --verbosity normal `
-          --logger trx `
-          --logger "console;verbosity=detailed" `
-          --results-directory "${{ github.workspace }}/TestResults/" `
-          $coverageArgs
+        & dotnet @testArgs
 
     - name: Generate coverage report
       uses: danielpalme/ReportGenerator-GitHub-Action@5.3.11
