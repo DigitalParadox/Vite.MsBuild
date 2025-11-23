@@ -6,20 +6,75 @@ on:
     branches: [ master, stable, dev ]
 
 jobs:
-  build:
-    name: Build .NET ${{ matrix.dotnet-version }}
-    strategy:
-      matrix:
-        dotnet-version: ['8.0.x', '9.0.x', '10.0.x']
-    uses: ./.github/workflows/build.yml
-    with:
-      dotnet-version: '8.0.x'
-      configuration: 'Release'
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-  unit-tests:
-    name: Unit Tests
-    needs: build
-    uses: ./.github/workflows/unit-tests.yml
-    with:
-      dotnet-version: '8.0.x'
-      configuration: 'Release'
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+
+    - name: Display .NET info
+      run: dotnet --info
+
+    - name: Restore dependencies
+      run: dotnet restore ViteKit.MsBuild.sln
+
+    - name: Build solution (multi-targeting net8.0;net9.0;net10.0)
+      run: dotnet build ViteKit.MsBuild.sln --configuration Release --no-restore
+
+    - name: Run unit tests (all frameworks)
+      run: |
+        dotnet test tests/ViteKit.MsBuild.PureUnitTests \
+          --configuration Release \
+          --no-build \
+          --verbosity normal \
+          --logger trx \
+          --logger "console;verbosity=detailed" \
+          --results-directory TestResults \
+          --collect:"XPlat Code Coverage" \
+          -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+
+    - name: Generate coverage report
+      uses: danielpalme/ReportGenerator-GitHub-Action@5.3.11
+      if: always()
+      with:
+        reports: 'TestResults/**/coverage.opencover.xml'
+        targetdir: 'CoverageReport'
+        reporttypes: 'Html;MarkdownSummaryGithub'
+
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: coverage-report
+        path: CoverageReport/
+        retention-days: 7
+
+    - name: Add coverage PR comment
+      uses: marocchino/sticky-pull-request-comment@v2
+      if: github.event_name == 'pull_request'
+      with:
+        recreate: true
+        path: CoverageReport/SummaryGithub.md
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: unit-test-results
+        path: TestResults/
+        retention-days: 7
+
+    - name: Publish test results
+      uses: dorny/test-reporter@v1
+      if: always()
+      with:
+        name: Unit Test Results
+        path: TestResults/*.trx
+        reporter: dotnet-trx
