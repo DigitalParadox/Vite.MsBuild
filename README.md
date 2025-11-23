@@ -3,8 +3,8 @@
 > **Framework-agnostic MSBuild integration for Vite in ASP.NET Core projects**
 
 [![NuGet Package](https://img.shields.io/nuget/v/ViteKit.Msbuild)](https://www.nuget.org/packages/ViteKit.Msbuild)
-[![Build Status](https://github.com/DigitalParadox/ViteKit.Msbuild/workflows/CI/badge.svg)](https://github.com/DigitalParadox/ViteKit.Msbuild/actions)
-[![Tests](https://img.shields.io/badge/tests-427%20passing-brightgreen)](https://github.com/DigitalParadox/ViteKit.Msbuild/actions)
+[![Build Status](https://github.com/DigitalParadox/ViteKit/workflows/CI/badge.svg)](https://github.com/DigitalParadox/ViteKit/actions)
+[![Tests](https://img.shields.io/badge/tests-427%20passing-brightgreen)](https://github.com/DigitalParadox/ViteKit/actions)
 
 **Seamlessly integrate Vite with ASP.NET Core** - Build Vue, React, Svelte, or any Vite-supported framework directly from `dotnet build`.
 
@@ -446,7 +446,7 @@ dotnet test
 
 Current test coverage: **427 tests passing** (100% pass rate)
 
-- ✅ **Core Tasks**: ValidateViteProjectTask, DetectPackageManagerTask, CollectViteInputFilesTask
+- ✅ **Core Tasks**: OrchestrateBuildTask, CollectViteInputFilesTask, ViteConfigurationResolver
 - ✅ **Resolver Tasks**: ViteConfigurationResolver, ViteConfigDependencyResolver, ViteModeResolver
 - ✅ **Command Builders**: ViteCommandFactory, ScriptBasedCommandBuilder, DirectToolCommandBuilder, CustomCommandBuilder
 - ✅ **Validation**: ViteConfig, ValidateViteConfig
@@ -468,9 +468,9 @@ This project is licensed under the [MIT License](LICENSE).
 ## 🔗 Links
 
 - **📦 NuGet Package**: https://www.nuget.org/packages/ViteKit.Msbuild
-- **🐛 Issues**: https://github.com/DigitalParadox/ViteKit.Msbuild/issues
-- **💬 Discussions**: https://github.com/DigitalParadox/ViteKit.Msbuild/discussions
-- **🔀 Pull Requests**: https://github.com/DigitalParadox/ViteKit.Msbuild/pulls
+- **🐛 Issues**: https://github.com/DigitalParadox/ViteKit/issues
+- **💬 Discussions**: https://github.com/DigitalParadox/ViteKit/discussions
+- **🔀 Pull Requests**: https://github.com/DigitalParadox/ViteKit/pulls
 
 ---
 
