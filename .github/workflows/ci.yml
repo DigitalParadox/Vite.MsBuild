@@ -1,9 +1,11 @@
 name: CI - Build and Unit Tests
 
 permissions:
-  contents: write
-  packages: write
-  actions: read
+  contents: write          # release notes, artifacts
+  packages: write          # github packages publish
+  actions: read            # download artifacts
+  checks: write            # create test reporter check runs
+  pull-requests: write     # allow PR comments for coverage/test (future)
 
 on:
   push:
