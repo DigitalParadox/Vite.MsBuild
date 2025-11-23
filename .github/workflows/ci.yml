@@ -34,6 +34,7 @@ jobs:
       run: dotnet build ViteKit.MsBuild.sln --configuration Release --no-restore
 
     - name: Run unit tests (all frameworks)
+      shell: bash
       run: |
         dotnet test tests/ViteKit.MsBuild.PureUnitTests/ViteKit.MsBuild.PureUnitTests.csproj \
           --configuration Release \
