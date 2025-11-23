@@ -139,6 +139,7 @@ jobs:
       assemblySemVer: ${{ steps.gitversion.outputs.assemblySemVer }}
       semFileVer: ${{ steps.gitversion.outputs.assemblySemFileVer }}
       informational: ${{ steps.gitversion.outputs.informationalVersion }}
+      alphaTag: ${{ steps.alpha_tag.outputs.alphaTag }}
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -166,6 +167,17 @@ jobs:
         echo "InformationalVersion=${{ steps.gitversion.outputs.informationalVersion }}"
         echo "BranchName=${{ steps.gitversion.outputs.branchName }}"
         echo "PreReleaseLabel=${{ steps.gitversion.outputs.preReleaseLabel }}"
+
+    - name: Compute rolling alpha tag
+      id: alpha_tag
+      if: contains(steps.gitversion.outputs.semVer, '-alpha')
+      shell: bash
+      run: |
+        raw="${{ steps.gitversion.outputs.semVer }}" # e.g. 0.1.0-alpha.184
+        base=${raw%%-alpha.*}                         # 0.1.0
+        rolling="v${base}-alpha"                     # v0.1.0-alpha
+        echo "alphaTag=$rolling" >> $GITHUB_OUTPUT
+        echo "Computed rolling alpha tag: $rolling from $raw"
 
 
     - name: Setup .NET SDK
@@ -285,6 +297,16 @@ jobs:
       with:
         name: nuget-package-${{ needs.pack.outputs.semVer }}
         path: nupkg
+    - name: Force update rolling prerelease tag
+      if: needs.pack.outputs.alphaTag != ''
+      run: |
+        git config user.name "github-actions"
+        git config user.email "github-actions@github.com"
+        git fetch --tags --quiet
+        TAG="${{ needs.pack.outputs.alphaTag }}"
+        echo "Updating rolling tag $TAG to latest commit"
+        git tag -f "$TAG"
+        git push origin -f "$TAG"
     - name: Push to GitHub Packages (prerelease)
       run: |
         dotnet nuget push nupkg/*.nupkg \
@@ -303,6 +325,8 @@ jobs:
         files: nupkg/*.nupkg
         draft: false
         prerelease: true
+        tag_name: ${{ needs.pack.outputs.alphaTag || format('v{0}', needs.pack.outputs.semVer) }}
+        name: ${{ needs.pack.outputs.alphaTag || format('v{0}', needs.pack.outputs.semVer) }} (rolling alpha)
         body_path: CHANGELOG_FRAGMENT.md
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
