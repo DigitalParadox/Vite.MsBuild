@@ -7,8 +7,13 @@ on:
 
 jobs:
   build-and-test:
-    name: Build and Test
-    runs-on: ubuntu-latest
+    name: Build and Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+      fail-fast: false
     
     steps:
     - name: Checkout repository
@@ -37,12 +42,11 @@ jobs:
           --logger trx \
           --logger "console;verbosity=detailed" \
           --results-directory TestResults \
-          --collect:"XPlat Code Coverage" \
-          --settings coverlet.runsettings
+          ${{ matrix.os == 'ubuntu-latest' && '--collect:"XPlat Code Coverage" --settings coverlet.runsettings' || '' }}
 
     - name: Generate coverage report
       uses: danielpalme/ReportGenerator-GitHub-Action@5.3.11
-      if: always()
+      if: matrix.os == 'ubuntu-latest'
       with:
         reports: 'TestResults/**/coverage.cobertura.xml'
         targetdir: 'CoverageReport'
@@ -50,7 +54,7 @@ jobs:
 
     - name: Upload coverage report
       uses: actions/upload-artifact@v4
-      if: always()
+      if: matrix.os == 'ubuntu-latest'
       with:
         name: coverage-report
         path: CoverageReport/
@@ -58,7 +62,7 @@ jobs:
 
     - name: Add coverage PR comment
       uses: marocchino/sticky-pull-request-comment@v2
-      if: github.event_name == 'pull_request'
+      if: github.event_name == 'pull_request' && matrix.os == 'ubuntu-latest'
       with:
         recreate: true
         path: CoverageReport/SummaryGithub.md
@@ -67,7 +71,7 @@ jobs:
       uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: unit-test-results
+        name: unit-test-results-${{ matrix.os }}
         path: TestResults/
         retention-days: 7
 
