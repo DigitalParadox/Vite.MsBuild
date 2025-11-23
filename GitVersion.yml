@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/GitTools/GitVersion/main/schemas/6.0/GitVersion.configuration.json
 
-mode: ContinuousDelivery
+mode: ContinuousDeployment
 tag-prefix: '[vV]'
 major-version-bump-message: '\+semver:\s?(breaking|major)'
 minor-version-bump-message: '\+semver:\s?(feature|minor)'
@@ -10,59 +10,28 @@ commit-message-incrementing: Enabled
 
 branches:
   master:
-    mode: ContinuousDelivery
+    regex: ^master$|^main$
     label: ''
     increment: Patch
-    track-merge-target: false
-    regex: ^master$|^main$
-    tracks-release-branches: false
     is-release-branch: true
-    
-  stable:
-    mode: ContinuousDeployment
-    label: 'beta'
-    increment: Patch
-    track-merge-target: false
-    regex: ^stable$
-    tracks-release-branches: false
-    is-release-branch: false
-    
   develop:
-    # Ensure dev branch always produces alpha prerelease labels.
-    mode: ContinuousDeployment
-    label: 'alpha'
+    # Force dev branch to always produce prerelease alpha versions
+    regex: ^dev$
+    label: alpha
     increment: Minor
-    track-merge-target: true
-    regex: ^dev$|^dev(elop)?(ment)?$  # Explicitly match 'dev' and full forms
-    tracks-release-branches: true
     is-release-branch: false
-    
-  feature:
-    mode: ContinuousDeployment
-    label: 'feat-{BranchName}'
-    increment: Inherit
-    regex: ^features?[/-]
-    source-branches: ['develop']
-    
-  hotfix:
-    mode: ContinuousDeployment
-    label: 'hotfix'
+    source-branches: []
+    tracks-release-branches: true
+  stable:
+    regex: ^stable$
+    label: beta
     increment: Patch
-    regex: ^hotfix(es)?[/-]
-    source-branches: ['master', 'stable', 'main']
-    
+    is-release-branch: false
   release:
-    mode: ContinuousDelivery
-    label: 'rc'
-    increment: None
     regex: ^releases?[/-]
-    source-branches: ['develop']
+    label: rc
+    increment: None
     is-release-branch: true
-    
-  pull-request:
-    mode: ContinuousDeployment
-    label: 'pr'
-    increment: Inherit
 
 ignore:
   sha: []
