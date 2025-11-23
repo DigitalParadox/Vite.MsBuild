@@ -34,8 +34,8 @@ jobs:
 
     - name: Display Version
       run: |
-        echo "SemVer: ${{ steps.gitversion.outputs.semVer }}"
-        echo "NuGetVersion: ${{ steps.gitversion.outputs.nuGetVersion }}"
+        echo "FullSemVer: ${{ steps.gitversion.outputs.fullSemVer }}"
+        echo "NuGetVersion (from SemVer): ${{ steps.gitversion.outputs.semVer }}"
         echo "Branch: ${{ steps.gitversion.outputs.branchName }}"
 
     - name: Setup .NET SDK
@@ -69,12 +69,12 @@ jobs:
           --configuration Release \
           --no-build \
           --output nupkg \
-          /p:PackageVersion=${{ steps.gitversion.outputs.nuGetVersion }}
+          /p:PackageVersion=${{ steps.gitversion.outputs.semVer }}
 
     - name: Upload NuGet package artifact
       uses: actions/upload-artifact@v4
       with:
-        name: nuget-package-${{ steps.gitversion.outputs.nuGetVersion }}
+        name: nuget-package-${{ steps.gitversion.outputs.semVer }}
         path: nupkg/*.nupkg
         retention-days: 90
 
@@ -101,6 +101,6 @@ jobs:
         files: nupkg/*.nupkg
         generate_release_notes: true
         draft: false
-        prerelease: ${{ contains(steps.gitversion.outputs.nuGetVersion, '-') }}
+        prerelease: ${{ contains(steps.gitversion.outputs.semVer, '-') }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

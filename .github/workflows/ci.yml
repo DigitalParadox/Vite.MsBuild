@@ -35,8 +35,8 @@ jobs:
 
     - name: Display GitVersion outputs
       run: |
-        echo "SemVer: ${{ steps.gitversion.outputs.semVer }}"
-        echo "NuGetVersion: ${{ steps.gitversion.outputs.nuGetVersion }}"
+        echo "FullSemVer: ${{ steps.gitversion.outputs.fullSemVer }}"
+        echo "NuGetVersion (from SemVer): ${{ steps.gitversion.outputs.semVer }}"
         echo "AssemblyVersion: ${{ steps.gitversion.outputs.assemblySemVer }}"
 
     - name: Setup .NET SDK
@@ -68,7 +68,7 @@ jobs:
           --configuration Release \
           --no-build \
           --output nupkg \
-          /p:PackageVersion=${{ steps.gitversion.outputs.nuGetVersion }}
+          /p:PackageVersion=${{ steps.gitversion.outputs.semVer }}
 
     - name: Upload NuGet package
       uses: actions/upload-artifact@v4
