@@ -30,7 +30,7 @@ jobs:
 
     - name: Run unit tests (all frameworks)
       run: |
-        dotnet test tests/ViteKit.MsBuild.PureUnitTests \
+        dotnet test tests/ViteKit.MsBuild.PureUnitTests/ViteKit.MsBuild.PureUnitTests.csproj \
           --configuration Release \
           --no-build \
           --verbosity normal \
@@ -38,13 +38,13 @@ jobs:
           --logger "console;verbosity=detailed" \
           --results-directory TestResults \
           --collect:"XPlat Code Coverage" \
-          -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+          --settings coverlet.runsettings
 
     - name: Generate coverage report
       uses: danielpalme/ReportGenerator-GitHub-Action@5.3.11
       if: always()
       with:
-        reports: 'TestResults/**/coverage.opencover.xml'
+        reports: 'TestResults/**/coverage.cobertura.xml'
         targetdir: 'CoverageReport'
         reporttypes: 'Html;MarkdownSummaryGithub'
 
