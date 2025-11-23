@@ -51,13 +51,15 @@ jobs:
       run: dotnet restore ViteKit.MsBuild.sln
 
     - name: Build solution (multi-targeting net8.0;net9.0;net10.0)
-      shell: bash
-      run: >
-        dotnet build ViteKit.MsBuild.sln --configuration Release --no-restore
-        /p:Version=${{ steps.gitversion.outputs.semVer }}
-        /p:AssemblyVersion=${{ steps.gitversion.outputs.assemblySemVer }}
-        /p:FileVersion=${{ steps.gitversion.outputs.assemblySemFileVer }}
-        /p:InformationalVersion=${{ steps.gitversion.outputs.informationalVersion }}
+      shell: pwsh
+      run: |
+        dotnet build ViteKit.MsBuild.sln `
+          --configuration Release `
+          --no-restore `
+          /p:Version=${{ steps.gitversion.outputs.semVer }} `
+          /p:AssemblyVersion=${{ steps.gitversion.outputs.assemblySemVer }} `
+          /p:FileVersion=${{ steps.gitversion.outputs.assemblySemFileVer }} `
+          /p:InformationalVersion=${{ steps.gitversion.outputs.informationalVersion }}
 
     - name: Pack NuGet package
       if: matrix.os == 'ubuntu-latest'
