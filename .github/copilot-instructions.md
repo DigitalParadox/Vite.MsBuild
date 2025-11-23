@@ -40,7 +40,7 @@ This project creates a **NuGet package** with MSBuild integration files, not a c
 - **Actionable examples**: Working code snippets that users can copy-paste
 - **Visual formatting**: Use formatting (`**bold**`, `*italic*`) for clarity
 - **Professional tone**: Enterprise-ready documentation with comprehensive examples
-- **Update test counts**: Keep test coverage badges current (currently 434 tests)
+- **Update test counts**: Keep test coverage badges current (currently 427 tests)
 - **README formatting**: Ensure README.md renders correctly on GitHub without duplicate headers or malformed sections
 - **Logging format**: Use ASCII-safe prefixes ([OK], [BUILD], [ERROR], [SKIP], [LINK]) instead of emojis for cross-platform terminal compatibility
 

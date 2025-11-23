@@ -1,25 +1,44 @@
-name: CI - Build and Unit Tests
+name: Reusable Build
 
 on:
-  push:
-  pull_request:
-    branches: [ master, stable, dev ]
+  workflow_call:
+    inputs:
+      dotnet-version:
+        description: '.NET version to use'
+        required: false
+        type: string
+        default: '8.0.x'
+      configuration:
+        description: 'Build configuration'
+        required: false
+        type: string
+        default: 'Release'
 
 jobs:
   build:
-    name: Build .NET ${{ matrix.dotnet-version }}
-    strategy:
-      matrix:
-        dotnet-version: ['8.0.x', '9.0.x', '10.0.x']
-    uses: ./.github/workflows/templates/build.yml
-    with:
-      dotnet-version: '8.0.x'
-      configuration: 'Release'
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-  unit-tests:
-    name: Unit Tests
-    needs: build
-    uses: ./.github/workflows/templates/unit-tests.yml
-    with:
-      dotnet-version: '8.0.x'
-      configuration: 'Release'
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ inputs.dotnet-version }}
+
+    - name: Restore dependencies
+      run: dotnet restore ViteKit.MsBuild.sln
+
+    - name: Build solution
+      run: dotnet build ViteKit.MsBuild.sln --configuration ${{ inputs.configuration }} --no-restore
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-artifacts-${{ inputs.configuration }}
+        path: |
+          build/
+          src/**/bin/${{ inputs.configuration }}/
+          tests/**/bin/${{ inputs.configuration }}/
+        retention-days: 1
