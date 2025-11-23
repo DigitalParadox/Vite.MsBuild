@@ -82,7 +82,10 @@ jobs:
     - name: Run unit tests (all frameworks)
       shell: pwsh
       run: |
-        $coverageArgs = if ('${{ matrix.os }}' -eq 'ubuntu-latest') { '--collect:"XPlat Code Coverage" --settings coverlet.runsettings' } else { '' }
+        $coverageArgs = @()
+        if ('${{ matrix.os }}' -eq 'ubuntu-latest') {
+          $coverageArgs = @('--collect:"XPlat Code Coverage"', '--settings', 'coverlet.runsettings')
+        }
         dotnet test tests/ViteKit.MsBuild.PureUnitTests/ViteKit.MsBuild.PureUnitTests.csproj `
           --configuration Release `
           --no-build `
