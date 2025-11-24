@@ -133,7 +133,7 @@ jobs:
   pack:
     name: Pack (Version Stamped)
     runs-on: ubuntu-latest
-    needs: test-ubuntu
+    needs: [test-ubuntu, test-cross]
     outputs:
       semVer: ${{ steps.gitversion.outputs.semVer }}
       assemblySemVer: ${{ steps.gitversion.outputs.assemblySemVer }}
