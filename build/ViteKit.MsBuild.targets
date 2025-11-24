@@ -10,9 +10,10 @@
     <!-- Load C# Tasks Assembly -->
     <PropertyGroup>
         <!-- Support multiple .NET versions: prefer newest available -->
-        <ViteMsBuildTasksAssembly Condition="'$(ViteMsBuildTasksAssembly)' == '' AND Exists('$(MSBuildThisFileDirectory)ViteKit.MsBuild.Tasks.dll')">$(MSBuildThisFileDirectory)ViteKit.MsBuild.Tasks.dll</ViteMsBuildTasksAssembly>
-        <ViteMsBuildTasksAssembly Condition="'$(ViteMsBuildTasksAssembly)' == '' AND Exists('$(MSBuildThisFileDirectory)..\tasks\net8.0\ViteKit.MsBuild.Tasks.dll')">$(MSBuildThisFileDirectory)..\tasks\net8.0\ViteKit.MsBuild.Tasks.dll</ViteMsBuildTasksAssembly>
-        <ViteMsBuildTasksAssembly Condition="'$(ViteMsBuildTasksAssembly)' == '' AND Exists('$(MSBuildThisFileDirectory)..\tasks\net6.0\ViteKit.MsBuild.Tasks.dll')">$(MSBuildThisFileDirectory)..\tasks\net6.0\ViteKit.MsBuild.Tasks.dll</ViteMsBuildTasksAssembly>
+        <!-- Prefer assembly alongside targets (copied during pack) -->
+        <ViteMsBuildTasksAssembly Condition="'$(ViteMsBuildTasksAssembly)' == '' AND Exists('$(MSBuildThisFileDirectory)ViteKit.MsBuild.dll')">$(MSBuildThisFileDirectory)ViteKit.MsBuild.dll</ViteMsBuildTasksAssembly>
+        <!-- Fallback to lib/net8.0 (standard dotnet pack layout) -->
+        <ViteMsBuildTasksAssembly Condition="'$(ViteMsBuildTasksAssembly)' == '' AND Exists('$(MSBuildThisFileDirectory)..\lib\net8.0\ViteKit.MsBuild.dll')">$(MSBuildThisFileDirectory)..\lib\net8.0\ViteKit.MsBuild.dll</ViteMsBuildTasksAssembly>
     </PropertyGroup>
 
     <!-- Register C# Tasks -->

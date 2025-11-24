@@ -15,13 +15,11 @@ branches:
     increment: Patch
     is-release-branch: true
   develop:
-    # Force dev branch to always produce prerelease alpha versions
     regex: ^dev$
     label: alpha
     increment: Minor
     is-release-branch: false
-    source-branches: []
-    tracks-release-branches: true
+    track-merge-target: false
   stable:
     regex: ^stable$
     label: beta
