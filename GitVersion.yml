@@ -23,8 +23,10 @@ branches:
   stable:
     regex: ^stable$
     label: beta
-    increment: Patch
-    is-release-branch: false
+    increment: Inherit
+    track-merge-target: true
+    is-release-branch: true
+    prevent-increment-of-merged-branch-version: false
   release:
     regex: ^releases?[/-]
     label: rc
