@@ -27,11 +27,9 @@
     <file src="build\ViteKit.MsBuild.targets" target="build" />
 
     <!-- Tasks assembly (highest TFM) placed in build for direct resolution -->
-    <file src="src\ViteKit.MsBuild.Tasks\bin\Release\net8.0\ViteKit.MsBuild.Tasks.dll" target="build" />
+    <file src="src\ViteKit.MsBuild\bin\Release\net8.0\ViteKit.MsBuild.dll" target="build" />
     <!-- Optional multi-TFM fallback locations -->
-    <file src="src\ViteKit.MsBuild.Tasks\bin\Release\net8.0\ViteKit.MsBuild.Tasks.dll" target="tasks\net8.0" />
-    <file src="src\ViteKit.MsBuild.Tasks\bin\Release\net9.0\ViteKit.MsBuild.Tasks.dll" target="tasks\net9.0" />
-    <file src="src\ViteKit.MsBuild.Tasks\bin\Release\net10.0\ViteKit.MsBuild.Tasks.dll" target="tasks\net10.0" />
+    <file src="src\ViteKit.MsBuild\bin\Release\net8.0\ViteKit.MsBuild.dll" target="tasks\net8.0" />
 
     <!-- Documentation -->
     <file src="README.md" target="" />

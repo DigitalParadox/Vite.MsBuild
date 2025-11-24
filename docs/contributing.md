@@ -63,7 +63,7 @@ dotnet test
 ```
 ViteKit/
 ├── src/
-│   └── ViteKit.MsBuild.Tasks/     # C# tasks and orchestration
+│   └── ViteKit.MsBuild/           # C# tasks and orchestration
 │       ├── OrchestrateBuildTask.cs
 │       ├── ViteConfigurationResolver.cs
 │       └── ...

@@ -205,7 +205,7 @@ jobs:
 
     - name: Pack NuGet package (csproj)
       run: |
-        dotnet pack src/ViteKit.MsBuild.Tasks/ViteKit.MsBuild.csproj \
+        dotnet pack src/ViteKit.MsBuild/ViteKit.MsBuild.csproj \
           --configuration Release \
           --no-build \
           --output nupkg \

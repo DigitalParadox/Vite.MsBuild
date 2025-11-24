@@ -150,7 +150,7 @@ git push origin v1.2.3
 
 Local packaging test:
 ```powershell
-dotnet pack src/ViteKit.MsBuild.Tasks/ViteKit.MsBuild.Tasks.csproj -c Release /p:PackageVersion=1.2.3-test -o .\nupkg
+dotnet pack src/ViteKit.MsBuild/ViteKit.MsBuild.csproj -c Release /p:PackageVersion=1.2.3-test -o .\nupkg
 ```
 
 ## Troubleshooting
