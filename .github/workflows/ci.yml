@@ -9,8 +9,6 @@ permissions:
 
 on:
   push:
-  pull_request:
-    branches: [ master, stable, dev ]
 
 jobs:
   build-and-test:
