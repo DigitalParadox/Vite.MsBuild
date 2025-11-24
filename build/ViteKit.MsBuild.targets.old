@@ -1,0 +1,331 @@
+<Project>
+
+    <!-- 
+    ViteKit.MsBuild | Build Targets (Streamlined Alpha Version)
+    
+    High-performance MSBuild integration using C# tasks instead of complex XML logic.
+    Automatically imported after ViteKit.MsBuild.props.
+    -->
+
+    <!-- Load C# Tasks (if available in .NET 6+ environments) -->
+    <PropertyGroup>
+        <ViteMsBuildTasksAssembly>$(MSBuildThisFileDirectory)..\tasks\net6.0\ViteKit.MsBuild.Tasks.dll</ViteMsBuildTasksAssembly>
+        <ViteUseAdvancedTasks Condition="'$(ViteUseAdvancedTasks)' == '' AND Exists('$(ViteMsBuildTasksAssembly)')">true</ViteUseAdvancedTasks>
+        <ViteUseAdvancedTasks Condition="'$(ViteUseAdvancedTasks)' == ''">false</ViteUseAdvancedTasks>
+    </PropertyGroup>
+
+    <!-- Register High-Performance C# Tasks -->
+    <UsingTask TaskName="ViteKit.MsBuild.Tasks.DetectPackageManagerTask" 
+               AssemblyFile="$(ViteMsBuildTasksAssembly)" 
+               Condition="'$(ViteUseAdvancedTasks)' == 'true'" />
+
+    <UsingTask TaskName="ViteKit.MsBuild.Tasks.CollectViteInputFilesTask" 
+               AssemblyFile="$(ViteMsBuildTasksAssembly)" 
+               Condition="'$(ViteUseAdvancedTasks)' == 'true'" />
+
+    <UsingTask TaskName="ViteKit.MsBuild.Tasks.ViteConfigurationResolver" 
+               AssemblyFile="$(ViteMsBuildTasksAssembly)" 
+               Condition="'$(ViteUseAdvancedTasks)' == 'true'" />
+
+    <UsingTask TaskName="ViteKit.MsBuild.Tasks.ViteConfigDependencyResolver" 
+               AssemblyFile="$(ViteMsBuildTasksAssembly)" 
+               Condition="'$(ViteUseAdvancedTasks)' == 'true'" />
+
+    <UsingTask TaskName="ViteKit.MsBuild.Tasks.ValidateViteProjectTask" 
+               AssemblyFile="$(ViteMsBuildTasksAssembly)" 
+               Condition="'$(ViteUseAdvancedTasks)' == 'true'" />
+
+    <UsingTask TaskName="ViteKit.MsBuild.Tasks.OrchestrateBuildTask" 
+               AssemblyFile="$(ViteMsBuildTasksAssembly)" 
+               Condition="'$(ViteUseAdvancedTasks)' == 'true'" />
+
+    <!-- Simple configuration task - only one name -->
+    <UsingTask TaskName="ViteKit.MsBuild.Tasks.ViteConfig" 
+               AssemblyFile="$(ViteMsBuildTasksAssembly)" 
+               Condition="'$(ViteUseAdvancedTasks)' == 'true'" />
+
+    <!-- Legacy task support for environments without C# tasks -->
+    <UsingTask TaskName="ViteKit.MsBuild.Tasks.BuildViteCommand" 
+               AssemblyFile="$(ViteMsBuildTasksAssembly)" 
+               Condition="'$(ViteUseAdvancedTasks)' == 'true'" />
+
+    <!-- Backward compatibility aliases (with deprecation warnings) -->
+    <UsingTask TaskName="ViteKit.MsBuild.Tasks.DefineViteConfig" 
+               AssemblyFile="$(ViteMsBuildTasksAssembly)" 
+               Condition="'$(ViteUseAdvancedTasks)' == 'true'" />
+
+    <UsingTask TaskName="ViteKit.MsBuild.Tasks.ConfigureViteConfig" 
+               AssemblyFile="$(ViteMsBuildTasksAssembly)" 
+               Condition="'$(ViteUseAdvancedTasks)' == 'true'" />
+
+    <!-- 
+    Main Build Pipeline (Streamlined)
+    Replaced 21 complex XML targets with simple C# task orchestration
+    -->
+
+    <!-- Target: ShowViteDiagnostics -->
+    <Target Name="ShowViteDiagnostics" 
+        Condition="'$(ViteShowDiagnostics)' == 'true'">
+        
+        <Message Text="🔍 ViteKit.MsBuild Diagnostics:" Importance="high" />
+        <Message Text="  ViteProjectRoot: $(ViteProjectRoot)" Importance="high" />
+        <Message Text="  ViteConfigFile: $(ViteConfigFile)" Importance="high" />
+        <Message Text="  ViteOutputDir: $(ViteOutputDir)" Importance="high" />
+        <Message Text="  ViteMode: $(ViteMode)" Importance="high" />
+        <Message Text="  PackageManager: $(PackageManager)" Importance="high" />
+        <Message Text="  EnableViteBuild: $(EnableViteBuild)" Importance="high" />
+        <Message Text="  ViteUseAdvancedTasks: $(ViteUseAdvancedTasks)" Importance="high" />
+    </Target>
+
+    <!-- Target: ResolveViteMode (Simple property mapping) -->
+    <Target Name="ResolveViteMode" 
+        BeforeTargets="ValidateViteSetup">
+        
+        <PropertyGroup>
+            <ViteMode Condition="'$(ViteMode)' == '' AND '$(Configuration)' == 'Debug'">development</ViteMode>
+            <ViteMode Condition="'$(ViteMode)' == '' AND '$(Configuration)' == 'Release'">production</ViteMode>
+            <ViteMode Condition="'$(ViteMode)' == ''">development</ViteMode>
+        </PropertyGroup>
+    </Target>
+
+    <!-- Target: DetectPackageManager (Native MSBuild Incremental Build + High-Performance C# Task) -->
+    <Target Name="DetectPackageManager" 
+        BeforeTargets="ValidateViteSetup"
+        Inputs="$(ViteProjectRoot)package.json;$(ViteProjectRoot)*.lockb;$(ViteProjectRoot)*-lock.yaml;$(ViteProjectRoot)*lock.json"
+        Outputs="$(IntermediateOutputPath)Vite.PackageManager.cache"
+        Condition="'$(EnableViteBuild)' == 'true'">
+
+        <!-- Try to read from cache first (MSBuild native incremental build) -->
+        <ReadLinesFromFile File="$(IntermediateOutputPath)Vite.PackageManager.cache"
+                           Condition="Exists('$(IntermediateOutputPath)Vite.PackageManager.cache')">
+            <Output TaskParameter="Lines" ItemName="_CachedPackageManager" />
+        </ReadLinesFromFile>
+
+        <PropertyGroup Condition="'@(_CachedPackageManager)' != ''">
+            <PackageManager>@(_CachedPackageManager)</PackageManager>
+        </PropertyGroup>
+
+        <!-- Detect only if cache doesn't exist or is stale (already handled by Inputs/Outputs) -->
+        <DetectPackageManagerTask ViteProjectRoot="$(ViteProjectRoot)"
+                                  ConflictAction="$(VitePackageManagerConflictAction)"
+                                  Condition="'$(ViteUseAdvancedTasks)' == 'true' AND '$(PackageManager)' == ''">
+            <Output TaskParameter="PackageManager" PropertyName="PackageManager" />
+            <Output TaskParameter="HasConflicts" PropertyName="HasPackageManagerConflicts" />
+            <Output TaskParameter="InstallCommand" PropertyName="ViteInstallCommand" />
+        </DetectPackageManagerTask>
+
+        <!-- Fallback for environments without C# tasks -->
+        <PropertyGroup Condition="'$(ViteUseAdvancedTasks)' != 'true' AND '$(PackageManager)' == ''">
+            <PackageManager Condition="Exists('$(ViteProjectRoot)bun.lockb')">bun</PackageManager>
+            <PackageManager Condition="'$(PackageManager)' == '' AND Exists('$(ViteProjectRoot)pnpm-lock.yaml')">pnpm</PackageManager>
+            <PackageManager Condition="'$(PackageManager)' == '' AND Exists('$(ViteProjectRoot)yarn.lock')">yarn</PackageManager>
+            <PackageManager Condition="'$(PackageManager)' == '' AND Exists('$(ViteProjectRoot)package-lock.json')">npm</PackageManager>
+            <PackageManager Condition="'$(PackageManager)' == ''">npm</PackageManager>
+        </PropertyGroup>
+
+        <!-- Write cache file for MSBuild incremental build tracking -->
+        <WriteLinesToFile File="$(IntermediateOutputPath)Vite.PackageManager.cache"
+                          Lines="$(PackageManager)"
+                          Overwrite="true"
+                          Condition="'$(PackageManager)' != ''" />
+    </Target>
+
+    <!-- Target: ValidateViteSetup (Native MSBuild Incremental Build + Comprehensive C# Validation) -->
+    <Target Name="ValidateViteSetup" 
+        DependsOnTargets="ResolveViteMode;DetectPackageManager"
+        Inputs="$(ViteProjectRoot)package.json;$(ViteConfigFile)"
+        Outputs="$(IntermediateOutputPath)Vite.Validation.cache"
+        Condition="'$(EnableViteBuild)' == 'true'">
+
+        <!-- Try to read validation status from cache (MSBuild native incremental build) -->
+        <ReadLinesFromFile File="$(IntermediateOutputPath)Vite.Validation.cache"
+                           Condition="Exists('$(IntermediateOutputPath)Vite.Validation.cache')">
+            <Output TaskParameter="Lines" ItemName="_CachedValidation" />
+        </ReadLinesFromFile>
+
+        <PropertyGroup Condition="'@(_CachedValidation)' != ''">
+            <ViteProjectIsValid>@(_CachedValidation)</ViteProjectIsValid>
+        </PropertyGroup>
+
+        <!-- Validate only if cache doesn't exist or is stale -->
+        <ValidateViteProjectTask ViteProjectRoot="$(ViteProjectRoot)"
+                                 ViteConfigFile="$(ViteConfigFile)"
+                                 ViteMissingEnvAction="$(ViteMissingEnvAction)"
+                                 PackageManager="$(PackageManager)"
+                                 EnableViteBuild="$(EnableViteBuild)"
+                                 ShowWelcomeMessage="true"
+                                 Condition="'$(ViteUseAdvancedTasks)' == 'true' AND '$(ViteProjectIsValid)' == ''">
+            <Output TaskParameter="IsValid" PropertyName="ViteProjectIsValid" />
+            <Output TaskParameter="HasPackageJson" PropertyName="ViteHasPackageJson" />
+            <Output TaskParameter="HasViteConfig" PropertyName="ViteHasConfig" />
+        </ValidateViteProjectTask>
+
+        <!-- Fallback validation for environments without C# tasks -->
+        <Error Text="❌ No package.json found in $(ViteProjectRoot). Run 'npm init' to create one." 
+               Condition="'$(ViteUseAdvancedTasks)' != 'true' AND !Exists('$(ViteProjectRoot)package.json')" />
+
+        <!-- Write cache file for MSBuild incremental build tracking -->
+        <WriteLinesToFile File="$(IntermediateOutputPath)Vite.Validation.cache"
+                          Lines="$(ViteProjectIsValid)"
+                          Overwrite="true"
+                          Condition="'$(ViteProjectIsValid)' != ''" />
+    </Target>
+
+    <!-- Target: CollectViteInputs (Native MSBuild Incremental Build + High-Performance C# File Collection) -->
+    <Target Name="CollectViteInputs"
+        Inputs="$(ViteProjectRoot)package.json;$(ViteConfigFile);$(MSBuildProjectFile)"
+        Outputs="$(IntermediateOutputPath)Vite.InputFiles.cache">
+        
+        <!-- Try to read from cache first (MSBuild native incremental build) -->
+        <ReadLinesFromFile File="$(IntermediateOutputPath)Vite.InputFiles.cache"
+                           Condition="Exists('$(IntermediateOutputPath)Vite.InputFiles.cache')">
+            <Output TaskParameter="Lines" ItemName="ViteInputFiles" />
+        </ReadLinesFromFile>
+
+        <!-- Collect files only if cache doesn't exist or is stale -->
+        <CollectViteInputFilesTask ViteProjectRoot="$(ViteProjectRoot)"
+                                   ViteConfigFile="$(ViteConfigFile)"
+                                   ViteOutputDir="$(ViteOutputDir)"
+                                   ExcludePatterns="node_modules;.git;obj;bin;$(ViteOutputDir)"
+                                   Condition="'$(ViteUseAdvancedTasks)' == 'true' AND '@(ViteInputFiles)' == ''">
+            <Output TaskParameter="ViteInputFiles" ItemName="ViteInputFiles" />
+            <Output TaskParameter="ConfigurationFiles" ItemName="ViteConfigurationFiles" />
+        </CollectViteInputFilesTask>
+
+        <!-- Fallback for environments without C# tasks -->
+        <ItemGroup Condition="'$(ViteUseAdvancedTasks)' != 'true' AND '@(ViteInputFiles)' == ''">
+            <ViteInputFiles Include="$(MSBuildProjectDirectory)\wwwroot\**\*.ts;$(MSBuildProjectDirectory)\wwwroot\**\*.js;$(MSBuildProjectDirectory)\wwwroot\**\*.tsx;$(MSBuildProjectDirectory)\wwwroot\**\*.jsx" />
+            <ViteInputFiles Include="$(MSBuildProjectDirectory)\wwwroot\**\*.vue;$(MSBuildProjectDirectory)\wwwroot\**\*.svelte" />
+            <ViteInputFiles Include="$(MSBuildProjectDirectory)\wwwroot\**\*.css;$(MSBuildProjectDirectory)\wwwroot\**\*.scss" />
+            <ViteInputFiles Include="$(ViteProjectRoot)package.json;$(ViteConfigFile)" Condition="Exists('$(ViteConfigFile)')" />
+        </ItemGroup>
+
+        <!-- Write cache file (file paths only, not full metadata) -->
+        <WriteLinesToFile File="$(IntermediateOutputPath)Vite.InputFiles.cache"
+                          Lines="@(ViteInputFiles)"
+                          Overwrite="true"
+                          Condition="'@(ViteInputFiles)' != ''" />
+    </Target>
+
+    <!-- Target: EnsureNodeDependencies (Package manager install) -->
+    <Target Name="EnsureNodeDependencies"
+        DependsOnTargets="ValidateViteSetup;DetectPackageManager"
+        Condition="'$(EnableViteBuild)' == 'true'">
+
+        <!-- Check if install needed -->
+        <PropertyGroup>
+            <NodeModulesExists Condition="Exists('$(ViteProjectRoot)node_modules')">true</NodeModulesExists>
+            <NodeModulesExists Condition="'$(NodeModulesExists)' == ''">false</NodeModulesExists>
+        </PropertyGroup>
+
+        <!-- Install dependencies if needed -->
+        <Exec Command="$(ViteInstallCommand)" 
+              WorkingDirectory="$(ViteProjectRoot)"
+              Condition="'$(NodeModulesExists)' == 'false' AND '$(ViteInstallCommand)' != ''" />
+
+        <!-- Fallback install command -->
+        <Exec Command="$(PackageManager) install" 
+              WorkingDirectory="$(ViteProjectRoot)"
+              Condition="'$(NodeModulesExists)' == 'false' AND '$(ViteInstallCommand)' == ''" />
+    </Target>
+
+    <!-- Target: ViteBuildAssets (Main Entry Point) -->
+    <Target Name="ViteBuildAssets"
+        BeforeTargets="ResolveStaticWebAssetsInputs"
+        DependsOnTargets="ValidateViteSetup;EnsureNodeDependencies;CollectViteInputs"
+        Inputs="@(ViteInputFiles);$(ViteConfigFile);$(MSBuildProjectFile)"
+        Outputs="$(IntermediateOutputPath)ViteBuild.marker"
+        Condition="'$(EnableViteBuild)' == 'true' AND '$(ViteBuildTiming)' != 'AfterCSharp'">
+
+        <CallTarget Targets="ExecuteViteBuild" />
+    </Target>
+
+    <!-- Target: ViteBuildAssetsAfter (Alternative timing) -->
+    <Target Name="ViteBuildAssetsAfter"
+        AfterTargets="Build" 
+        DependsOnTargets="ValidateViteSetup;EnsureNodeDependencies;CollectViteInputs"
+        Inputs="@(ViteInputFiles);$(ViteConfigFile);$(MSBuildProjectFile)"
+        Outputs="$(IntermediateOutputPath)ViteBuild.marker"
+        Condition="'$(EnableViteBuild)' == 'true' AND '$(ViteBuildTiming)' == 'AfterCSharp'">
+
+        <CallTarget Targets="ExecuteViteBuild" />
+    </Target>
+
+    <!-- Target: ExecuteViteBuild (Comprehensive C# Build Orchestration) -->
+    <Target Name="ExecuteViteBuild">
+        
+        <!-- Resolve configurations first -->
+        <ViteConfigurationResolver ViteProjectRoot="$(ViteProjectRoot)"
+                                   ViteConfigFile="$(ViteConfigFile)"
+                                   ViteOutputDir="$(ViteOutputDir)"
+                                   ViteMode="$(ViteMode)"
+                                   PackageManager="$(PackageManager)"
+                                   UserDefinedConfigs="@(ViteConfig)"
+                                   Condition="'$(ViteUseAdvancedTasks)' == 'true'">
+            <Output TaskParameter="ResolvedConfigs" ItemName="ResolvedViteConfig" />
+            <Output TaskParameter="IsMultiConfig" PropertyName="ViteIsMultiConfig" />
+        </ViteConfigurationResolver>
+
+        <!-- Resolve dependency order for builds -->
+        <ViteConfigDependencyResolver ViteConfigurations="@(ResolvedViteConfig)"
+                                      Condition="'$(ViteUseAdvancedTasks)' == 'true'">
+            <Output TaskParameter="OrderedConfigurations" ItemName="OrderedViteConfig" />
+            <Output TaskParameter="DependencyGroups" ItemName="ViteConfigDependencyGroups" />
+        </ViteConfigDependencyResolver>
+
+        <!-- Execute the build in dependency order -->
+        <OrchestrateBuildTask ViteProjectRoot="$(ViteProjectRoot)"
+                              PackageManager="$(PackageManager)"
+                              ViteMode="$(ViteMode)"
+                              ViteConfigFile="$(ViteConfigFile)"
+                              ViteOutputDir="$(ViteOutputDir)"
+                              ViteBuildCommand="$(ViteBuildCommand)"
+                              ViteInstallCommand="$(ViteInstallCommand)"
+                              ViteEnableColors="$(ViteEnableColors)"
+                              ViteLogLevel="$(ViteLogLevel)"
+                              IntermediateOutputPath="$(IntermediateOutputPath)"
+                              ViteConfigurations="@(OrderedViteConfig)"
+                              ViteInputFiles="@(ViteInputFiles)"
+                              Condition="'$(ViteUseAdvancedTasks)' == 'true'">
+            <Output TaskParameter="BuildSucceeded" PropertyName="ViteBuildSucceeded" />
+            <Output TaskParameter="OutputDirectories" ItemName="ViteOutputDirectories" />
+        </OrchestrateBuildTask>
+
+        <!-- Fallback to legacy build for environments without C# tasks -->
+        <BuildViteCommand ViteProjectRoot="$(ViteProjectRoot)"
+                          ViteConfigFile="$(ViteConfigFile)"
+                          OutputPath="$(ViteOutputDir)"
+                          Mode="$(ViteMode)"
+                          PackageManager="$(PackageManager)"
+                          Condition="'$(ViteUseAdvancedTasks)' != 'true'"
+                          ContinueOnError="false" />
+
+        <!-- Update marker file -->
+        <Touch Files="$(IntermediateOutputPath)ViteBuild.marker" 
+               AlwaysCreate="true" />
+    </Target>
+
+    <!-- Target: ViteCleanAssets (Clean output directories and cache files) -->
+    <Target Name="ViteCleanAssets" 
+        BeforeTargets="Clean" 
+        Condition="'$(EnableViteBuild)' == 'true'">
+        
+        <RemoveDir Directories="$(ViteOutputDir)" Condition="Exists('$(ViteOutputDir)')" />
+        
+        <!-- Clean MSBuild incremental build markers and cache files -->
+        <Delete Files="$(IntermediateOutputPath)ViteBuild*.marker" />
+        <Delete Files="$(IntermediateOutputPath)Vite.PackageManager.cache" />
+        <Delete Files="$(IntermediateOutputPath)Vite.Validation.cache" />
+        <Delete Files="$(IntermediateOutputPath)Vite.InputFiles.cache" />
+        
+        <Message Text="🧹 Cleaned Vite output and cache files" Importance="normal" />
+    </Target>
+
+    <!-- Target: BuildViteOnly (Development helper) -->
+    <Target Name="BuildViteOnly" 
+        DependsOnTargets="ValidateViteSetup;EnsureNodeDependencies;CollectViteInputs;ExecuteViteBuild">
+        
+        <Message Text="✅ Vite-only build completed" Importance="high" />
+    </Target>
+
+</Project>

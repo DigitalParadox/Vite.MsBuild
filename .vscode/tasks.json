@@ -1,0 +1,91 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "ViteKit.Msbuild.sln"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "build-tests",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "tests/ViteKit.MsbuildIntegrationTests/ViteKit.MsbuildIntegrationTests.csproj"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": "build"
+        },
+        {
+            "label": "test",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "test",
+                "tests/ViteKit.MsbuildIntegrationTests/ViteKit.MsbuildIntegrationTests.csproj",
+                "--verbosity",
+                "normal"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "test-detailed",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "test",
+                "tests/ViteKit.MsbuildIntegrationTests/ViteKit.MsbuildIntegrationTests.csproj",
+                "--verbosity",
+                "detailed"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": "test"
+        },
+        {
+            "label": "build-package",
+            "command": "pwsh",
+            "type": "shell",
+            "args": [
+                "-File",
+                "build-package.ps1"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "run-integration-tests",
+            "command": "pwsh",
+            "type": "shell",
+            "args": [
+                "-File",
+                "tests/run-integration-tests.ps1"
+            ],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            }
+        }
+    ]
+}

@@ -1,0 +1,172 @@
+name: CI - Build and Unit Tests
+
+permissions:
+  contents: write          # release notes, artifacts
+  packages: write          # github packages publish
+  actions: read            # download artifacts
+  checks: write            # create test reporter check runs
+  pull-requests: write     # allow PR comments for coverage/test (future)
+
+on:
+  push:
+  pull_request:
+    branches: [ master, stable, dev ]
+
+jobs:
+  build-and-test:
+    name: Build and Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+      fail-fast: false
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Required for GitVersion
+
+    - name: Install GitVersion
+      uses: gittools/actions/gitversion/setup@v1.2.0
+      with:
+        versionSpec: '6.0.x'
+
+    - name: Determine Version
+      id: gitversion
+      uses: gittools/actions/gitversion/execute@v1.2.0
+      with:
+        useConfigFile: true
+        configFilePath: GitVersion.yml
+
+    - name: Display GitVersion outputs
+      run: |
+        echo "FullSemVer: ${{ steps.gitversion.outputs.fullSemVer }}"
+        echo "NuGetVersion (from SemVer): ${{ steps.gitversion.outputs.semVer }}"
+        echo "AssemblyVersion: ${{ steps.gitversion.outputs.assemblySemVer }}"
+
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+
+    - name: Display .NET info
+      run: dotnet --info
+
+    - name: Restore dependencies
+      run: dotnet restore ViteKit.MsBuild.sln
+
+    - name: Build solution (multi-targeting net8.0;net9.0;net10.0)
+      shell: pwsh
+      run: |
+        dotnet build ViteKit.MsBuild.sln `
+          --configuration Release `
+          --no-restore `
+          /p:Version=${{ steps.gitversion.outputs.semVer }} `
+          /p:AssemblyVersion=${{ steps.gitversion.outputs.assemblySemVer }} `
+          /p:FileVersion=${{ steps.gitversion.outputs.assemblySemFileVer }} `
+          /p:InformationalVersion=${{ steps.gitversion.outputs.informationalVersion }}
+
+    - name: Pack NuGet package
+      if: matrix.os == 'ubuntu-latest'
+      shell: pwsh
+      run: |
+        dotnet pack src/ViteKit.MsBuild/ViteKit.MsBuild.csproj `
+          --configuration Release `
+          --no-build `
+          --output nupkg `
+          /p:PackageVersion=${{ steps.gitversion.outputs.semVer }}
+
+    - name: Upload NuGet package
+      uses: actions/upload-artifact@v4
+      if: matrix.os == 'ubuntu-latest'
+      with:
+        name: nuget-package
+        path: nupkg/*.nupkg
+        retention-days: 7
+
+    - name: Run unit tests (all frameworks)
+      shell: pwsh
+      run: |
+        $testArgs = @(
+          'test'
+          'tests/ViteKit.MsBuild.PureUnitTests/ViteKit.MsBuild.PureUnitTests.csproj'
+          '--configuration','Release'
+          '--no-build'
+          '--verbosity','normal'
+          '--logger','trx'
+          '--logger','console;verbosity=detailed'
+          '--results-directory','${{ github.workspace }}/TestResults'
+        )
+        if ('${{ matrix.os }}' -eq 'ubuntu-latest') {
+          # Use msbuild coverlet properties (multi-target produces per-TFM files in coverage dir)
+          $testArgs += @(
+            '/p:CollectCoverage=true',
+            '/p:CoverletOutputFormat=cobertura',
+            '/p:CoverletOutput=${{ github.workspace }}/TestResults/coverage/'
+          )
+        }
+        & dotnet @testArgs
+
+    - name: Generate coverage report
+      uses: danielpalme/ReportGenerator-GitHub-Action@5.3.11
+      if: matrix.os == 'ubuntu-latest'
+      with:
+        reports: 'TestResults/coverage/*.cobertura.xml'
+        targetdir: 'CoverageReport'
+        reporttypes: 'Html;MarkdownSummaryGithub'
+
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v4
+      if: matrix.os == 'ubuntu-latest'
+      with:
+        name: coverage-report
+        path: CoverageReport/
+        retention-days: 7
+
+    - name: Publish coverage summary
+      if: matrix.os == 'ubuntu-latest'
+      shell: pwsh
+      run: |
+        if (Test-Path CoverageReport/SummaryGithub.md) {
+          $content = Get-Content CoverageReport/SummaryGithub.md -Raw
+          "## Coverage Summary`n$content" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+        } else {
+          echo "Coverage summary file not found."
+        }
+
+    # Optional gating (disabled). Uncomment to enforce minimum coverage.
+    # - name: Enforce coverage threshold
+    #   if: matrix.os == 'ubuntu-latest'
+    #   shell: pwsh
+    #   run: |
+    #     $min = 70  # set desired minimum percentage
+    #     $file = 'CoverageReport/SummaryGithub.md'
+    #     if (!(Test-Path $file)) { Write-Error "Coverage summary missing" }
+    #     $line = (Select-String -Path $file -Pattern 'Line coverage').Line
+    #     if ($line -match '(\d+\.\d+)%') { $value = [double]$matches[1] } else { Write-Error "Could not parse coverage" }
+    #     if ($value -lt $min) { Write-Error "Coverage $value% below threshold $min%" } else { echo "Coverage $value% meets threshold $min%" }
+
+    - name: Add coverage PR comment
+      uses: marocchino/sticky-pull-request-comment@v2
+      if: github.event_name == 'pull_request' && matrix.os == 'ubuntu-latest'
+      with:
+        recreate: true
+        path: CoverageReport/SummaryGithub.md
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: unit-test-results-${{ matrix.os }}
+        path: TestResults/
+        retention-days: 7
+
+    - name: Publish test results
+      uses: dorny/test-reporter@v1
+      if: always()
+      with:
+        name: Unit Test Results (${{ matrix.os }})
+        path: "TestResults/**/*.trx"
+        reporter: dotnet-trx

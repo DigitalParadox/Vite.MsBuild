@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <EnableViteBuild>true</EnableViteBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ViteConfig Include="vite.admin.config.ts" BuildId="admin" OutputDir="wwwroot/admin" />
+    <ViteConfig Include="vite.customer.config.ts" BuildId="customer" OutputDir="wwwroot/customer" />
+  </ItemGroup>
+
+  <!-- Detect ViteKit build file location (E2E test output or source location) -->
+  <PropertyGroup>
+    <ViteKitBuildPath Condition="Exists('$(MSBuildProjectDirectory)\..\..\build\ViteKit.MsBuild.props')">$(MSBuildProjectDirectory)\..\..\build</ViteKitBuildPath>
+    <ViteKitBuildPath Condition="'$(ViteKitBuildPath)' == ''">$(MSBuildProjectDirectory)\..\..\..\..\build</ViteKitBuildPath>
+  </PropertyGroup>
+  
+  <Import Project="$(ViteKitBuildPath)\ViteKit.MsBuild.props" />
+  <Import Project="$(ViteKitBuildPath)\ViteKit.MsBuild.targets" />
+
+</Project>

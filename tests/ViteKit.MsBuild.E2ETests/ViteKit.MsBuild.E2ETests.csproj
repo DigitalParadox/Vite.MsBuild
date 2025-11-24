@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <IsPackable>false</IsPackable>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="xunit" Version="2.6.6" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.6">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="FluentAssertions" Version="6.12.0" />
+  </ItemGroup>
+
+  <!-- Reference the Tasks project - Private=true ensures DLL is copied to build/ directory -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ViteKit.MsBuild\ViteKit.MsBuild.csproj" />
+  </ItemGroup>
+  
+  <!-- Copy the Tasks DLL to build/ directory where targets expect it -->
+  <Target Name="CopyTasksDllToBuild" AfterTargets="Build">
+    <ItemGroup>
+      <TasksDll Include="$(OutputPath)ViteKit.MsBuild.dll" />
+    </ItemGroup>
+    <Copy SourceFiles="@(TasksDll)" DestinationFolder="$(OutputPath)build\" Condition="Exists('%(TasksDll.Identity)')" />
+  </Target>
+
+  <!-- Include test projects as content so they're copied to output -->
+  <ItemGroup>
+    <Content Include="TestProjects\**\*.*" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  
+  <!-- Copy the ViteKit MSBuild files to output/build directory -->
+  <ItemGroup>
+    <None Include="..\..\build\ViteKit.MsBuild.props" Link="build\ViteKit.MsBuild.props" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\build\ViteKit.MsBuild.targets" Link="build\ViteKit.MsBuild.targets" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <!-- Exclude test project source files from compilation -->
+  <ItemGroup>
+    <Compile Remove="TestProjects\**\*.cs" />
+  </ItemGroup>
+
+</Project>

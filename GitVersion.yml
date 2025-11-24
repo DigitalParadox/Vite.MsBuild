@@ -1,0 +1,42 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/GitTools/GitVersion/main/schemas/6.0/GitVersion.configuration.json
+
+mode: ContinuousDeployment
+tag-prefix: '[vV]'
+major-version-bump-message: '\+semver:\s?(major)'
+minor-version-bump-message: '\+semver:\s?(feature|minor)'
+patch-version-bump-message: '\+semver:\s?(fix|patch)'
+no-bump-message: '\+semver:\s?(none|skip)'
+commit-message-incrementing: Enabled
+
+branches:
+  master:
+    regex: ^master$|^main$
+    label: ''
+    increment: Patch
+    is-release-branch: true
+  develop:
+    regex: ^dev$
+    label: alpha
+    increment: Minor
+    is-release-branch: false
+    track-merge-target: false
+  stable:
+    regex: ^stable$
+    label: beta
+    increment: Patch
+    is-release-branch: false
+  release:
+    regex: ^releases?[/-]
+    label: rc
+    increment: None
+    is-release-branch: true
+
+ignore:
+  sha: []
+
+merge-message-formats:
+  # Conventional Commits support (Major bumps ONLY via explicit +semver: major directive)
+  '(?:^|\\n)feat(\\(.+\\))?:': Minor
+  '(?:^|\\n)fix(\\(.+\\))?:': Patch
+  '(?:^|\\n)perf(\\(.+\\))?:': Patch
+  # Removed automatic BREAKING CHANGE major bump; require +semver: major instead

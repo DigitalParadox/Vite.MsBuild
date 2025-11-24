@@ -1,0 +1,200 @@
+<Project>
+
+    <!-- 
+    ViteKit.MsBuild | Build Targets (Clean C#-First Architecture)
+    
+    This file is a thin MSBuild orchestration layer.
+    All logic is in C# tasks for testability, performance, and maintainability.
+    -->
+
+    <!-- Load C# Tasks Assembly -->
+    <PropertyGroup>
+        <!-- Support multiple .NET versions: prefer newest available -->
+        <!-- Prefer assembly alongside targets (copied during pack) -->
+        <ViteMsBuildTasksAssembly Condition="'$(ViteMsBuildTasksAssembly)' == '' AND Exists('$(MSBuildThisFileDirectory)ViteKit.MsBuild.dll')">$(MSBuildThisFileDirectory)ViteKit.MsBuild.dll</ViteMsBuildTasksAssembly>
+        <!-- Fallback to lib/net8.0 (standard dotnet pack layout) -->
+        <ViteMsBuildTasksAssembly Condition="'$(ViteMsBuildTasksAssembly)' == '' AND Exists('$(MSBuildThisFileDirectory)..\lib\net8.0\ViteKit.MsBuild.dll')">$(MSBuildThisFileDirectory)..\lib\net8.0\ViteKit.MsBuild.dll</ViteMsBuildTasksAssembly>
+    </PropertyGroup>
+
+    <!-- Register C# Tasks -->
+    <UsingTask TaskName="ViteKit.MsBuild.Tasks.OrchestrateBuildTask" AssemblyFile="$(ViteMsBuildTasksAssembly)" />
+    <UsingTask TaskName="ViteKit.MsBuild.Tasks.CollectViteInputFilesTask" AssemblyFile="$(ViteMsBuildTasksAssembly)" />
+    <UsingTask TaskName="ViteKit.MsBuild.Tasks.ViteConfigurationResolver" AssemblyFile="$(ViteMsBuildTasksAssembly)" />
+
+    <!--  
+    ============================================================================
+    Target: _ResolveViteConfigurations (Internal)
+    Discovers and resolves Vite configurations from vite.config files
+    ============================================================================
+    -->
+    <Target Name="_ResolveViteConfigurations" BeforeTargets="ViteRestore;ViteBuild" DependsOnTargets="_ResolveViteMode">
+        <!-- Capture user-defined configs before resolving -->
+        <ItemGroup>
+            <_UserDefinedViteConfig Include="@(ViteConfig)" />
+        </ItemGroup>
+        
+        <!-- Resolve configurations (discovers config files, sets defaults) -->
+        <ViteConfigurationResolver
+            ViteProjectRoot="$(ViteProjectRoot)"
+            ViteOutputDir="$(ViteOutputDir)"
+            UserDefinedConfigs="@(_UserDefinedViteConfig)"
+            ViteMode="$(ViteMode)"
+            PackageManager="$(PackageManager)">
+            
+            <Output TaskParameter="ResolvedConfigs" ItemName="_ResolvedViteConfig" />
+        </ViteConfigurationResolver>
+        
+        <!-- Replace ViteConfig with fully resolved configs -->
+        <ItemGroup>
+            <ViteConfig Remove="@(ViteConfig)" />
+            <ViteConfig Include="@(_ResolvedViteConfig)" />
+        </ItemGroup>
+    </Target>
+
+    <!--  
+    ============================================================================
+    Target: _ResolveViteMode (Internal)
+    Resolves ViteMode from Configuration if not explicitly set
+    ============================================================================
+    -->
+    <Target Name="_ResolveViteMode" BeforeTargets="_ResolveViteConfigurations">
+        <PropertyGroup>
+            <ViteMode Condition="'$(ViteMode)' == '' AND '$(Configuration)' == 'Debug'">development</ViteMode>
+            <ViteMode Condition="'$(ViteMode)' == '' AND '$(Configuration)' == 'Release'">production</ViteMode>
+            <ViteMode Condition="'$(ViteMode)' == ''">development</ViteMode>
+        </PropertyGroup>
+    </Target>
+
+    <!-- 
+    ============================================================================
+    Target: ViteRestore
+    Restores npm/pnpm/yarn/bun packages for all Vite configurations
+    Analogous to 'dotnet restore' - runs package manager install
+    ============================================================================
+    -->
+    <Target Name="ViteRestore"
+            DependsOnTargets="_ResolveViteMode"
+            Condition="'$(EnableViteBuild)' == 'true'">
+
+        <Message Text="[RESTORE] Restoring packages for Vite configurations..." Importance="high" />
+
+        <!-- Orchestrator builds the restore task pipeline -->
+        <OrchestrateBuildTask
+            ViteProjectRoot="$(ViteProjectRoot)"
+            ViteOutputDir="$(ViteOutputDir)"
+            ViteMode="$(ViteMode)"
+            ViteLogLevel="$(ViteLogLevel)"
+            ViteEnableColors="$(ViteEnableColors)"
+            PackageManager="$(PackageManager)"
+            ViteConfigurations="@(ViteConfig)">
+            
+            <Output TaskParameter="RestoreTasks" ItemName="_ViteRestoreTask" />
+        </OrchestrateBuildTask>
+
+        <!-- Execute restore tasks -->
+        <Exec Command="%(Command)" 
+              WorkingDirectory="%(_ViteRestoreTask.WorkingDirectory)"
+              EnvironmentVariables="%(_ViteRestoreTask.Environment)"
+              ConsoleToMSBuild="true"
+              IgnoreStandardErrorWarningFormat="false"
+              Condition="'@(_ViteRestoreTask)' != ''" />
+
+        <Message Text="[OK] Package restore completed" Importance="high" Condition="'@(_ViteRestoreTask)' != ''" />
+        <Message Text="[SKIP] No package restore needed" Importance="normal" Condition="'@(_ViteRestoreTask)' == ''" />
+    </Target>
+
+    <!-- 
+    ============================================================================
+    Target: ViteBuild
+    Builds all Vite configurations in dependency order
+    Analogous to 'dotnet build' - compiles frontend assets
+    ============================================================================
+    -->
+    <Target Name="ViteBuild"
+            DependsOnTargets="ViteRestore"
+            Condition="'$(EnableViteBuild)' == 'true'"
+            BeforeTargets="ResolveStaticWebAssetsInputs">
+
+        <Message Text="[BUILD] Building Vite assets..." Importance="high" />
+
+        <!-- Orchestrator builds the compile task pipeline -->
+        <OrchestrateBuildTask
+            ViteProjectRoot="$(ViteProjectRoot)"
+            ViteOutputDir="$(ViteOutputDir)"
+            ViteMode="$(ViteMode)"
+            ViteLogLevel="$(ViteLogLevel)"
+            ViteEnableColors="$(ViteEnableColors)"
+            PackageManager="$(PackageManager)"
+            ViteConfigurations="@(ViteConfig)">
+            
+            <Output TaskParameter="BuildTasks" ItemName="_ViteBuildTask" />
+        </OrchestrateBuildTask>
+
+        <!-- Diagnostic output -->
+        <Message Text="[DEBUG] Build task count: @(_ViteBuildTask->Count())" Importance="high" />
+        <Message Text="[DEBUG] Build task: %(Identity), Command: %(_ViteBuildTask.Command)" Importance="high" Condition="'@(_ViteBuildTask)' != ''" />
+
+        <!-- Execute build tasks in order -->
+        <Exec Command="%(Command)" 
+              WorkingDirectory="%(_ViteBuildTask.WorkingDirectory)"
+              EnvironmentVariables="%(_ViteBuildTask.Environment)"
+              ConsoleToMSBuild="true"
+              IgnoreStandardErrorWarningFormat="false"
+              Condition="'@(_ViteBuildTask)' != ''" />
+
+        <Message Text="[OK] Vite build completed" Importance="high" Condition="'@(_ViteBuildTask)' != ''" />
+        <Message Text="[SKIP] No Vite builds needed" Importance="normal" Condition="'@(_ViteBuildTask)' == ''" />
+    </Target>
+
+    <!-- 
+    ============================================================================
+    Target: _CollectViteInputs (Internal)
+    Collects all frontend files for incremental build tracking
+    ============================================================================
+    -->
+    <Target Name="_CollectViteInputs">
+        <CollectViteInputFilesTask ViteProjectRoot="$(ViteProjectRoot)">
+            <Output TaskParameter="ViteInputFiles" ItemName="_ViteInputFiles" />
+        </CollectViteInputFilesTask>
+    </Target>
+
+    <!-- 
+    ============================================================================
+    Target: ViteClean
+    Removes ViteKit marker files and Vite cache directories.
+    Does NOT remove build outputs - users should handle cleanup via custom targets if needed.
+    ============================================================================
+    -->
+    <Target Name="ViteClean"
+            AfterTargets="Clean"
+            Condition="'$(EnableViteBuild)' == 'true'">
+
+        <Message Text="[CLEAN] Cleaning ViteKit build state..." Importance="normal" />
+
+        <!-- Remove marker file to ensure incremental builds work correctly -->
+        <Delete Files="$(IntermediateOutputPath)ViteKit.Build.marker" />
+
+        <!-- Remove Vite cache directories -->
+        <RemoveDir Directories="$(ViteProjectRoot).vite" Condition="Exists('$(ViteProjectRoot).vite')" />
+        <RemoveDir Directories="$(ViteProjectRoot)node_modules\.vite" Condition="Exists('$(ViteProjectRoot)node_modules\.vite')" />
+
+        <Message Text="[OK] ViteKit build state cleaned" Importance="normal" />
+    </Target>
+
+    <!-- 
+    ============================================================================
+    Target: ViteDiagnostics (Optional)
+    Shows configuration for debugging
+    ============================================================================
+    -->
+    <Target Name="ViteDiagnostics" Condition="'$(ViteShowDiagnostics)' == 'true'" BeforeTargets="ViteBuild">
+        <Message Text="🔍 ViteKit.MsBuild Configuration:" Importance="high" />
+        <Message Text="  ViteProjectRoot: $(ViteProjectRoot)" Importance="high" />
+        <Message Text="  ViteOutputDir: $(ViteOutputDir)" Importance="high" />
+        <Message Text="  ViteMode: $(ViteMode)" Importance="high" />
+        <Message Text="  PackageManager: $(PackageManager)" Importance="high" />
+        <Message Text="  Configuration: $(Configuration)" Importance="high" />
+        <Message Text="  EnableViteBuild: $(EnableViteBuild)" Importance="high" />
+    </Target>
+
+</Project>

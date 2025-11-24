@@ -1,374 +1,477 @@
-# Vite.MsBuild
+# ViteKit.Msbuild
 
-**Framework-agnostic MSBuild integration for Vite in ASP.NET Core projects**
+> **Framework-agnostic MSBuild integration for Vite in ASP.NET Core projects**
 
-Supports: Vue, React, Svelte, Solid, Preact, and vanilla JS/TS
+[![NuGet Package](https://img.shields.io/nuget/v/ViteKit.Msbuild)](https://www.nuget.org/packages/ViteKit.Msbuild)
+[![Build Status](https://github.com/DigitalParadox/ViteKit/workflows/CI/badge.svg)](https://github.com/DigitalParadox/ViteKit/actions)
+[![Tests](https://img.shields.io/badge/tests-427%20passing-brightgreen)](https://github.com/DigitalParadox/ViteKit/actions)
 
-## Features
+**Seamlessly integrate Vite with ASP.NET Core** - Build Vue, React, Svelte, or any Vite-supported framework directly from `dotnet build`.
 
-✅ **Zero configuration** - Auto-detects package.json and vite.config  
-✅ **Incremental builds** - Only rebuilds when source files change  
-✅ **Parallel build safe** - Prevents npm install conflicts  
-✅ **Framework-agnostic** - Works with any Vite-supported framework  
-✅ **Package manager agnostic** - Auto-detects npm, pnpm, yarn, or bun  
-✅ **Smart validation** - Helpful error messages and welcome guide  
-✅ **Production ready** - Used in production ASP.NET Core apps  
+---
 
-## Quick Start
+## ✨ Features
 
-### Install
+- 🎯 **Zero Configuration** - Auto-detects your project structure and package manager
+- ⚡ **Incremental Builds** - Only rebuilds when source files actually change  
+- 🔄 **Parallel Build Safe** - Prevents npm install conflicts in CI/CD
+- 🌍 **Framework Agnostic** - Vue, React, Svelte, Solid, Preact, vanilla JS/TS
+- 📦 **Package Manager Smart** - Auto-detects npm, pnpm, yarn, or bun
+- 🛡️ **Enterprise Ready** - Robust error handling and comprehensive logging
+- 🎛️ **MSBuild Native** - Uses proper MSBuild targets, not hacky scripts
+
+---
+
+## 🚀 Quick Start
+
+### 1. Install the NuGet Package
 
 ```bash
-dotnet add package Vite.MsBuild
+dotnet add package ViteKit.Msbuild
 ```
 
-The package automatically enables when installed.
+### 2. Initialize Your Frontend
 
-### Create Vite Config
+Choose your preferred framework:
 
 ```bash
+# Vue + TypeScript
 npm create vite@latest . -- --template vue-ts
+
+# React + TypeScript  
+npm create vite@latest . -- --template react-ts
+
+# Svelte + TypeScript
+npm create vite@latest . -- --template svelte-ts
+
+# Or any other Vite template
 ```
 
-### Build
+### 3. Build
 
 ```bash
 dotnet build
 ```
 
-That's it! Vite assets are built automatically during `dotnet build`.
+**That's it!** Your Vite assets are now built automatically during MSBuild.
 
-## Configuration (Optional)
+---
 
-All configuration is optional - the package works with sensible defaults.
+## 📋 Requirements
+
+- **.NET 6.0+** (supports .NET 8, .NET 9)
+- **Node.js 18+** 
+- **Vite 4.0+** or **Vite 5.0+**
+- **ASP.NET Core project** (Web, MVC, API, Blazor)
+
+---
+
+## ⚙️ Configuration
+
+### Zero Configuration (Recommended)
+
+ViteKit.Msbuild works out-of-the-box with sensible defaults:
+
+```xml
+<PackageReference Include="ViteKit.Msbuild" Version="2.0.0" />
+<!-- That's it! No configuration needed -->
+```
+
+### Custom Configuration (Optional)
+
+Override defaults when needed:
 
 ```xml
 <PropertyGroup>
-  <!-- Disable if needed -->
+  <!-- Disable Vite builds -->
   <EnableViteBuild>false</EnableViteBuild>
   
-  <!-- Custom config location -->
-  <ViteConfigFile>$(MSBuildProjectDirectory)\custom-vite.config.ts</ViteConfigFile>
+  <!-- Custom Vite config location -->
+  <ViteConfigFile>custom.vite.config.ts</ViteConfigFile>
   
   <!-- Custom output directory -->
-  <ViteOutputDir>wwwroot\assets</ViteOutputDir>
-  
-  <!-- Override Vite mode -->
-  <ViteMode>staging</ViteMode>
+  <ViteOutputDir>wwwroot/dist</ViteOutputDir>
   
   <!-- Force specific package manager -->
   <PackageManager>pnpm</PackageManager>
   
-  <!-- Validate .env files -->
-  <ViteMissingEnvAction>warn</ViteMissingEnvAction>
+  <!-- Override Vite mode -->
+  <ViteMode>staging</ViteMode>
   
-  <!-- Disable colors for CI/CD -->
-  <ViteEnableColors>false</ViteEnableColors>
-  
-  <!-- When to run Vite build (default: BeforeCSharp) -->
+  <!-- Control build timing -->
   <ViteBuildTiming>AfterCSharp</ViteBuildTiming>
 </PropertyGroup>
 ```
 
-## Custom File Tracking
-
-Add or remove files from incremental build tracking:
+### Advanced File Filtering
 
 ```xml
 <ItemGroup>
-  <!-- Add custom paths -->
-  <ViteInputFiles Include="wwwroot\data\**\*.json" />
+  <!-- Include additional source files -->
+  <ViteInputFiles Include="custom/**/*.ts" />
+  <ViteInputFiles Include="shared/**/*.vue" />
   
-  <!-- Exclude paths -->
-  <ViteInputFiles Remove="wwwroot\js\legacy\**\*" />
+  <!-- Exclude specific patterns -->
+  <ViteInputFiles Remove="legacy/**/*" />
+  <ViteInputFiles Remove="temp/**/*" />
 </ItemGroup>
 ```
 
-## Build Timing
+---
+
+## 📦 Package Manager Support
+
+Automatically detects and works with all major package managers:
+
+| Package Manager | Lock File | Install Command | Notes |
+|---|---|---|---|
+| **npm** | `package-lock.json` | `npm ci` | Default Node.js package manager |
+| **pnpm** | `pnpm-lock.yaml` | `pnpm install --frozen-lockfile` | Fast, disk-space efficient |
+| **Yarn** | `yarn.lock` | `yarn install --frozen-lockfile` | Classic and Berry (PnP) supported |
+| **Bun** | `bun.lockb` | `bun install --frozen-lockfile` | Ultra-fast JavaScript runtime |
+
+### Package Manager Conflicts
+
+If multiple lock files are detected, ViteKit.Msbuild provides clear guidance:
+
+```
+⚠️  Multiple package manager lock files detected: yarn.lock, package-lock.json
+💡 To resolve with yarn:
+   rm package-lock.json && yarn install --frozen-lockfile
+💡 Then commit the updated yarn lock file to your repository
+```
+
+---
+
+## 🏗️ Build Integration
+
+### MSBuild Target Execution Order
+
+```
+ResolveStaticWebAssetsInputs
+├── ShowViteDiagnostics (if verbosity >= detailed)
+├── ResolveViteMode (Configuration → Vite mode mapping)
+├── ValidateViteSetup (validation + welcome message)
+├── EnsureNodeDependencies (npm install if needed)
+└── ViteBuildAssets (main Vite build)
+```
+
+### Build Timing Options
 
 Control when Vite builds relative to C# compilation:
 
 ```xml
 <PropertyGroup>
-  <!-- Default: Vite builds before C# compilation -->
+  <!-- Build before C# (default) -->
   <ViteBuildTiming>BeforeCSharp</ViteBuildTiming>
   
-  <!-- Alternative: Vite builds after C# compilation -->
+  <!-- Build after C# compilation -->
   <ViteBuildTiming>AfterCSharp</ViteBuildTiming>
 </PropertyGroup>
 ```
 
-**BeforeCSharp (Default):**
-- ✅ Frontend assets available during C# compilation
-- ✅ Static web assets properly integrated
-- ✅ Faster overall build (parallel where possible)
+### Verbosity Mapping
 
-**AfterCSharp:**
-- ✅ C# compilation completes first
-- ✅ Useful for debugging build order issues
-- ✅ Good for scenarios where frontend depends on C# outputs
-
-## Development Workflow
-
-### Recommended: Two Terminals
-
-**Best performance with instant Hot Module Replacement:**
+MSBuild verbosity automatically maps to Vite log levels:
 
 ```bash
-# Terminal 1: Backend
-dotnet watch run
-
-# Terminal 2: Frontend (instant HMR)
-npm run dev
+dotnet build -v:quiet     # → vite build --logLevel silent
+dotnet build -v:minimal   # → vite build --logLevel warn
+dotnet build -v:normal    # → vite build --logLevel info
+dotnet build -v:detailed  # → vite build --logLevel info + diagnostics
+dotnet build -v:diag      # → vite build --logLevel debug
 ```
 
-### Alternative: Single Terminal
+---
+
+## 🏢 Enterprise & Monorepo Support
+
+### Multi-SPA Configuration
+
+For complex applications with multiple frontend entry points:
 
 ```xml
-<PropertyGroup>
-  <ViteWatchIntegration>true</ViteWatchIntegration>
-</PropertyGroup>
+<ItemGroup>
+  <ViteConfig Include="Areas/Admin/vite.config.ts">
+    <BuildId>admin</BuildId>
+    <OutputDir>wwwroot/admin</OutputDir>
+    <Mode>development</Mode>
+  </ViteConfig>
+  
+  <ViteConfig Include="Areas/Portal/vite.config.ts">
+    <BuildId>portal</BuildId>
+    <OutputDir>wwwroot/portal</OutputDir>
+    <Mode>production</Mode>
+  </ViteConfig>
+</ItemGroup>
 ```
 
-```bash
-dotnet watch run
-```
+See the [Multi-SPA Guide](docs/guides/multi-spa.md) for complete documentation.
 
-Slower - app restarts on frontend changes.
+### Monorepo Project Structure
 
-## Supported Package Managers
-
-Auto-detected from lock files:
-
-- **npm** - `package-lock.json`
-- **pnpm** - `pnpm-lock.yaml` 
-- **yarn** - `yarn.lock`
-- **bun** - `bun.lockb`
-
-## Supported Frameworks
-
-Works with all Vite-compatible frameworks:
-
-- ✅ Vue 3
-- ✅ React 18+
-- ✅ Preact
-- ✅ Svelte 4+
-- ✅ Solid.js
-- ✅ Lit
-- ✅ Vanilla JS/TS
-
-## Build Modes
-
-Auto-mapped from MSBuild Configuration:
-
-| MSBuild | Vite Mode |
-|---------|-----------|
-| Debug | development |
-| Release | production |
-| Staging | staging |
-| UAT | uat |
-
-Override with `<ViteMode>custom</ViteMode>` if needed.
-
-## Monorepo Support
-
-### Project-Specific Configuration
-
-```
-MyMonorepo/
-├── src/
-│   ├── WebApp/
-│   │   ├── package.json          ← WebApp-specific
-│   │   ├── vite.config.ts        ← WebApp config
-│   │   └── WebApp.csproj
-│   └── AdminPanel/
-│       ├── package.json          ← AdminPanel-specific
-│       ├── vite.config.ts        ← AdminPanel config
-│       └── AdminPanel.csproj
-```
-
-Each project can have its own Vite setup.
-
-### Shared Configuration
-
+**Option 1: Shared Package.json**
 ```
 MyProject/
-├── package.json                  ← Shared for all projects
-├── vite.config.ts                ← Shared config
+├── package.json              ← Shared dependencies
+├── vite.config.ts            ← Shared Vite config  
 └── src/
-    ├── Web/
-    │   └── Web.csproj
-    └── Api/
-        └── Api.csproj
+    └── WebApp/
+        └── WebApp.csproj     ← References ViteKit.Msbuild
 ```
 
-All projects share the same Vite configuration.
+**Option 2: Project-Specific Dependencies**
+```
+MyProject/
+└── src/
+    └── WebApp/
+        ├── package.json      ← WebApp-specific dependencies
+        ├── vite.config.ts    ← WebApp-specific config
+        └── WebApp.csproj     ← References ViteKit.Msbuild
+```
 
-## Troubleshooting
+---
 
-### Verbosity Control
+## 🧪 Framework Examples
+
+### Vue 3 + TypeScript
 
 ```bash
-dotnet build -v:q        # Quiet
-dotnet build -v:m        # Minimal
-dotnet build -v:n        # Normal (default)
-dotnet build -v:d        # Detailed (shows diagnostics)
-dotnet build -v:diag     # Diagnostic (full details)
+npm create vite@latest . -- --template vue-ts
 ```
 
-### Force Rebuild
+**vite.config.ts:**
+```typescript
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+
+export default defineConfig({
+  plugins: [vue()],
+  build: {
+    outDir: 'wwwroot',
+    manifest: true,
+    rollupOptions: {
+      input: 'src/main.ts'
+    }
+  }
+})
+```
+
+### React + TypeScript
 
 ```bash
-dotnet clean
-dotnet build
+npm create vite@latest . -- --template react-ts
 ```
 
-### See Full Vite Output
+**vite.config.ts:**
+```typescript
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()],
+  build: {
+    outDir: 'wwwroot',
+    manifest: true,
+    rollupOptions: {
+      input: 'src/main.tsx'
+    }
+  }
+})
+```
+
+### Svelte + TypeScript
 
 ```bash
-dotnet build -tl:false
+npm create vite@latest . -- --template svelte-ts
 ```
 
-Disables terminal logger to show complete Vite output.
+**vite.config.ts:**
+```typescript
+import { defineConfig } from 'vite'
+import { svelte } from '@sveltejs/vite-plugin-svelte'
 
-## Performance
+export default defineConfig({
+  plugins: [svelte()],
+  build: {
+    outDir: 'wwwroot',
+    manifest: true,
+    rollupOptions: {
+      input: 'src/main.ts'
+    }
+  }
+})
+```
 
-| Scenario | Time | Notes |
-|----------|------|-------|
-| Clean build | ~5-10s | Full Vite build + C# |
-| Incremental (C# only) | ~1-2s | Vite skipped |
-| Incremental (frontend only) | ~2-3s | C# skipped |
-| No changes | <1s | Both skipped |
-| HMR (npm run dev) | ~50ms | Instant updates |
+---
 
-## Examples
+## 🔄 Migration Guide
 
-### Minimal Setup
+### From ViteKit.Msbuild 1.x to 2.x
 
-```xml
-<Project Sdk="Microsoft.NET.Sdk.Web">
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-  </PropertyGroup>
+**Breaking Changes:**
+
+1. **New Task Architecture** - Migrated from XML-based tasks to high-performance C# tasks
+2. **Auto-Enable by Default** - Package now auto-enables when installed (can be disabled)
+3. **Improved File Detection** - Better handling of framework-specific files and config files
+
+**Migration Steps:**
+
+1. **Update Package Reference:**
+   ```xml
+   <!-- Old -->
+   <PackageReference Include="ViteKit.Msbuild" Version="1.x" />
+   
+   <!-- New -->
+   <PackageReference Include="ViteKit.Msbuild" Version="2.0.0" />
+   ```
+
+2. **Remove Old Configuration (if using):**
+   ```xml
+   <!-- These are now auto-detected -->
+   <PropertyGroup>
+     <ViteTasksLoaded>true</ViteTasksLoaded>  ← Remove
+     <ViteAssetsEnabled>true</ViteAssetsEnabled>  ← Remove
+   </PropertyGroup>
+   ```
+
+3. **Verify Output Directory:**
+   ```xml
+   <!-- Ensure your Vite config outputs to wwwroot (default) -->
+   <PropertyGroup>
+     <ViteOutputDir>wwwroot</ViteOutputDir>
+   </PropertyGroup>
+   ```
+
+**New Features in 2.x:**
+- ✅ Automatic package manager detection
+- ✅ Better error messages and validation
+- ✅ Improved incremental build performance
+- ✅ Enhanced monorepo support
+- ✅ Comprehensive logging and diagnostics
+
+---
+
+## 🛠️ Troubleshooting
+
+### Common Issues
+
+**Build fails with "Task attempted to log before it was initialized"**
+- **Fixed in 2.x** - This was resolved with the new C# task architecture
+
+**Multiple package manager lock files detected**
+- Choose one package manager and remove other lock files
+- Follow the guidance messages for your preferred package manager
+
+**Vite config not found**
+- Ensure `vite.config.ts`, `vite.config.js`, or `vite.config.mjs` exists
+- Use `<ViteConfigFile>` to specify custom location
+
+**Assets not appearing in output**
+- Check that Vite build outputs to the correct directory (usually `wwwroot`)
+- Verify `<ViteOutputDir>` property matches your Vite config `build.outDir`
+
+### Debug Information
+
+Enable detailed logging to diagnose issues:
+
+```bash
+dotnet build -v:detailed
+```
+
+This shows:
+- ✅ Package manager detection
+- ✅ File discovery process  
+- ✅ Vite command execution
+- ✅ Build timing information
+
+---
+
+## 📈 Performance
+
+### Incremental Build Optimization
+
+ViteKit.Msbuild uses MSBuild's incremental build system:
+
+- **Input Files**: All frontend source files + config files
+- **Output Marker**: Timestamp file in `obj/` directory  
+- **Build Logic**: Only rebuilds if inputs are newer than outputs
+
+**Typical Performance:**
+- **Clean Build**: 5-15 seconds (depending on project size)
+- **Incremental Build**: 0.1-0.5 seconds (if no changes)
+- **Changed File Build**: 1-5 seconds (Vite HMR speed)
+
+### CI/CD Optimization
+
+For optimal CI/CD performance:
+
+```yaml
+# GitHub Actions example
+- name: Build
+  run: dotnet build --configuration Release --verbosity minimal
   
-  <ItemGroup>
-    <PackageReference Include="Vite.MsBuild" Version="1.0.0" />
-  </ItemGroup>
-</Project>
+# Only install dependencies if lock file changed
+- name: Cache Node modules
+  uses: actions/cache@v3
+  with:
+    path: node_modules
+    key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
 ```
 
-### Advanced Setup
+---
 
-```xml
-<Project Sdk="Microsoft.NET.Sdk.Web">
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <PackageManager>pnpm</PackageManager>
-  </PropertyGroup>
-  
-  <ItemGroup>
-    <PackageReference Include="Vite.MsBuild" Version="1.0.0" />
-  </ItemGroup>
-  
-  <!-- Development: Local mode -->
-  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-    <ViteMode>local</ViteMode>
-  </PropertyGroup>
-  
-  <!-- Production: Strict validation -->
-  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-    <ViteMissingEnvAction>error</ViteMissingEnvAction>
-    <ViteEnableColors>false</ViteEnableColors>
-  </PropertyGroup>
-</Project>
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+### Development Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/DigitalParadox/ViteKit.Msbuild.git
+cd ViteKit.Msbuild
+
+# Restore dependencies
+dotnet restore
+
+# Run tests
+dotnet test
+
+# Build package
+.\build-package.ps1 -Version "1.0.0"
 ```
 
-## How It Works
+### Test Coverage
 
-### Build Flow
+Current test coverage: **427 tests passing** (100% pass rate)
 
-```
-dotnet build
-  ↓
-Auto-detect package.json location
-  ↓
-Auto-detect vite.config.{ts,js,mjs}
-  ↓
-Resolve ViteMode (Debug → development)
-  ↓
-Validate setup
-  ↓
-Check if npm install needed
-  ↓
-Run npm install (if needed)
-  ↓
-Collect frontend source files
-  ↓
-Run vite build (if files changed)
-  ↓
-Include in ASP.NET static assets
-```
+- ✅ **Core Tasks**: OrchestrateBuildTask, CollectViteInputFilesTask, ViteConfigurationResolver
+- ✅ **Resolver Tasks**: ViteConfigurationResolver, ViteConfigDependencyResolver, ViteModeResolver
+- ✅ **Command Builders**: ViteCommandFactory, ScriptBasedCommandBuilder, DirectToolCommandBuilder, CustomCommandBuilder
+- ✅ **Validation**: ViteConfig, ValidateViteConfig
+- ✅ **Orchestration**: OrchestrateBuildTask (multi-config builds, dependency ordering, incremental builds)
+- ✅ **Build Integration**: MSBuild target execution, parallel builds, marker files
+- ✅ **Framework Support**: Vue, React, Svelte file detection
+- ✅ **Package Managers**: npm, pnpm, yarn, bun detection and command generation
+- ✅ **Advanced Features**: Dependency graphs, topological sorting, circular detection, mode resolution, architecture detection
+- ✅ **Error Scenarios**: Validation, conflict resolution, helpful messages, encoding compatibility
 
-### Incremental Builds
+---
 
-Uses Microsoft SDK pattern with Inputs/Outputs:
+## 📄 License
 
-- **Inputs**: All frontend files, config files, lock files
-- **Outputs**: Marker file in `obj/`
-- **Logic**: Only rebuilds if inputs newer than outputs
+This project is licensed under the [MIT License](LICENSE).
 
-### Parallel Build Safety
+---
 
-Uses marker files in `obj/` with MSBuild's built-in serialization:
+## 🔗 Links
 
-```
-obj/
-├── Vite.MsBuild.NodeRestore.marker    ← Shared restore tracking
-└── Debug/net9.0/
-    └── net9.0.Vite.MsBuild.Build.marker   ← Per-project build tracking
-```
+- **📦 NuGet Package**: https://www.nuget.org/packages/ViteKit.Msbuild
+- **🐛 Issues**: https://github.com/DigitalParadox/ViteKit/issues
+- **💬 Discussions**: https://github.com/DigitalParadox/ViteKit/discussions
+- **🔀 Pull Requests**: https://github.com/DigitalParadox/ViteKit/pulls
 
-MSBuild ensures only one project restores at a time.
+---
 
-## Architecture
-
-### File Structure
-
-```
-Vite.MsBuild.nupkg
-├── Vite.MsBuild.nuspec
-├── README.md
-├── LICENSE
-└── build/
-    ├── Vite.MsBuild.props      ← Properties, defaults
-    └── Vite.MsBuild.targets    ← Build targets
-```
-
-### Import Order
-
-```
-1. Vite.MsBuild.props (before project)
-2. Your .csproj
-3. Vite.MsBuild.targets (after project)
-```
-
-This allows you to override any property in your `.csproj`.
-
-## Requirements
-
-- **.NET 8.0+** or **.NET 9.0+**
-- **Node.js 18+**
-- **Vite 4.0+** or **Vite 5.0+**
-- **Package manager**: npm, pnpm, yarn, or bun
-
-## License
-
-MIT
-
-## Contributing
-
-Issues and PRs welcome at: https://github.com/DigitalParadox/Vite.MsBuild
-
-## Documentation
-
-Full documentation: https://github.com/DigitalParadox/Vite.MsBuild#readme
+*Made with ❤️ for the ASP.NET Core and Vite communities*
