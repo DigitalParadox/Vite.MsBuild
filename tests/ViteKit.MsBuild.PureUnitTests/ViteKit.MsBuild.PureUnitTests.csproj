@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\ViteKit.MsBuild.Tasks\ViteKit.MsBuild.Tasks.csproj" />
+    <ProjectReference Include="..\..\src\ViteKit.MsBuild.Tasks\ViteKit.MsBuild.csproj" />
   </ItemGroup>
 
 </Project>

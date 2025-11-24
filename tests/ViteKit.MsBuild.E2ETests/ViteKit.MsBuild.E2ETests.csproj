@@ -19,13 +19,13 @@
 
   <!-- Reference the Tasks project - Private=true ensures DLL is copied to build/ directory -->
   <ItemGroup>
-    <ProjectReference Include="..\..\src\ViteKit.MsBuild.Tasks\ViteKit.MsBuild.Tasks.csproj" />
+    <ProjectReference Include="..\..\src\ViteKit.MsBuild.Tasks\ViteKit.MsBuild.csproj" />
   </ItemGroup>
   
   <!-- Copy the Tasks DLL to build/ directory where targets expect it -->
   <Target Name="CopyTasksDllToBuild" AfterTargets="Build">
     <ItemGroup>
-      <TasksDll Include="$(OutputPath)ViteKit.MsBuild.Tasks.dll" />
+      <TasksDll Include="$(OutputPath)ViteKit.MsBuild.dll" />
     </ItemGroup>
     <Copy SourceFiles="@(TasksDll)" DestinationFolder="$(OutputPath)build\" Condition="Exists('%(TasksDll.Identity)')" />
   </Target>
