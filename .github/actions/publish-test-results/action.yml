@@ -66,6 +66,7 @@ runs:
         reporter: dotnet-trx
         list-tests: failed
         max-annotations: 50
+        comment-on-pr: true
 
     - name: Check test reporter result
       if: always() && steps.unit_test_report.outcome == 'failure' && inputs.fail-on-test-report-error == 'true'
