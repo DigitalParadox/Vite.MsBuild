@@ -31,7 +31,7 @@ jobs:
         if: always()
         with:
           name: Unit Test Results (${{ matrix.os }})
-          path: "${{ steps.build.outputs.test-results }}/**/*.trx"
+          path: "${{ steps.build.outputs.test-results-relative }}/**/*.trx"
           reporter: dotnet-trx
 
       - name: Upload test results artifact
@@ -39,7 +39,7 @@ jobs:
         if: always()
         with:
           name: unit-test-results-${{ matrix.os }}
-          path: ${{ steps.build.outputs.test-results }}
+          path: ${{ steps.build.outputs.test-results-relative }}
           retention-days: 7
 
       - name: Upload coverage artifact
@@ -47,7 +47,7 @@ jobs:
         if: always() && matrix.os == 'ubuntu-latest'
         with:
           name: coverage-report
-          path: ${{ steps.build.outputs.coverage-report }}
+          path: ${{ steps.build.outputs.coverage-report-relative }}
           retention-days: 7
 
       - name: Publish coverage summary
@@ -56,5 +56,5 @@ jobs:
         with:
           check-name: Coverage Summary
           title: Coverage Summary
-          summary-file: ${{ steps.build.outputs.coverage-report }}/SummaryGithub.md
+          summary-file: ${{ steps.build.outputs.coverage-report-relative }}/SummaryGithub.md
           summary: Coverage summary not available.

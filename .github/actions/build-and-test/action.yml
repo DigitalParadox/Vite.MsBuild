@@ -38,7 +38,9 @@ runs:
       shell: pwsh
       run: |
         $resultsDir = Join-Path $env:GITHUB_WORKSPACE 'artifacts/test-results'
+        $resultsDirRelative = [System.IO.Path]::GetRelativePath($env:GITHUB_WORKSPACE, $resultsDir)
         $coverageDir = Join-Path $env:GITHUB_WORKSPACE 'artifacts/coverage'
+        $coverageDirRelative = [System.IO.Path]::GetRelativePath($env:GITHUB_WORKSPACE, $coverageDir)
         New-Item -ItemType Directory -Path $resultsDir -Force | Out-Null
         New-Item -ItemType Directory -Path $coverageDir -Force | Out-Null
 
@@ -53,14 +55,18 @@ runs:
           /p:CoverletOutput="$coverageDir/"
 
         Add-Content -Path $env:GITHUB_OUTPUT -Value "test-results=$resultsDir"
+        Add-Content -Path $env:GITHUB_OUTPUT -Value "test-results-relative=$resultsDirRelative"
         Add-Content -Path $env:GITHUB_OUTPUT -Value "coverage-directory=$coverageDir"
+        Add-Content -Path $env:GITHUB_OUTPUT -Value "coverage-directory-relative=$coverageDirRelative"
 
     - name: Generate coverage summary
       id: coverage
       shell: pwsh
       run: |
         $coverageDir = "${{ steps.test.outputs.coverage-directory }}"
+        $coverageDirRelative = "${{ steps.test.outputs.coverage-directory-relative }}"
         $reportDir = Join-Path $env:GITHUB_WORKSPACE 'artifacts/coverage-report'
+        $reportDirRelative = [System.IO.Path]::GetRelativePath($env:GITHUB_WORKSPACE, $reportDir)
         New-Item -ItemType Directory -Path $reportDir -Force | Out-Null
 
         dotnet tool update --global dotnet-reportgenerator-globaltool > $null 2>&1
@@ -72,18 +78,28 @@ runs:
         if (-not ($env:PATH.Split($pathSeparator) -contains $toolDir)) {
           $env:PATH = "$env:PATH$pathSeparator$toolDir"
         }
-        $reportsGlob = Join-Path $coverageDir '*.cobertura.xml'
-        reportgenerator "-reports:$reportsGlob" "-targetdir:$reportDir" "-reporttypes:Html;MarkdownSummaryGithub"
+          $reportsGlob = Join-Path $coverageDir '*.cobertura.xml'
+          reportgenerator "-reports:$reportsGlob" "-targetdir:$reportDir" "-reporttypes:Html;MarkdownSummaryGithub"
 
-        Add-Content -Path $env:GITHUB_OUTPUT -Value "report-directory=$reportDir"
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "report-directory=$reportDir"
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "report-directory-relative=$reportDirRelative"
 
 outputs:
   test-results:
     description: Directory containing TRX test result files.
     value: ${{ steps.test.outputs.test-results }}
+  test-results-relative:
+    description: Workspace-relative path to the TRX results directory.
+    value: ${{ steps.test.outputs.test-results-relative }}
   coverage-directory:
     description: Directory containing Cobertura coverage reports.
     value: ${{ steps.test.outputs.coverage-directory }}
+  coverage-directory-relative:
+    description: Workspace-relative path to the Cobertura coverage directory.
+    value: ${{ steps.test.outputs.coverage-directory-relative }}
   coverage-report:
     description: Directory containing generated coverage summaries.
     value: ${{ steps.coverage.outputs.report-directory }}
+  coverage-report-relative:
+    description: Workspace-relative path to the coverage summary directory.
+    value: ${{ steps.coverage.outputs.report-directory-relative }}
