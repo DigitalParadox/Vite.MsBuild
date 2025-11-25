@@ -58,6 +58,16 @@ jobs:
           name: coverage-report-ubuntu-latest
           path: coverage-report
 
+      - name: Add coverage to job summary
+        if: always()
+        shell: bash
+        run: |
+          if [ -f coverage-report/SummaryGithub.md ]; then
+            cat coverage-report/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Coverage summary not available." >> $GITHUB_STEP_SUMMARY
+          fi
+
       - name: Publish coverage summary
         uses: ./.github/actions/publish-github-check
         with:
