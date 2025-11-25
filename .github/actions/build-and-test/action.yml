@@ -49,7 +49,7 @@ runs:
         dotnet test "${{ inputs.test-project }}" `
           --configuration "${{ inputs.configuration }}" `
           --no-build `
-          --logger "junit;LogFilePath=junit-{assembly}.xml" `
+          --logger "junit;LogFileName=junit-{assembly}.xml" `
           --logger "console;verbosity=detailed" `
           --results-directory "$resultsDir" `
           /p:CollectCoverage=true `
