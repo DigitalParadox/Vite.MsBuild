@@ -39,8 +39,10 @@ runs:
       run: |
         $resultsDir = Join-Path $env:GITHUB_WORKSPACE 'artifacts/test-results'
         $resultsDirRelative = [System.IO.Path]::GetRelativePath($env:GITHUB_WORKSPACE, $resultsDir)
+        $resultsDirRelative = $resultsDirRelative -replace '\\', '/'
         $coverageDir = Join-Path $env:GITHUB_WORKSPACE 'artifacts/coverage'
         $coverageDirRelative = [System.IO.Path]::GetRelativePath($env:GITHUB_WORKSPACE, $coverageDir)
+        $coverageDirRelative = $coverageDirRelative -replace '\\', '/'
         New-Item -ItemType Directory -Path $resultsDir -Force | Out-Null
         New-Item -ItemType Directory -Path $coverageDir -Force | Out-Null
 
@@ -67,6 +69,7 @@ runs:
         $coverageDirRelative = "${{ steps.test.outputs.coverage-directory-relative }}"
         $reportDir = Join-Path $env:GITHUB_WORKSPACE 'artifacts/coverage-report'
         $reportDirRelative = [System.IO.Path]::GetRelativePath($env:GITHUB_WORKSPACE, $reportDir)
+        $reportDirRelative = $reportDirRelative -replace '\\', '/'
         New-Item -ItemType Directory -Path $reportDir -Force | Out-Null
 
         dotnet tool update --global dotnet-reportgenerator-globaltool > $null 2>&1
