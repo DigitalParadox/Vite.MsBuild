@@ -29,15 +29,67 @@ jobs:
         id: build
         uses: ./.github/actions/build-and-test
 
-      - name: Publish test results
+      - name: Upload test results
         uses: ./.github/actions/publish-test-results
         if: always()
         with:
-          test-results-path: "${{ steps.build.outputs.test-results-relative }}/**/*.trx"
+          test-results-path: "${{ steps.build.outputs.test-results-relative }}/**/*.xml"
           test-check-name: Unit Test Results
           matrix-os: ${{ matrix.os }}
           retention-days: 7
+          skip-test-report: true
+          skip-coverage-check: true
           
           upload-coverage: ${{ matrix.os == 'ubuntu-latest' }}
           coverage-artifact-path: ${{ steps.build.outputs.coverage-report-relative }}
           coverage-summary-file: ${{ steps.build.outputs.coverage-report-relative }}/SummaryGithub.md
+
+  report-test-results:
+    name: Unit Test Results
+    runs-on: ubuntu-latest
+    needs: build
+    if: always()
+    steps:
+      - name: Download all test results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: unit-test-results-*
+          path: test-results
+
+      - name: Publish test results (ubuntu-latest)
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Unit Test Results (ubuntu-latest)
+          path: 'test-results/unit-test-results-ubuntu-latest/**/*.xml'
+          reporter: java-junit
+
+      - name: Publish test results (windows-latest)
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Unit Test Results (windows-latest)
+          path: 'test-results/unit-test-results-windows-latest/**/*.xml'
+          reporter: java-junit
+
+      - name: Publish test results (macos-latest)
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Unit Test Results (macos-latest)
+          path: 'test-results/unit-test-results-macos-latest/**/*.xml'
+          reporter: java-junit
+
+      - name: Download coverage report
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-report-ubuntu-latest
+          path: coverage-report
+
+      - name: Publish coverage summary
+        uses: ./.github/actions/publish-github-check
+        with:
+          check-name: Coverage Summary
+          title: Coverage Summary
+          summary-file: coverage-report/SummaryGithub.md
+          summary: Coverage summary not available.

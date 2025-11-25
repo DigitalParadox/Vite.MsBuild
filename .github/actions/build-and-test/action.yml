@@ -49,7 +49,7 @@ runs:
         dotnet test "${{ inputs.test-project }}" `
           --configuration "${{ inputs.configuration }}" `
           --no-build `
-          --logger "trx" `
+          --logger "junit;LogFilePath=junit-{assembly}.xml" `
           --logger "console;verbosity=detailed" `
           --results-directory "$resultsDir" `
           /p:CollectCoverage=true `
@@ -89,10 +89,10 @@ runs:
 
 outputs:
   test-results:
-    description: Directory containing TRX test result files.
+    description: Directory containing JUnit test result files.
     value: ${{ steps.test.outputs.test-results }}
   test-results-relative:
-    description: Workspace-relative path to the TRX results directory.
+    description: Workspace-relative path to the JUnit results directory.
     value: ${{ steps.test.outputs.test-results-relative }}
   coverage-directory:
     description: Directory containing Cobertura coverage reports.

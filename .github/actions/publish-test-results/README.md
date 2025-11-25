@@ -1,12 +1,12 @@
 # Publish Test Results Composite Action
 
 ## Overview
-Centralizes post-test reporting by uploading `.trx` files, emitting GitHub checks, and optionally handling coverage artifacts plus a coverage summary check. Use this action after running the `build-and-test` composite to keep workflows concise.
+Centralizes post-test reporting by uploading JUnit XML files, emitting GitHub checks, and optionally handling coverage artifacts plus a coverage summary check. Use this action after running the `build-and-test` composite to keep workflows concise.
 
 ## Inputs
 | Name | Required | Default | Description |
 | --- | --- | --- | --- |
-| `test-results-path` | Yes | – | Workspace-relative glob or directory containing `.trx` files. |
+| `test-results-path` | Yes | – | Workspace-relative glob or directory containing JUnit XML files. |
 | `test-check-name` | No | `Unit Test Results` | GitHub check name for the unit test summary (matrix info appended automatically when provided). |
 | `retention-days` | No | `7` | Retention period for uploaded artifacts. |
 | `fail-on-test-report-error` | No | `false` | When `true`, fail the workflow if `dorny/test-reporter@v1` encounters an error. |
@@ -15,6 +15,7 @@ Centralizes post-test reporting by uploading `.trx` files, emitting GitHub check
 | `coverage-summary-file` | No | `''` | Path to the Markdown coverage summary (e.g., `artifacts/coverage-report/SummaryGithub.md`). |
 | `coverage-check-name` | No | `Coverage Summary` | Name of the coverage GitHub check. |
 | `matrix-os` | No | `''` | Optional string appended to artifact names/check titles, typically the matrix OS. |
+| `skip-test-report` | No | `false` | When `true`, skip creating the test report check run (useful when aggregating results in a separate job). |
 
 ## Outputs
 | Name | Description |
@@ -26,7 +27,7 @@ Centralizes post-test reporting by uploading `.trx` files, emitting GitHub check
 - name: Publish test results
   uses: ./.github/actions/publish-test-results
   with:
-    test-results-path: "${{ steps.build.outputs.test-results-relative }}/**/*.trx"
+    test-results-path: "${{ steps.build.outputs.test-results-relative }}/**/*.xml"
     matrix-os: ${{ matrix.os }}
     retention-days: 7
     fail-on-test-report-error: ${{ env.FAIL_ON_TEST_REPORT_ERROR }}

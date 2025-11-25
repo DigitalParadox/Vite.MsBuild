@@ -2,7 +2,7 @@ name: Publish Test Results
 description: Upload unit test results, publish GitHub checks, and optionally upload coverage artifacts.
 inputs:
   test-results-path:
-    description: Workspace-relative path containing .trx files (including optional glob wildcards).
+    description: Workspace-relative path containing JUnit XML files (including optional glob wildcards).
     required: true
   test-check-name:
     description: Name for the unit test GitHub check.
@@ -36,6 +36,10 @@ inputs:
     description: Optional string appended to artifact/check names (typically the matrix OS).
     required: false
     default: ''
+  skip-test-report:
+    description: When true, skip creating the test report check run (useful when aggregating results in a separate job).
+    required: false
+    default: 'false'
 outputs:
   test-results-artifact:
     description: Name of the uploaded test results artifact.
@@ -46,12 +50,12 @@ runs:
     - name: Publish unit test results
       id: unit_test_report
       uses: dorny/test-reporter@v1
-      if: always()
+      if: always() && inputs.skip-test-report != 'true'
       continue-on-error: true
       with:
         name: ${{ inputs.test-check-name }}${{ inputs.matrix-os && format(' ({0})', inputs.matrix-os) || '' }}
         path: ${{ inputs.test-results-path }}
-        reporter: dotnet-trx
+        reporter: java-junit
 
     - name: Check test reporter result
       if: always() && steps.unit_test_report.outcome == 'failure' && inputs.fail-on-test-report-error == 'true'
