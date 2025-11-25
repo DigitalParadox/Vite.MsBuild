@@ -67,7 +67,11 @@ runs:
         if ($LASTEXITCODE -ne 0) {
           dotnet tool install --global dotnet-reportgenerator-globaltool > $null 2>&1
         }
-        $env:PATH = "$env:PATH;$HOME/.dotnet/tools"
+        $toolDir = Join-Path $HOME '.dotnet/tools'
+        $pathSeparator = [System.IO.Path]::PathSeparator
+        if (-not ($env:PATH.Split($pathSeparator) -contains $toolDir)) {
+          $env:PATH = "$env:PATH$pathSeparator$toolDir"
+        }
         $reportsGlob = Join-Path $coverageDir '*.cobertura.xml'
         reportgenerator "-reports:$reportsGlob" "-targetdir:$reportDir" "-reporttypes:Html;MarkdownSummaryGithub"
 
