@@ -67,12 +67,14 @@ jobs:
         uses: ./.github/actions/build-and-test
         with:
           version: ${{ needs.version.outputs.fullSemVer }}
+          matrix-os: ${{ matrix.os }}
 
       - name: Publish test results
         uses: ./.github/actions/publish-test-results
         if: always()
         with:
           test-results-path: "${{ steps.build.outputs.test-results-relative }}/**/*.trx"
+          test-results-directory: "${{ steps.build.outputs.test-results-relative }}"
           test-check-name: Unit Test Results
           matrix-os: ${{ matrix.os }}
           retention-days: 7
