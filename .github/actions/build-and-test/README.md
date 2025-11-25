@@ -13,8 +13,8 @@ Runs the full .NET build pipeline for this repository: restores the solution, bu
 ## Outputs
 | Name | Description |
 | --- | --- |
-| `test-results` | Absolute path to the directory containing generated JUnit XML test result files. |
-| `test-results-relative` | Workspace-relative path to the JUnit results directory (useful for globbing in GitHub Actions). |
+| `test-results` | Absolute path to the directory containing generated `.trx` test result files. |
+| `test-results-relative` | Workspace-relative path to the `.trx` results directory (useful for globbing in GitHub Actions). |
 | `coverage-directory` | Absolute path to Cobertura coverage output produced by Coverlet. |
 | `coverage-directory-relative` | Workspace-relative path to the Cobertura coverage directory. |
 | `coverage-report` | Absolute path to the directory containing the ReportGenerator HTML and `SummaryGithub.md` coverage summary. |

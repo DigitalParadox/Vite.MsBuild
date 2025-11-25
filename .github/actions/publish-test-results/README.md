@@ -1,12 +1,12 @@
 # Publish Test Results Composite Action
 
 ## Overview
-Centralizes post-test reporting by uploading JUnit XML files, emitting GitHub checks, and optionally handling coverage artifacts plus a coverage summary check. Use this action after running the `build-and-test` composite to keep workflows concise.
+Centralizes post-test reporting by uploading `.trx` files, emitting GitHub checks, and optionally handling coverage artifacts plus a coverage summary check. Use this action after running the `build-and-test` composite to keep workflows concise.
 
 ## Inputs
 | Name | Required | Default | Description |
 | --- | --- | --- | --- |
-| `test-results-path` | Yes | – | Workspace-relative glob or directory containing JUnit XML files. |
+| `test-results-path` | Yes | – | Workspace-relative glob or directory containing `.trx` files. |
 | `test-check-name` | No | `Unit Test Results` | GitHub check name for the unit test summary (matrix info appended automatically when provided). |
 | `retention-days` | No | `7` | Retention period for uploaded artifacts. |
 | `fail-on-test-report-error` | No | `false` | When `true`, fail the workflow if `dorny/test-reporter@v1` encounters an error. |
@@ -27,7 +27,7 @@ Centralizes post-test reporting by uploading JUnit XML files, emitting GitHub ch
 - name: Publish test results
   uses: ./.github/actions/publish-test-results
   with:
-    test-results-path: "${{ steps.build.outputs.test-results-relative }}/**/*.xml"
+    test-results-path: "${{ steps.build.outputs.test-results-relative }}/**/*.trx"
     matrix-os: ${{ matrix.os }}
     retention-days: 7
     fail-on-test-report-error: ${{ env.FAIL_ON_TEST_REPORT_ERROR }}
