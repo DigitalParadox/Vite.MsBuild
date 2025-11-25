@@ -26,6 +26,9 @@ branches:
     increment: Inherit
     track-merge-target: true
     is-release-branch: true
+    source-branches:
+      - main
+      - dev
     prevent-increment:
       of-merged-branch: false
   release:
