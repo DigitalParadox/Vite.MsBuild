@@ -1,0 +1,123 @@
+name: Publish GitHub Check
+description: Create a GitHub Check run using file-based or inline content.
+inputs:
+  check-name:
+    description: Name of the GitHub check run.
+    required: true
+  title:
+    description: Title displayed in the check output.
+    required: false
+    default: ''
+  summary-file:
+    description: Path to a file whose contents populate the check summary.
+    required: false
+    default: ''
+  summary:
+    description: Fallback summary content when summary-file is not supplied or missing.
+    required: false
+    default: Summary not available.
+  text-file:
+    description: Path to a file whose contents populate the check text field.
+    required: false
+    default: ''
+  text:
+    description: Fallback text content when text-file is not supplied.
+    required: false
+    default: ''
+  conclusion:
+    description: "Conclusion to set when status is completed. Examples: success, failure, neutral."
+    required: false
+    default: "success"
+  status:
+    description: Check status. Must be one of queued, in_progress, completed.
+    required: false
+    default: "completed"
+  sha:
+    description: Commit SHA the check should be associated with.
+    required: false
+    default: ''
+  details-url:
+    description: Optional URL for more details about the check.
+    required: false
+    default: ''
+runs:
+  using: composite
+  steps:
+    - name: Publish GitHub check
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+
+          const summaryFile = process.env.SUMMARY_FILE;
+          const summaryFallback = process.env.SUMMARY_FALLBACK;
+          const textFile = process.env.TEXT_FILE;
+          const textFallback = process.env.TEXT_FALLBACK;
+          const checkName = process.env.CHECK_NAME;
+          const title = process.env.CHECK_TITLE || checkName;
+          const status = process.env.CHECK_STATUS;
+          const requestedConclusion = process.env.CHECK_CONCLUSION;
+          const sha = process.env.CHECK_SHA || context.sha;
+          const detailsUrl = process.env.DETAILS_URL;
+
+          function readFileSafe(filePath) {
+            if (!filePath) return undefined;
+            try {
+              return fs.readFileSync(path.resolve(process.env.GITHUB_WORKSPACE, filePath), 'utf8');
+            } catch (error) {
+              core.warning(`Check content file missing at ${filePath}. ${error.message}`);
+              return undefined;
+            }
+          }
+
+          let summary = readFileSafe(summaryFile);
+          let usedFallback = false;
+          if (!summary || summary.trim().length === 0) {
+            summary = summaryFallback;
+            usedFallback = true;
+          }
+
+          let text = readFileSafe(textFile);
+          if (!text || text.trim().length === 0) {
+            text = textFallback || undefined;
+          }
+
+          const output = {
+            title,
+            summary,
+          };
+          if (text) {
+            output.text = text;
+          }
+
+          const createParams = {
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            name: checkName,
+            head_sha: sha,
+            status,
+            output,
+          };
+
+          if (detailsUrl) {
+            createParams.details_url = detailsUrl;
+          }
+
+          if (status === 'completed') {
+            const effectiveConclusion = usedFallback && summaryFile ? 'neutral' : requestedConclusion;
+            createParams.conclusion = effectiveConclusion;
+          }
+
+          await github.rest.checks.create(createParams);
+      env:
+        SUMMARY_FILE: ${{ inputs.summary-file }}
+        SUMMARY_FALLBACK: ${{ inputs.summary }}
+        TEXT_FILE: ${{ inputs.text-file }}
+        TEXT_FALLBACK: ${{ inputs.text }}
+        CHECK_NAME: ${{ inputs.check-name }}
+        CHECK_TITLE: ${{ inputs.title }}
+        CHECK_STATUS: ${{ inputs.status }}
+        CHECK_CONCLUSION: ${{ inputs.conclusion }}
+        CHECK_SHA: ${{ inputs.sha }}
+        DETAILS_URL: ${{ inputs['details-url'] }}

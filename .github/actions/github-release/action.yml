@@ -1,0 +1,107 @@
+name: Publish GitHub Release
+description: Publish a GitHub release (stable or prerelease) with assets and conventional commit notes.
+inputs:
+  tag:
+    description: Release tag name (e.g. v1.2.3).
+    required: true
+  name:
+    description: Display name for the release.
+    required: false
+    default: ''
+  draft:
+    description: Whether the release should be a draft.
+    required: false
+    default: 'false'
+  prerelease:
+    description: Whether the release should be marked as a prerelease.
+    required: false
+    default: 'false'
+  files:
+    description: Newline-separated list of asset globs to upload.
+    required: false
+    default: ''
+  token:
+    description: GitHub token. Defaults to the workflow GITHUB_TOKEN.
+    required: false
+  release_notes_path:
+    description: Path to a markdown file containing release notes.
+    required: false
+    default: ''
+  release_notes_content:
+    description: Release notes content (used if release_notes_path not supplied).
+    required: false
+    default: ''
+runs:
+  using: composite
+  steps:
+    - name: Prepare release notes
+      id: notes
+      shell: bash
+      env:
+        PROVIDED_PATH: ${{ inputs.release_notes_path }}
+        PROVIDED_CONTENT: ${{ inputs.release_notes_content }}
+      run: |
+        set -euo pipefail
+        if [ -n "$PROVIDED_PATH" ]; then
+          if [ ! -f "$PROVIDED_PATH" ]; then
+            echo "Release notes file not found: $PROVIDED_PATH" >&2
+            exit 1
+          fi
+          final_path="$PROVIDED_PATH"
+        else
+          notes_dir="${GITHUB_WORKSPACE}/artifacts"
+          mkdir -p "$notes_dir"
+          final_path="${notes_dir}/release-notes.md"
+          if [ -n "$PROVIDED_CONTENT" ]; then
+            printf '%s\n' "$PROVIDED_CONTENT" > "$final_path"
+          else
+            printf '# Release Notes\n_No release notes provided._\n' > "$final_path"
+          fi
+        fi
+
+        echo "path=$final_path" >> "$GITHUB_OUTPUT"
+
+    - name: Setup GitReleaseManager
+      uses: gittools/actions/gitrelease-manager/setup@v1
+      with:
+        versionSpec: '0.20.x'
+
+    - name: Resolve release assets
+      id: assets
+      shell: bash
+      env:
+        ASSET_INPUT: ${{ inputs.files }}
+      run: |
+        set -euo pipefail
+        assets_list=""
+        if [ -n "$ASSET_INPUT" ]; then
+          while IFS= read -r line; do
+            [ -z "$line" ] && continue
+            for file in $line; do
+              matches=$(compgen -G "$file" || true)
+              if [ -n "$matches" ]; then
+                while IFS= read -r match; do
+                  assets_list+="$match"$'\n'
+                done <<< "$matches"
+              else
+                echo "[SKIP] Asset pattern '$file' matched no files" >&2
+              fi
+            done
+          done <<< "$ASSET_INPUT"
+        fi
+        assets_list=${assets_list%$'\n'}
+        echo "list=$assets_list" >> "$GITHUB_OUTPUT"
+
+    - name: Publish GitHub release
+      uses: gittools/actions/gitrelease-manager/create@v1
+      with:
+        token: ${{ inputs.token || github.token }}
+        owner: ${{ github.repository_owner }}
+        repository: ${{ github.event.repository.name }}
+        tagName: ${{ inputs.tag }}
+        targetCommitish: ${{ github.sha }}
+        name: ${{ inputs.name || inputs.tag }}
+        prerelease: ${{ inputs.prerelease }}
+        draft: ${{ inputs.draft }}
+        inputFilePath: ${{ steps.notes.outputs.path }}
+        assets: ${{ steps.assets.outputs.list }}

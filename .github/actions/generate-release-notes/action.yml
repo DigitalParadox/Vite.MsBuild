@@ -1,0 +1,69 @@
+name: Generate Release Notes
+description: Produce conventional-commit release notes and persist them to a markdown file.
+inputs:
+  token:
+    description: GitHub token used to query commits. Defaults to workflow GITHUB_TOKEN.
+    required: false
+  extra_notes:
+    description: Additional markdown appended to the generated notes.
+    required: false
+    default: ''
+  output_directory:
+    description: Directory (relative to workspace) where the release notes file is written.
+    required: false
+    default: artifacts
+  file_name:
+    description: File name for the generated release notes.
+    required: false
+    default: release-notes.md
+runs:
+  using: composite
+  steps:
+    - name: Generate changelog
+      id: changelog
+      uses: TriPSs/conventional-changelog-action@v5
+      with:
+        github-token: ${{ inputs.token || github.token }}
+        tag-prefix: ''
+        release-count: 1
+        skip-commit: true
+        skip-tag: true
+        skip-version-file: true
+        output-file: false
+
+    - name: Write release notes file
+      id: notes
+      shell: bash
+      env:
+        EXTRA_NOTES: ${{ inputs.extra_notes }}
+        CLEAN_CHANGELOG: ${{ steps.changelog.outputs.clean_changelog }}
+        OUTPUT_DIR: ${{ inputs.output_directory }}
+        FILE_NAME: ${{ inputs.file_name }}
+      run: |
+        set -euo pipefail
+        notes_dir="${GITHUB_WORKSPACE}/${OUTPUT_DIR}"
+        notes_path="${notes_dir}/${FILE_NAME}"
+        mkdir -p "$notes_dir"
+
+        if [ -n "$CLEAN_CHANGELOG" ]; then
+          printf '%s\n' "$CLEAN_CHANGELOG" > "$notes_path"
+        else
+          printf '# Release Notes\n_No conventional commits found for this release._\n' > "$notes_path"
+        fi
+
+        if [ -n "$EXTRA_NOTES" ]; then
+          printf '\n%s\n' "$EXTRA_NOTES" >> "$notes_path"
+        fi
+
+        echo "notes_path=$notes_path" >> "$GITHUB_OUTPUT"
+        echo "notes_content<<EOF" >> "$GITHUB_OUTPUT"
+        cat "$notes_path" >> "$GITHUB_OUTPUT"
+        echo "EOF" >> "$GITHUB_OUTPUT"
+
+outputs:
+  notes_path:
+    description: Absolute path to the generated release notes file.
+    value: ${{ steps.notes.outputs.notes_path }}
+  notes_content:
+    description: Markdown content of the generated release notes.
+    value: ${{ steps.notes.outputs.notes_content }}
