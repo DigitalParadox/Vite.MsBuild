@@ -14,7 +14,44 @@ env:
   FAIL_ON_TEST_REPORT_ERROR: 'false'
 
 jobs:
+  version:
+    name: Version Info
+    runs-on: ubuntu-latest
+    outputs:
+      semVer: ${{ steps.gitversion.outputs.semVer }}
+      fullSemVer: ${{ steps.gitversion.outputs.fullSemVer }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup GitVersion
+        uses: gittools/actions/gitversion/setup@v1
+        with:
+          versionSpec: '6.x'
+
+      - name: Determine version with GitVersion
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v1
+
+      - name: Add version info to job summary
+        shell: bash
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << 'EOF'
+          ## Version Information
+          
+          | Property | Value |
+          |----------|-------|
+          | SemVer | ${{ steps.gitversion.outputs.semVer }} |
+          | FullSemVer | ${{ steps.gitversion.outputs.fullSemVer }} |
+          | InformationalVersion | ${{ steps.gitversion.outputs.informationalVersion }} |
+          | BranchName | ${{ steps.gitversion.outputs.branchName }} |
+          | CommitsSinceVersionSource | ${{ steps.gitversion.outputs.commitsSinceVersionSource }} |
+          EOF
+
   build:
+    needs: version
     strategy:
       fail-fast: false
       matrix:
@@ -28,6 +65,8 @@ jobs:
       - name: Build and Test
         id: build
         uses: ./.github/actions/build-and-test
+        with:
+          version: ${{ needs.version.outputs.fullSemVer }}
 
       - name: Publish test results
         uses: ./.github/actions/publish-test-results
@@ -41,6 +80,24 @@ jobs:
           upload-coverage: ${{ matrix.os == 'ubuntu-latest' }}
           coverage-artifact-path: ${{ steps.build.outputs.coverage-report-relative }}
           coverage-summary-file: ${{ steps.build.outputs.coverage-report-relative }}/SummaryGithub.md
+
+  pack:
+    name: Pack NuGet Packages
+    runs-on: ubuntu-latest
+    needs: [version, build]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Pack NuGet packages
+        uses: ./.github/actions/pack-and-push-nuget
+        with:
+          version: ${{ needs.version.outputs.fullSemVer }}
+          push-to-nuget: 'false'
+          push-to-github: 'false'
+          upload-artifact: 'true'
+          artifact-name: 'nuget-packages'
+          retention-days: '7'
 
   report-coverage:
     name: Coverage Summary

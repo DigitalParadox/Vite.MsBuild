@@ -13,6 +13,10 @@ inputs:
     description: Build configuration.
     required: false
     default: Release
+  version:
+    description: Version to stamp into assemblies (GitVersion FullSemVer).
+    required: false
+    default: ''
 runs:
   using: composite
   steps:
@@ -29,9 +33,11 @@ runs:
     - name: Build solution
       shell: pwsh
       run: |
+        $versionArg = if ('${{ inputs.version }}') { "/p:Version=${{ inputs.version }}" } else { "" }
         dotnet build "${{ inputs.solution }}" `
           --configuration "${{ inputs.configuration }}" `
-          --no-restore
+          --no-restore `
+          $versionArg
 
     - name: Run unit tests with coverage
       id: test

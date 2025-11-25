@@ -42,6 +42,18 @@ inputs:
     description: Optional path to a release notes file to include in the package.
     required: false
     default: ''
+  upload-artifact:
+    description: When true, upload the packed packages as workflow artifacts.
+    required: false
+    default: 'false'
+  artifact-name:
+    description: Name for the uploaded artifact.
+    required: false
+    default: 'nuget-packages'
+  retention-days:
+    description: Artifact retention period in days.
+    required: false
+    default: '7'
 outputs:
   package-directory:
     description: Directory containing generated packages.
@@ -150,3 +162,11 @@ runs:
           --source "${{ inputs.github-source }}" \
           --api-key "$GITHUB_TOKEN" \
           --skip-duplicate
+
+    - name: Upload NuGet packages artifact
+      if: ${{ inputs.upload-artifact == 'true' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ steps.pack.outputs.package-directory }}/*.nupkg
+        retention-days: ${{ inputs.retention-days }}

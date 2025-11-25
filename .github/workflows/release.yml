@@ -87,13 +87,39 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Determine release version
+      - name: Setup GitVersion
+        uses: gittools/actions/gitversion/setup@v1
+        with:
+          versionSpec: '6.x'
+
+      - name: Determine version with GitVersion
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v1
+
+      - name: Set version output
         id: version
         shell: bash
         run: |
-          tag="${GITHUB_REF#refs/tags/}"
-          version="${tag#v}"
-          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "version=${{ steps.gitversion.outputs.semVer }}" >> "$GITHUB_OUTPUT"
+
+      - name: Add version info to job summary
+        shell: bash
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << 'EOF'
+          ## Version Information
+          
+          | Property | Value |
+          |----------|-------|
+          | SemVer | ${{ steps.gitversion.outputs.semVer }} |
+          | FullSemVer | ${{ steps.gitversion.outputs.fullSemVer }} |
+          | InformationalVersion | ${{ steps.gitversion.outputs.informationalVersion }} |
+          | Major | ${{ steps.gitversion.outputs.major }} |
+          | Minor | ${{ steps.gitversion.outputs.minor }} |
+          | Patch | ${{ steps.gitversion.outputs.patch }} |
+          | PreReleaseTag | ${{ steps.gitversion.outputs.preReleaseTag }} |
+          | CommitsSinceVersionSource | ${{ steps.gitversion.outputs.commitsSinceVersionSource }} |
+          | BranchName | ${{ steps.gitversion.outputs.branchName }} |
+          EOF
 
       - name: Generate release notes
         id: release_notes
@@ -112,7 +138,7 @@ jobs:
         id: pack
         uses: ./.github/actions/pack-and-push-nuget
         with:
-          version: ${{ steps.version.outputs.version }}
+          version: ${{ steps.gitversion.outputs.semVer }}
           push-to-nuget: 'true'
           nuget-api-key: ${{ secrets.NUGET_API_KEY }}
           push-to-github: 'true'
