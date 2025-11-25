@@ -1,0 +1,114 @@
+name: Build and Test
+description: Restore, build, and test the solution with coverage enabled.
+inputs:
+  solution:
+    description: Path to the solution file.
+    required: false
+    default: ViteKit.MsBuild.sln
+  test-project:
+    description: Path to the unit test project to execute.
+    required: false
+    default: tests/ViteKit.MsBuild.PureUnitTests/ViteKit.MsBuild.PureUnitTests.csproj
+  configuration:
+    description: Build configuration.
+    required: false
+    default: Release
+  version:
+    description: Version to stamp into assemblies (GitVersion FullSemVer).
+    required: false
+    default: ''
+runs:
+  using: composite
+  steps:
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+
+    - name: Restore solution
+      shell: pwsh
+      run: |
+        dotnet restore "${{ inputs.solution }}"
+
+    - name: Build solution
+      shell: pwsh
+      run: |
+        $versionArg = if ('${{ inputs.version }}') { "/p:Version=${{ inputs.version }}" } else { "" }
+        dotnet build "${{ inputs.solution }}" `
+          --configuration "${{ inputs.configuration }}" `
+          --no-restore `
+          $versionArg
+
+    - name: Run unit tests with coverage
+      id: test
+      shell: pwsh
+      run: |
+        $resultsDir = Join-Path $env:GITHUB_WORKSPACE 'artifacts/test-results'
+        $resultsDirRelative = [System.IO.Path]::GetRelativePath($env:GITHUB_WORKSPACE, $resultsDir)
+        $resultsDirRelative = $resultsDirRelative -replace '\\', '/'
+        $coverageDir = Join-Path $env:GITHUB_WORKSPACE 'artifacts/coverage'
+        $coverageDirRelative = [System.IO.Path]::GetRelativePath($env:GITHUB_WORKSPACE, $coverageDir)
+        $coverageDirRelative = $coverageDirRelative -replace '\\', '/'
+        New-Item -ItemType Directory -Path $resultsDir -Force | Out-Null
+        New-Item -ItemType Directory -Path $coverageDir -Force | Out-Null
+
+        dotnet test "${{ inputs.test-project }}" `
+          --configuration "${{ inputs.configuration }}" `
+          --no-build `
+          --logger "trx" `
+          --logger "console;verbosity=detailed" `
+          --results-directory "$resultsDir" `
+          /p:CollectCoverage=true `
+          /p:CoverletOutputFormat=cobertura `
+          /p:CoverletOutput="$coverageDir/"
+
+        Add-Content -Path $env:GITHUB_OUTPUT -Value "test-results=$resultsDir"
+        Add-Content -Path $env:GITHUB_OUTPUT -Value "test-results-relative=$resultsDirRelative"
+        Add-Content -Path $env:GITHUB_OUTPUT -Value "coverage-directory=$coverageDir"
+        Add-Content -Path $env:GITHUB_OUTPUT -Value "coverage-directory-relative=$coverageDirRelative"
+
+    - name: Generate coverage summary
+      id: coverage
+      shell: pwsh
+      run: |
+        $coverageDir = "${{ steps.test.outputs.coverage-directory }}"
+        $coverageDirRelative = "${{ steps.test.outputs.coverage-directory-relative }}"
+        $reportDir = Join-Path $env:GITHUB_WORKSPACE 'artifacts/coverage-report'
+        $reportDirRelative = [System.IO.Path]::GetRelativePath($env:GITHUB_WORKSPACE, $reportDir)
+        $reportDirRelative = $reportDirRelative -replace '\\', '/'
+        New-Item -ItemType Directory -Path $reportDir -Force | Out-Null
+
+        dotnet tool update --global dotnet-reportgenerator-globaltool > $null 2>&1
+        if ($LASTEXITCODE -ne 0) {
+          dotnet tool install --global dotnet-reportgenerator-globaltool > $null 2>&1
+        }
+        $toolDir = Join-Path $HOME '.dotnet/tools'
+        $pathSeparator = [System.IO.Path]::PathSeparator
+        if (-not ($env:PATH.Split($pathSeparator) -contains $toolDir)) {
+          $env:PATH = "$env:PATH$pathSeparator$toolDir"
+        }
+          $reportsGlob = Join-Path $coverageDir '*.cobertura.xml'
+          reportgenerator "-reports:$reportsGlob" "-targetdir:$reportDir" "-reporttypes:Html;MarkdownSummaryGithub"
+
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "report-directory=$reportDir"
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "report-directory-relative=$reportDirRelative"
+
+outputs:
+  test-results:
+    description: Directory containing TRX test result files.
+    value: ${{ steps.test.outputs.test-results }}
+  test-results-relative:
+    description: Workspace-relative path to the TRX results directory.
+    value: ${{ steps.test.outputs.test-results-relative }}
+  coverage-directory:
+    description: Directory containing Cobertura coverage reports.
+    value: ${{ steps.test.outputs.coverage-directory }}
+  coverage-directory-relative:
+    description: Workspace-relative path to the Cobertura coverage directory.
+    value: ${{ steps.test.outputs.coverage-directory-relative }}
+  coverage-report:
+    description: Directory containing generated coverage summaries.
+    value: ${{ steps.coverage.outputs.report-directory }}
+  coverage-report-relative:
+    description: Workspace-relative path to the coverage summary directory.
+    value: ${{ steps.coverage.outputs.report-directory-relative }}

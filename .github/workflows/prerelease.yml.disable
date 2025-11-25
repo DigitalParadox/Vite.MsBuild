@@ -1,0 +1,98 @@
+name: Prerelease
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  packages: write
+  checks: write
+
+env:
+  FAIL_ON_TEST_REPORT_ERROR: 'false'
+
+jobs:
+  build:
+    name: Build, Test, and Report (${{ matrix.os }})
+    if: contains(github.ref_name, '-')
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build and Test
+        id: build
+        uses: ./.github/actions/build-and-test
+
+      - name: Publish test results
+        uses: ./.github/actions/publish-test-results
+        if: always()
+        with:
+          test-results-path: "${{ steps.build.outputs.test-results-relative }}/**/*.trx"
+          test-check-name: Unit Test Results
+          matrix-os: ${{ matrix.os }}
+          retention-days: 14
+          fail-on-test-report-error: ${{ env.FAIL_ON_TEST_REPORT_ERROR }}
+          upload-coverage: ${{ matrix.os == 'ubuntu-latest' }}
+          coverage-artifact-path: ${{ steps.build.outputs.coverage-report-relative }}
+          coverage-summary-file: ${{ steps.build.outputs.coverage-report-relative }}/SummaryGithub.md
+
+  publish:
+    name: Pack, Push, and Publish Prerelease
+    runs-on: ubuntu-latest
+    needs: build
+    if: contains(github.ref_name, '-')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine release version
+        id: version
+        shell: bash
+        run: |
+          tag="${GITHUB_REF#refs/tags/}"
+          version="${tag#v}"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Generate release notes
+        id: release_notes
+        uses: ./.github/actions/generate-release-notes
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload release notes artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-notes
+          path: ${{ steps.release_notes.outputs.notes_path }}
+          retention-days: 14
+
+      - name: Pack and publish NuGet packages
+        id: pack
+        uses: ./.github/actions/pack-and-push-nuget
+        with:
+          version: ${{ steps.version.outputs.version }}
+          push-to-nuget: 'true'
+          nuget-api-key: ${{ secrets.NUGET_API_KEY }}
+          push-to-github: 'true'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          release-notes: ${{ steps.release_notes.outputs.notes_content }}
+          release-notes-file: ${{ steps.release_notes.outputs.notes_path }}
+
+      - name: Publish GitHub prerelease
+        uses: ./.github/actions/github-release
+        with:
+          tag: ${{ github.ref_name }}
+          name: Pre-release ${{ steps.version.outputs.version }}
+          release_notes_path: ${{ steps.release_notes.outputs.notes_path }}
+          release_notes_content: ${{ steps.release_notes.outputs.notes_content }}
+          prerelease: 'true'
+          files: "${{ steps.pack.outputs.package-directory }}/*.nupkg"

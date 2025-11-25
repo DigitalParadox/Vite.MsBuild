@@ -1,0 +1,172 @@
+name: Pack and Push NuGet Package
+description: Pack the NuGet package and optionally publish it to configured feeds.
+inputs:
+  project-path:
+    description: Path to the project to pack.
+    required: false
+    default: src/ViteKit.MsBuild/ViteKit.MsBuild.csproj
+  configuration:
+    description: Build configuration to pack.
+    required: false
+    default: Release
+  version:
+    description: NuGet package version to apply.
+    required: true
+  output-directory:
+    description: Directory (relative to workspace) to place generated packages.
+    required: false
+    default: artifacts/packages
+  push-to-nuget:
+    description: Whether to push to NuGet.org.
+    required: false
+    default: 'false'
+  nuget-api-key:
+    description: API key for NuGet.org. Required when push-to-nuget is true.
+    required: false
+  push-to-github:
+    description: Whether to push to GitHub Packages.
+    required: false
+    default: 'false'
+  github-source:
+    description: GitHub Packages source URL.
+    required: false
+    default: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+  github-token:
+    description: Token for GitHub Packages. Defaults to GITHUB_TOKEN when omitted.
+    required: false
+  release-notes:
+    description: Release notes content to embed in NuGet metadata.
+    required: false
+    default: ''
+  release-notes-file:
+    description: Optional path to a release notes file to include in the package.
+    required: false
+    default: ''
+  upload-artifact:
+    description: When true, upload the packed packages as workflow artifacts.
+    required: false
+    default: 'false'
+  artifact-name:
+    description: Name for the uploaded artifact.
+    required: false
+    default: 'nuget-packages'
+  retention-days:
+    description: Artifact retention period in days.
+    required: false
+    default: '7'
+outputs:
+  package-directory:
+    description: Directory containing generated packages.
+    value: ${{ steps.pack.outputs.package-directory }}
+  package-version:
+    description: Package version that was produced.
+    value: ${{ inputs.version }}
+runs:
+  using: composite
+  steps:
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+
+    - name: Ensure output directory
+      id: prepare
+      shell: bash
+      run: |
+        package_dir="${{ github.workspace }}/${{ inputs.output-directory }}"
+        mkdir -p "$package_dir"
+        echo "package-directory=$package_dir" >> "$GITHUB_OUTPUT"
+
+    - name: Pack project
+      id: pack
+      shell: bash
+      env:
+        RELEASE_NOTES: ${{ inputs['release-notes'] }}
+        RELEASE_NOTES_FILE: ${{ inputs['release-notes-file'] }}
+      run: |
+        set -euo pipefail
+        package_dir="${{ steps.prepare.outputs.package-directory }}"
+
+        release_notes_property=""
+        if [ -n "$RELEASE_NOTES" ]; then
+          notes_value=$(python -c "import os, json; text = os.environ.get('RELEASE_NOTES', '').strip(); print(json.dumps(text)[1:-1])")
+          if [ -n "$notes_value" ]; then
+            release_notes_property="/p:PackageReleaseNotes=$notes_value"
+          fi
+        fi
+
+        if [ -z "$release_notes_property" ] && [ -n "$RELEASE_NOTES_FILE" ]; then
+          if [ ! -f "$RELEASE_NOTES_FILE" ]; then
+            echo "Release notes file not found: $RELEASE_NOTES_FILE" >&2
+            exit 1
+          fi
+          notes_value=$(python -c "import os, json, pathlib; path = pathlib.Path(os.environ['RELEASE_NOTES_FILE']); text = path.read_text(encoding='utf-8').strip(); print(json.dumps(text)[1:-1])")
+          if [ -n "$notes_value" ]; then
+            release_notes_property="/p:PackageReleaseNotes=$notes_value"
+          fi
+        fi
+
+        release_notes_file_arg=""
+        if [ -n "$RELEASE_NOTES_FILE" ]; then
+          if [ ! -f "$RELEASE_NOTES_FILE" ]; then
+            echo "Release notes file not found: $RELEASE_NOTES_FILE" >&2
+            exit 1
+          fi
+          release_notes_file_arg="/p:PackageReleaseNotesFile=$RELEASE_NOTES_FILE"
+        fi
+
+        args=(
+          dotnet pack "${{ inputs.project-path }}"
+          --configuration "${{ inputs.configuration }}"
+          --no-build
+          --output "$package_dir"
+          /p:PackageVersion="${{ inputs.version }}"
+          /p:Version="${{ inputs.version }}"
+          /p:IncludeSymbols=true
+          /p:SymbolPackageFormat=snupkg
+        )
+
+        if [ -n "$release_notes_property" ]; then
+          args+=("$release_notes_property")
+        fi
+
+        if [ -n "$release_notes_file_arg" ]; then
+          args+=("$release_notes_file_arg")
+        fi
+
+        "${args[@]}"
+        echo "package-directory=$package_dir" >> "$GITHUB_OUTPUT"
+
+    - name: Push to NuGet.org
+      if: ${{ inputs.push-to-nuget == 'true' }}
+      shell: bash
+      run: |
+        package_dir="${{ steps.pack.outputs.package-directory }}"
+        if [ -z "${{ inputs.nuget-api-key }}" ]; then
+          echo "NuGet API key is required when push-to-nuget is true." >&2
+          exit 1
+        fi
+        dotnet nuget push "$package_dir"/*.nupkg \
+          --source https://api.nuget.org/v3/index.json \
+          --api-key "${{ inputs.nuget-api-key }}" \
+          --skip-duplicate
+
+    - name: Push to GitHub Packages
+      if: ${{ inputs.push-to-github == 'true' }}
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token || github.token }}
+      shell: bash
+      run: |
+        package_dir="${{ steps.pack.outputs.package-directory }}"
+        dotnet nuget push "$package_dir"/*.nupkg \
+          --source "${{ inputs.github-source }}" \
+          --api-key "$GITHUB_TOKEN" \
+          --skip-duplicate
+
+    - name: Upload NuGet packages artifact
+      if: ${{ inputs.upload-artifact == 'true' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ steps.pack.outputs.package-directory }}/*.nupkg
+        retention-days: ${{ inputs.retention-days }}
