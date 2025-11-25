@@ -44,6 +44,11 @@ This project creates a **NuGet package** with MSBuild integration files, not a c
 - **README formatting**: Ensure README.md renders correctly on GitHub without duplicate headers or malformed sections
 - **Logging format**: Use ASCII-safe prefixes ([OK], [BUILD], [ERROR], [SKIP], [LINK]) instead of emojis for cross-platform terminal compatibility
 
+## Workflow Authoring Guidelines
+
+- Prefer the composite actions under `.github/actions/` when composing GitHub workflows. These mirror the repository's conventions for build, test, packaging, and release automation.
+- If a workflow scenario is not covered by the existing actions, pause and confirm with the team before introducing custom scripts or external/third-party actions.
+
 ## Key Technical Patterns
 
 ### Property Naming Convention
