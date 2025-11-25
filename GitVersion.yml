@@ -14,8 +14,8 @@ branches:
     label: ''
     increment: Patch
     is-release-branch: true
-  develop:
-    regex: ^dev$
+  dev:
+    regex: ^dev(elop)?(ment)?$
     label: alpha
     increment: Minor
     is-release-branch: false
@@ -27,7 +27,7 @@ branches:
     track-merge-target: true
     is-release-branch: true
     source-branches:
-      - main
+      - master
       - dev
     prevent-increment:
       of-merged-branch: false
