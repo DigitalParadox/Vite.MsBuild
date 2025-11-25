@@ -1,0 +1,87 @@
+name: Publish Test Results
+description: Upload unit test results, publish GitHub checks, and optionally upload coverage artifacts.
+inputs:
+  test-results-path:
+    description: Workspace-relative path containing .trx files (including optional glob wildcards).
+    required: true
+  test-check-name:
+    description: Name for the unit test GitHub check.
+    required: false
+    default: Unit Test Results
+  retention-days:
+    description: Artifact retention period in days for test results and coverage uploads.
+    required: false
+    default: '7'
+  fail-on-test-report-error:
+    description: When true, fail the workflow if the test reporter step fails.
+    required: false
+    default: 'false'
+  upload-coverage:
+    description: When true, upload coverage artifacts and publish a coverage summary check.
+    required: false
+    default: 'true'
+  coverage-artifact-path:
+    description: Workspace-relative directory containing coverage reports.
+    required: false
+    default: ''
+  coverage-summary-file:
+    description: Workspace-relative path to the Markdown summary (e.g., SummaryGithub.md).
+    required: false
+    default: ''
+  coverage-check-name:
+    description: Name of the coverage GitHub check when coverage is uploaded.
+    required: false
+    default: Coverage Summary
+  matrix-os:
+    description: Optional string appended to artifact/check names (typically the matrix OS).
+    required: false
+    default: ''
+outputs:
+  test-results-artifact:
+    description: Name of the uploaded test results artifact.
+    value: ${{ steps.upload_test_results.outputs.artifact-name }}
+runs:
+  using: composite
+  steps:
+    - name: Publish unit test results
+      id: unit_test_report
+      uses: dorny/test-reporter@v1
+      if: always()
+      continue-on-error: true
+      with:
+        name: ${{ inputs.test-check-name }}${{ inputs.matrix-os && format(' ({0})', inputs.matrix-os) || '' }}
+        path: ${{ inputs.test-results-path }}
+        reporter: dotnet-trx
+
+    - name: Check test reporter result
+      if: always() && steps.unit_test_report.outcome == 'failure' && inputs.fail-on-test-report-error == 'true'
+      shell: bash
+      run: |
+        echo "dorny/test-reporter failed; failing job as configured via fail-on-test-report-error." >&2
+        exit 1
+
+    - name: Upload test results artifact
+      id: upload_test_results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: ${{ inputs.matrix-os && format('unit-test-results-{0}', inputs.matrix-os) || 'unit-test-results' }}
+        path: ${{ inputs.test-results-path }}
+        retention-days: ${{ inputs.retention-days }}
+
+    - name: Upload coverage artifact
+      if: always() && inputs.upload-coverage == 'true' && inputs.coverage-artifact-path != ''
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.matrix-os && format('coverage-report-{0}', inputs.matrix-os) || 'coverage-report' }}
+        path: ${{ inputs.coverage-artifact-path }}
+        retention-days: ${{ inputs.retention-days }}
+
+    - name: Publish coverage summary
+      if: always() && inputs.upload-coverage == 'true' && inputs.coverage-summary-file != ''
+      uses: ./.github/actions/publish-github-check
+      with:
+        check-name: ${{ inputs.coverage-check-name }}
+        title: ${{ inputs.coverage-check-name }}
+        summary-file: ${{ inputs.coverage-summary-file }}
+        summary: Coverage summary not available.

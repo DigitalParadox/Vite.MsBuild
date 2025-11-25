@@ -10,6 +10,9 @@ permissions:
   packages: write
   checks: write
 
+env:
+  FAIL_ON_TEST_REPORT_ERROR: 'false'
+
 jobs:
   build:
     name: Build, Test, and Report (${{ matrix.os }})
@@ -27,38 +30,18 @@ jobs:
         id: build
         uses: ./.github/actions/build-and-test
 
-      - name: Publish unit test results
-        uses: dorny/test-reporter@v1
+      - name: Publish test results
+        uses: ./.github/actions/publish-test-results
         if: always()
         with:
-          name: Unit Test Results (${{ matrix.os }})
-          path: "${{ steps.build.outputs.test-results-relative }}/**/*.trx"
-          reporter: dotnet-trx
-
-      - name: Upload test results artifact
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: unit-test-results-${{ matrix.os }}
-          path: ${{ steps.build.outputs.test-results-relative }}
+          test-results-path: "${{ steps.build.outputs.test-results-relative }}/**/*.trx"
+          test-check-name: Unit Test Results
+          matrix-os: ${{ matrix.os }}
           retention-days: 14
-
-      - name: Upload coverage artifact
-        uses: actions/upload-artifact@v4
-        if: always() && matrix.os == 'ubuntu-latest'
-        with:
-          name: coverage-report
-          path: ${{ steps.build.outputs.coverage-report-relative }}
-          retention-days: 14
-
-      - name: Publish coverage summary
-        uses: ./.github/actions/publish-github-check
-        if: always() && matrix.os == 'ubuntu-latest'
-        with:
-          check-name: Coverage Summary
-          title: Coverage Summary
-          summary-file: ${{ steps.build.outputs.coverage-report-relative }}/SummaryGithub.md
-          summary: Coverage summary not available.
+          fail-on-test-report-error: ${{ env.FAIL_ON_TEST_REPORT_ERROR }}
+          upload-coverage: ${{ matrix.os == 'ubuntu-latest' }}
+          coverage-artifact-path: ${{ steps.build.outputs.coverage-report-relative }}
+          coverage-summary-file: ${{ steps.build.outputs.coverage-report-relative }}/SummaryGithub.md
 
   publish:
     name: Pack, Push, and Publish Prerelease
