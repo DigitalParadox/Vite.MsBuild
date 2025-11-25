@@ -26,7 +26,8 @@ branches:
     increment: Inherit
     track-merge-target: true
     is-release-branch: true
-    prevent-increment-of-merged-branch-version: false
+    prevent-increment:
+      of-merged-branch: false
   release:
     regex: ^releases?[/-]
     label: rc
