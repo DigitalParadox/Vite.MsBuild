@@ -90,7 +90,7 @@ jobs:
       - name: Setup GitVersion
         uses: gittools/actions/gitversion/setup@v1
         with:
-          versionSpec: '6.x'
+          versionSpec: '6.0.x'
 
       - name: Determine version with GitVersion
         id: gitversion
