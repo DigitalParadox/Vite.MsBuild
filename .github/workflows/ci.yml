@@ -45,41 +45,42 @@ jobs:
           coverage-summary-file: ${{ steps.build.outputs.coverage-report-relative }}/SummaryGithub.md
 
   report-test-results:
-    name: Unit Test Results
+    name: Test Results
+    runs-on: ubuntu-latest
+    needs: build
+    if: always()
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - name: Download test results for ${{ matrix.os }}
+        uses: actions/download-artifact@v4
+        with:
+          name: unit-test-results-${{ matrix.os }}
+          path: test-results
+
+      - name: Convert JUnit to CTRF
+        run: |
+          npx --yes junit-to-ctrf test-results/**/*.xml test-results/ctrf-report.json
+
+      - name: Publish test results for ${{ matrix.os }}
+        uses: ctrf-io/github-test-reporter@v1
+        if: always()
+        with:
+          report-path: 'test-results/ctrf-report.json'
+          github-report: true
+          status-check: true
+          status-check-name: 'Unit Test Results (${{ matrix.os }})'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  report-coverage:
+    name: Coverage Summary
     runs-on: ubuntu-latest
     needs: build
     if: always()
     steps:
-      - name: Download all test results
-        uses: actions/download-artifact@v4
-        with:
-          pattern: unit-test-results-*
-          path: test-results
-
-      - name: Publish test results (ubuntu-latest)
-        uses: dorny/test-reporter@v1
-        if: always()
-        with:
-          name: Unit Test Results (ubuntu-latest)
-          path: 'test-results/unit-test-results-ubuntu-latest/**/*.xml'
-          reporter: java-junit
-
-      - name: Publish test results (windows-latest)
-        uses: dorny/test-reporter@v1
-        if: always()
-        with:
-          name: Unit Test Results (windows-latest)
-          path: 'test-results/unit-test-results-windows-latest/**/*.xml'
-          reporter: java-junit
-
-      - name: Publish test results (macos-latest)
-        uses: dorny/test-reporter@v1
-        if: always()
-        with:
-          name: Unit Test Results (macos-latest)
-          path: 'test-results/unit-test-results-macos-latest/**/*.xml'
-          reporter: java-junit
-
       - name: Download coverage report
         uses: actions/download-artifact@v4
         with:
