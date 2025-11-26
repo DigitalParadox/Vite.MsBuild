@@ -44,21 +44,21 @@ jobs:
 
       - name: Build solution
         run: |
-          dotnet build ViteKit.MsBuild.sln `
-            --configuration Release `
-            --no-restore `
+          dotnet build ViteKit.MsBuild.sln \
+            --configuration Release \
+            --no-restore \
             /p:Version=${{ steps.gitversion.outputs.fullSemVer }}
 
       - name: Run unit tests
         run: |
-          dotnet test tests/ViteKit.MsBuild.PureUnitTests/ViteKit.MsBuild.PureUnitTests.csproj `
-            --configuration Release `
-            --no-build `
-            --logger "trx;LogFileName=${{ matrix.os }}.trx" `
-            --logger "console;verbosity=detailed" `
-            --results-directory TestResults `
-            /p:CollectCoverage=true `
-            /p:CoverletOutputFormat=cobertura `
+          dotnet test tests/ViteKit.MsBuild.PureUnitTests/ViteKit.MsBuild.PureUnitTests.csproj \
+            --configuration Release \
+            --no-build \
+            --logger "trx;LogFileName=${{ matrix.os }}.trx" \
+            --logger "console;verbosity=detailed" \
+            --results-directory TestResults \
+            /p:CollectCoverage=true \
+            /p:CoverletOutputFormat=cobertura \
             /p:CoverletOutput=coverage/
 
       - name: Publish test results
@@ -96,9 +96,9 @@ jobs:
       - name: Pack NuGet packages
         if: matrix.os == 'ubuntu-latest'
         run: |
-          dotnet pack ViteKit.MsBuild.nuspec `
-            /p:NuspecFile=ViteKit.MsBuild.nuspec `
-            /p:Version=${{ steps.gitversion.outputs.fullSemVer }} `
+          dotnet pack ViteKit.MsBuild.nuspec \
+            /p:NuspecFile=ViteKit.MsBuild.nuspec \
+            /p:Version=${{ steps.gitversion.outputs.fullSemVer }} \
             --output nupkg
 
       - name: Upload NuGet packages
