@@ -115,7 +115,6 @@ jobs:
       - name: Publish aggregated test results
         uses: dorny/test-reporter@v2
         if: always()
-        continue-on-error: true
         with:
           name: Test Results (All Platforms)
           path: 'test-results/**/*.trx'
