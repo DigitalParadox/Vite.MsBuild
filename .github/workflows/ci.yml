@@ -14,14 +14,12 @@ env:
   FAIL_ON_TEST_REPORT_ERROR: 'false'
 
 jobs:
-  build:
-    strategy:
-      fail-fast: false
-      matrix:
-        # TODO: Re-add windows-latest before production release
-        os: [ubuntu-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
-    name: Build and Test (${{ matrix.os }})
+  version:
+    name: Version Info
+    runs-on: ubuntu-latest
+    outputs:
+      semVer: ${{ steps.gitversion.outputs.semVer }}
+      fullSemVer: ${{ steps.gitversion.outputs.fullSemVer }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -33,16 +31,43 @@ jobs:
         with:
           versionSpec: '6.0.x'
 
-      - name: Determine version
+      - name: Determine version with GitVersion
         id: gitversion
         uses: gittools/actions/gitversion/execute@v1
+
+      - name: Add version info to job summary
+        shell: bash
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << 'EOF'
+          ## Version Information
+          
+          | Property | Value |
+          |----------|-------|
+          | SemVer | ${{ steps.gitversion.outputs.semVer }} |
+          | FullSemVer | ${{ steps.gitversion.outputs.fullSemVer }} |
+          | InformationalVersion | ${{ steps.gitversion.outputs.informationalVersion }} |
+          | BranchName | ${{ steps.gitversion.outputs.branchName }} |
+          | CommitsSinceVersionSource | ${{ steps.gitversion.outputs.commitsSinceVersionSource }} |
+          EOF
+
+  build:
+    needs: version
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    name: Build and Test (${{ matrix.os }})
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Build and Test
         id: build
         uses: ./.github/actions/build-and-test
         with:
-          version: ${{ steps.gitversion.outputs.fullSemVer }}
-          matrix-os: ${{ matrix.os }}
+          version: ${{ needs.version.outputs.fullSemVer }}
+          test-results-filename: '${{ matrix.os }}.trx'
 
       - name: Publish test results
         uses: ./.github/actions/publish-test-results
@@ -57,18 +82,43 @@ jobs:
           upload-coverage: ${{ matrix.os == 'ubuntu-latest' }}
           coverage-artifact-path: ${{ steps.build.outputs.coverage-report-relative }}
           coverage-summary-file: ${{ steps.build.outputs.coverage-report-relative }}/SummaryGithub.md
+          skip-coverage-check: ${{ matrix.os != 'ubuntu-latest' }}
 
       - name: Pack NuGet packages
         if: matrix.os == 'ubuntu-latest'
         uses: ./.github/actions/pack-and-push-nuget
         with:
-          version: ${{ steps.gitversion.outputs.fullSemVer }}
+          version: ${{ needs.version.outputs.fullSemVer }}
           push-to-nuget: 'false'
           push-to-github: 'false'
           upload-artifact: 'true'
           artifact-name: 'nuget-packages'
           retention-days: '7'
 
+  report-tests:
+    name: Test Results (All Platforms)
+    runs-on: ubuntu-latest
+    needs: build
+    if: always()
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-          
+      - name: Download all test results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: unit-test-results-*
+          path: test-results
+          merge-multiple: true
+
+      - name: Publish aggregated test results
+        uses: dorny/test-reporter@v2
+        if: always()
+        with:
+          name: Test Results (All Platforms)
+          path: 'test-results/**/*.trx'
+          reporter: dotnet-trx
+          list-tests: failed
+          max-annotations: 25
+
 

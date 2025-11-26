@@ -17,8 +17,8 @@ inputs:
     description: Version to stamp into assemblies (GitVersion FullSemVer).
     required: false
     default: ''
-  matrix-os:
-    description: Matrix OS name to include in test result filenames.
+  test-results-filename:
+    description: Name for the TRX test results file. If not specified, uses dotnet default naming.
     required: false
     default: ''
 runs:
@@ -56,11 +56,11 @@ runs:
         New-Item -ItemType Directory -Path $resultsDir -Force | Out-Null
         New-Item -ItemType Directory -Path $coverageDir -Force | Out-Null
 
-        $osPrefix = if ('${{ inputs.matrix-os }}') { '${{ inputs.matrix-os }}_' } else { '' }
+        $logFileParam = if ('${{ inputs.test-results-filename }}') { ";LogFileName=${{ inputs.test-results-filename }}" } else { "" }
         dotnet test "${{ inputs.test-project }}" `
           --configuration "${{ inputs.configuration }}" `
           --no-build `
-          --logger "trx;LogFileName=${osPrefix}test-results.trx" `
+          --logger "trx$logFileParam" `
           --logger "console;verbosity=detailed" `
           --results-directory "$resultsDir" `
           /p:CollectCoverage=true `

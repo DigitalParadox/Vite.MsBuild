@@ -59,38 +59,25 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Parse test results
-      id: parse_tests
+    - name: Publish unit test results
+      id: unit_test_report
+      uses: dorny/test-reporter@v2
       if: always() && inputs.skip-test-report != 'true'
-      shell: pwsh
+      continue-on-error: true
+      with:
+        name: ${{ inputs.test-check-name }}${{ inputs.matrix-os && format(' ({0})', inputs.matrix-os) || '' }}
+        path: ${{ inputs.test-results-path }}
+        reporter: dotnet-trx
+        list-tests: failed
+        max-annotations: 0
+        comment-on-pr: false
+
+    - name: Check test reporter result
+      if: always() && steps.unit_test_report.outcome == 'failure' && inputs.fail-on-test-report-error == 'true'
+      shell: bash
       run: |
-        $trxFiles = Get-ChildItem -Path "${{ inputs.test-results-path }}" -File
-        $totalTests = 0
-        $passedTests = 0
-        $failedTests = 0
-        $skippedTests = 0
-        
-        foreach ($file in $trxFiles) {
-          [xml]$trx = Get-Content $file.FullName
-          $counters = $trx.TestRun.ResultSummary.Counters
-          $totalTests += [int]$counters.total
-          $passedTests += [int]$counters.passed
-          $failedTests += [int]$counters.failed
-          $skippedTests += [int]$counters.inconclusive + [int]$counters.notExecuted
-        }
-        
-        Add-Content -Path $env:GITHUB_OUTPUT -Value "total=$totalTests"
-        Add-Content -Path $env:GITHUB_OUTPUT -Value "passed=$passedTests"
-        Add-Content -Path $env:GITHUB_OUTPUT -Value "failed=$failedTests"
-        Add-Content -Path $env:GITHUB_OUTPUT -Value "skipped=$skippedTests"
-        
-        $status = if ($failedTests -gt 0) { "❌" } else { "✅" }
-        $summary = "## $status Test Results${{ inputs.matrix-os && format(' ({0})', inputs.matrix-os) || '' }}`n`n"
-        $summary += "| Total | Passed | Failed | Skipped |`n"
-        $summary += "|-------|--------|--------|---------|`n"
-        $summary += "| $totalTests | $passedTests | $failedTests | $skippedTests |`n"
-        
-        Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
+        echo "dorny/test-reporter failed; failing job as configured via fail-on-test-report-error." >&2
+        exit 1
 
     - name: Upload test results artifact
       id: upload_test_results
