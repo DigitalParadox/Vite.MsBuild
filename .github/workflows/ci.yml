@@ -79,6 +79,7 @@ jobs:
           test-check-name: Unit Test Results
           matrix-os: ${{ matrix.os }}
           retention-days: 7
+          skip-test-report: true
           
           upload-coverage: ${{ matrix.os == 'ubuntu-latest' }}
           coverage-artifact-path: ${{ steps.build.outputs.coverage-report-relative }}
@@ -119,7 +120,5 @@ jobs:
           name: Test Results (All Platforms)
           path: 'test-results/**/*.trx'
           reporter: dotnet-trx
-          list-tests: all
-          max-annotations: 25
 
 
