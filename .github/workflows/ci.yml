@@ -14,12 +14,14 @@ env:
   FAIL_ON_TEST_REPORT_ERROR: 'false'
 
 jobs:
-  version:
-    name: Version Info
-    runs-on: ubuntu-latest
-    outputs:
-      semVer: ${{ steps.gitversion.outputs.semVer }}
-      fullSemVer: ${{ steps.gitversion.outputs.fullSemVer }}
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        # TODO: Re-add windows-latest before production release
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    name: Build and Test (${{ matrix.os }})
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,43 +33,15 @@ jobs:
         with:
           versionSpec: '6.0.x'
 
-      - name: Determine version with GitVersion
+      - name: Determine version
         id: gitversion
         uses: gittools/actions/gitversion/execute@v1
-
-      - name: Add version info to job summary
-        shell: bash
-        run: |
-          cat >> $GITHUB_STEP_SUMMARY << 'EOF'
-          ## Version Information
-          
-          | Property | Value |
-          |----------|-------|
-          | SemVer | ${{ steps.gitversion.outputs.semVer }} |
-          | FullSemVer | ${{ steps.gitversion.outputs.fullSemVer }} |
-          | InformationalVersion | ${{ steps.gitversion.outputs.informationalVersion }} |
-          | BranchName | ${{ steps.gitversion.outputs.branchName }} |
-          | CommitsSinceVersionSource | ${{ steps.gitversion.outputs.commitsSinceVersionSource }} |
-          EOF
-
-  build:
-    needs: version
-    strategy:
-      fail-fast: false
-      matrix:
-        # TODO: Re-add windows-latest before production release
-        os: [ubuntu-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
-    name: Build and Test (${{ matrix.os }})
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
 
       - name: Build and Test
         id: build
         uses: ./.github/actions/build-and-test
         with:
-          version: ${{ needs.version.outputs.fullSemVer }}
+          version: ${{ steps.gitversion.outputs.fullSemVer }}
           test-results-filename: '${{ matrix.os }}.trx'
 
       - name: Publish test results
@@ -90,7 +64,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         uses: ./.github/actions/pack-and-push-nuget
         with:
-          version: ${{ needs.version.outputs.fullSemVer }}
+          version: ${{ steps.gitversion.outputs.fullSemVer }}
           push-to-nuget: 'false'
           push-to-github: 'false'
           upload-artifact: 'true'
