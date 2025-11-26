@@ -96,7 +96,7 @@ jobs:
           retention-days: '7'
 
   report-tests:
-    name: Test Results (All Platforms)
+    name: Publish Test Results
     runs-on: ubuntu-latest
     needs: build
     if: always()
