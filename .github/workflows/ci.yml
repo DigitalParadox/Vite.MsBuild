@@ -70,21 +70,21 @@ jobs:
           version: ${{ needs.version.outputs.fullSemVer }}
           test-results-filename: '${{ matrix.os }}.trx'
 
-      # - name: Publish test results
-      #   uses: ./.github/actions/publish-test-results
-      #   if: always()
-      #   with:
-      #     test-results-path: "${{ steps.build.outputs.test-results-relative }}/**/*.trx"
-      #     test-results-directory: "${{ steps.build.outputs.test-results-relative }}"
-      #     test-check-name: Unit Test Results
-      #     matrix-os: ${{ matrix.os }}
-      #     retention-days: 7
-      #     skip-test-report: true
+      - name: Publish test results
+        uses: ./.github/actions/publish-test-results
+        if: always()
+        with:
+          test-results-path: "${{ steps.build.outputs.test-results-relative }}/**/*.trx"
+          test-results-directory: "${{ steps.build.outputs.test-results-relative }}"
+          test-check-name: Unit Test Results
+          matrix-os: ${{ matrix.os }}
+          retention-days: 7
+          skip-test-report: true
           
-      #     upload-coverage: ${{ matrix.os == 'ubuntu-latest' }}
-      #     coverage-artifact-path: ${{ steps.build.outputs.coverage-report-relative }}
-      #     coverage-summary-file: ${{ steps.build.outputs.coverage-report-relative }}/SummaryGithub.md
-      #     skip-coverage-check: ${{ matrix.os != 'ubuntu-latest' }}
+          upload-coverage: ${{ matrix.os == 'ubuntu-latest' }}
+          coverage-artifact-path: ${{ steps.build.outputs.coverage-report-relative }}
+          coverage-summary-file: ${{ steps.build.outputs.coverage-report-relative }}/SummaryGithub.md
+          skip-coverage-check: ${{ matrix.os != 'ubuntu-latest' }}
 
       - name: Pack NuGet packages
         if: matrix.os == 'ubuntu-latest'
