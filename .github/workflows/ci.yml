@@ -102,6 +102,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     if: always()
+    permissions:
+      contents: read
+      actions: read
+      checks: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -120,8 +124,5 @@ jobs:
           name: Test Results (All Platforms)
           path: 'test-results/**/*.trx'
           reporter: dotnet-trx
-          list-tests: failed
-          list-suites: failed
-          max-annotations: 10
-
+          
 
