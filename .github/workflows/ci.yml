@@ -113,7 +113,7 @@ jobs:
           merge-multiple: true
 
       - name: Publish aggregated test results
-        uses: dorny/test-reporter@v2
+        uses: dorny/test-reporter@v1
         if: always()
         with:
           name: Test Results (All Platforms)
