@@ -84,6 +84,16 @@ jobs:
           coverage-summary-file: ${{ steps.build.outputs.coverage-report-relative }}/SummaryGithub.md
           skip-coverage-check: ${{ matrix.os != 'ubuntu-latest' }}
 
+      - name: Add coverage to job summary
+        if: always() && matrix.os == 'ubuntu-latest'
+        shell: bash
+        run: |
+          if [ -f ${{ steps.build.outputs.coverage-report-relative }}/SummaryGithub.md ]; then
+            cat ${{ steps.build.outputs.coverage-report-relative }}/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Coverage summary not available." >> $GITHUB_STEP_SUMMARY
+          fi
+
       - name: Pack NuGet packages
         if: matrix.os == 'ubuntu-latest'
         uses: ./.github/actions/pack-and-push-nuget
