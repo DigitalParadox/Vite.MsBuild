@@ -25,15 +25,22 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      - name: Build site
-        run: |
-          npm ci
-          npm run build
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.1'
+          bundler-cache: false
+
+      - name: Install Jekyll
+        run: gem install jekyll
+
+      - name: Build Jekyll site
+        run: jekyll build --source ./docs --destination ./_site
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./dist
+          path: ./_site
 
       - name: Deploy to GitHub Pages
         id: deployment
