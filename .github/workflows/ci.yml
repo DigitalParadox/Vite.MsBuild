@@ -67,7 +67,7 @@ jobs:
         uses: ./.github/actions/build-and-test
         with:
           version: ${{ needs.version.outputs.fullSemVer }}
-          matrix-os: ${{ matrix.os }}
+          test-results-filename: ${{ matrix.os }}.trx
 
       - name: Publish test results
         uses: ./.github/actions/publish-test-results

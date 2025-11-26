@@ -30,7 +30,7 @@ jobs:
         id: build
         uses: ./.github/actions/build-and-test
         with:
-          matrix-os: ${{ matrix.os }}
+          test-results-filename: ${{ matrix.os }}.trx
 
       - name: Publish test results
         uses: ./.github/actions/publish-test-results
