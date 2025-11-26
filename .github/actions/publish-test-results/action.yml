@@ -69,9 +69,8 @@ runs:
         path: ${{ inputs.test-results-path }}
         reporter: dotnet-trx
         list-tests: failed
-        list-suites: failed
-        max-annotations: 10
-        only-summary: false
+        max-annotations: 50
+        comment-on-pr: true
 
     - name: Check test reporter result
       if: always() && steps.unit_test_report.outcome == 'failure' && inputs.fail-on-test-report-error == 'true'

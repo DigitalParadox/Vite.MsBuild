@@ -45,20 +45,39 @@ jobs:
           test-results-filename: '${{ matrix.os }}.trx'
 
       - name: Publish test results
-        uses: ./.github/actions/publish-test-results
+        uses: dorny/test-reporter@v2
         if: always()
         with:
-          test-results-path: "${{ steps.build.outputs.test-results-relative }}/**/*.trx"
-          test-results-directory: "${{ steps.build.outputs.test-results-relative }}"
-          test-check-name: Unit Test Results
-          matrix-os: ${{ matrix.os }}
+          name: Unit Test Results (${{ matrix.os }})
+          path: "${{ steps.build.outputs.test-results-relative }}/**/*.trx"
+          reporter: dotnet-trx
+          list-tests: failed
+          max-annotations: 50
+
+      - name: Upload test results artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unit-test-results-${{ matrix.os }}
+          path: ${{ steps.build.outputs.test-results-relative }}
           retention-days: 7
-          skip-test-report: false
           
-          upload-coverage: ${{ matrix.os == 'ubuntu-latest' }}
-          coverage-artifact-path: ${{ steps.build.outputs.coverage-report-relative }}
-          coverage-summary-file: ${{ steps.build.outputs.coverage-report-relative }}/SummaryGithub.md
-          skip-coverage-check: ${{ matrix.os != 'ubuntu-latest' }}
+      - name: Upload coverage artifact
+        if: always() && matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report-${{ matrix.os }}
+          path: ${{ steps.build.outputs.coverage-report-relative }}
+          retention-days: 7
+
+      - name: Publish coverage summary
+        if: always() && matrix.os == 'ubuntu-latest'
+        uses: ./.github/actions/publish-github-check
+        with:
+          check-name: Coverage Summary
+          title: Coverage Summary
+          summary-file: ${{ steps.build.outputs.coverage-report-relative }}/SummaryGithub.md
+          summary: Coverage summary not available.
 
       - name: Pack NuGet packages
         if: matrix.os == 'ubuntu-latest'
