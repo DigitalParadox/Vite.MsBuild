@@ -62,14 +62,12 @@ jobs:
             /p:CoverletOutput=coverage/
 
       - name: Publish test results
-        uses: dorny/test-reporter@v2
+        uses: dorny/test-reporter@v1
         if: always()
         with:
           name: Unit Test Results (${{ matrix.os }})
           path: TestResults/**/*.trx
           reporter: dotnet-trx
-          list-tests: failed
-          max-annotations: 50
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
