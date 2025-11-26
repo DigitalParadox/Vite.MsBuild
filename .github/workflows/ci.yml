@@ -114,11 +114,12 @@ jobs:
       - name: Publish aggregated test results
         uses: dorny/test-reporter@v2
         if: always()
+        continue-on-error: true
         with:
           name: Test Results (All Platforms)
           path: 'test-results/**/*.trx'
           reporter: dotnet-trx
-          list-tests: failed
+          list-tests: all
           max-annotations: 25
 
 
