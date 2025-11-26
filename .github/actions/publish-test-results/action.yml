@@ -61,7 +61,7 @@ runs:
   steps:
     - name: Publish unit test results
       id: unit_test_report
-      uses: dorny/test-reporter@v1
+      uses: dorny/test-reporter@v2
       if: always() && inputs.skip-test-report != 'true'
       continue-on-error: true
       with:
@@ -69,7 +69,9 @@ runs:
         path: ${{ inputs.test-results-path }}
         reporter: dotnet-trx
         list-tests: failed
-        max-annotations: 0
+        list-suites: failed
+        max-annotations: 10
+        only-summary: false
 
     - name: Check test reporter result
       if: always() && steps.unit_test_report.outcome == 'failure' && inputs.fail-on-test-report-error == 'true'
