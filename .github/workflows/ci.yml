@@ -67,7 +67,7 @@ jobs:
         uses: ./.github/actions/build-and-test
         with:
           version: ${{ needs.version.outputs.fullSemVer }}
-          test-results-filename: ${{ matrix.os }}-{framework}-{assembly}.trx
+          test-results-filename: '${{ matrix.os }}.trx'
 
       - name: Publish test results
         uses: ./.github/actions/publish-test-results
@@ -93,6 +93,29 @@ jobs:
           upload-artifact: 'true'
           artifact-name: 'nuget-packages'
           retention-days: '7'
+
+  report-tests:
+    name: Test Results (All Platforms)
+    runs-on: ubuntu-latest
+    needs: build
+    if: always()
+    steps:
+      - name: Download all test results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: unit-test-results-*
+          path: test-results
+          merge-multiple: true
+
+      - name: Publish aggregated test results
+        uses: dorny/test-reporter@v2
+        if: always()
+        with:
+          name: Test Results (All Platforms)
+          path: 'test-results/**/*.trx'
+          reporter: dotnet-trx
+          list-tests: failed
+          max-annotations: 50
 
   report-coverage:
     name: Coverage Summary
