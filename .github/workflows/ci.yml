@@ -82,6 +82,7 @@ jobs:
           upload-coverage: ${{ matrix.os == 'ubuntu-latest' }}
           coverage-artifact-path: ${{ steps.build.outputs.coverage-report-relative }}
           coverage-summary-file: ${{ steps.build.outputs.coverage-report-relative }}/SummaryGithub.md
+          skip-test-report: true
           skip-coverage-check: ${{ matrix.os != 'ubuntu-latest' }}
 
       - name: Add coverage to job summary
@@ -128,7 +129,8 @@ jobs:
           name: Test Results (All Platforms)
           path: 'test-results/**/*.trx'
           reporter: dotnet-trx
-          list-tests: failed
+        
           max-annotations: 25
+          token: ${{ github.token }}
 
 
