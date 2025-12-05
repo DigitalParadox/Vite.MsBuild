@@ -4,6 +4,10 @@ inputs:
   test-results-path:
     description: Workspace-relative path containing TRX files (including optional glob wildcards).
     required: true
+  test-results-directory:
+    description: Directory path (without glob) for artifact upload. Defaults to test-results-path if not provided.
+    required: false
+    default: ''
   test-check-name:
     description: Name for the unit test GitHub check.
     required: false
@@ -65,7 +69,7 @@ runs:
         path: ${{ inputs.test-results-path }}
         reporter: dotnet-trx
         list-tests: failed
-        max-annotations: 50
+        max-annotations: 10
         comment-on-pr: true
 
     - name: Check test reporter result
@@ -81,7 +85,7 @@ runs:
       if: always()
       with:
         name: ${{ inputs.matrix-os && format('unit-test-results-{0}', inputs.matrix-os) || 'unit-test-results' }}
-        path: ${{ inputs.test-results-path }}
+        path: ${{ inputs.test-results-directory || inputs.test-results-path }}
         retention-days: ${{ inputs.retention-days }}
 
     - name: Upload coverage artifact

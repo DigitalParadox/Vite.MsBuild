@@ -17,6 +17,10 @@ inputs:
     description: Version to stamp into assemblies (GitVersion FullSemVer).
     required: false
     default: ''
+  test-results-filename:
+    description: Name for the TRX test results file. If not specified, uses dotnet default naming.
+    required: false
+    default: ''
 runs:
   using: composite
   steps:
@@ -52,10 +56,11 @@ runs:
         New-Item -ItemType Directory -Path $resultsDir -Force | Out-Null
         New-Item -ItemType Directory -Path $coverageDir -Force | Out-Null
 
+        $logFileParam = if ('${{ inputs.test-results-filename }}') { ";LogFileName=${{ inputs.test-results-filename }}" } else { "" }
         dotnet test "${{ inputs.test-project }}" `
           --configuration "${{ inputs.configuration }}" `
           --no-build `
-          --logger "trx" `
+          --logger "trx$logFileParam" `
           --logger "console;verbosity=detailed" `
           --results-directory "$resultsDir" `
           /p:CollectCoverage=true `

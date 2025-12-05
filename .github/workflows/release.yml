@@ -29,12 +29,15 @@ jobs:
       - name: Build and Test
         id: build
         uses: ./.github/actions/build-and-test
+        with:
+          test-results-filename: '${{ matrix.os }}.trx'
 
       - name: Publish test results
         uses: ./.github/actions/publish-test-results
         if: always()
         with:
           test-results-path: "${{ steps.build.outputs.test-results-relative }}/**/*.trx"
+          test-results-directory: "${{ steps.build.outputs.test-results-relative }}"
           test-check-name: Unit Test Results
           matrix-os: ${{ matrix.os }}
           retention-days: 14
