@@ -130,10 +130,6 @@
             <Output TaskParameter="BuildTasks" ItemName="_ViteBuildTask" />
         </OrchestrateBuildTask>
 
-        <!-- Diagnostic output (visible only at -v:d / -v:diag) -->
-        <Message Text="[DEBUG] Build task count: @(_ViteBuildTask->Count())" Importance="low" />
-        <Message Text="[DEBUG] Build task: %(Identity), Command: %(_ViteBuildTask.Command)" Importance="low" Condition="'@(_ViteBuildTask)' != ''" />
-
         <!-- Execute build tasks in order -->
         <Exec Command="%(Command)" 
               WorkingDirectory="%(_ViteBuildTask.WorkingDirectory)"
